@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -27,6 +28,9 @@ public class BatchForecastResponse {
 
     @Schema(description = "Số mặt hàng phát hiện nguy cơ hư hỏng / ế hàng ở mức CAO", example = "1")
     private Integer soMatHangRuiRoCao;
+
+    @Schema(description = "Giá trị nhu cầu dự báo theo giá niêm yết, chưa áp khuyến mãi hay giới hạn tồn kho")
+    private BigDecimal giaTriNhuCauDuKien;
 
     @Schema(description = "Danh sách chi tiết kết quả dự báo từng mặt hàng")
     private List<ForecastResponse> danhSachDuBao;

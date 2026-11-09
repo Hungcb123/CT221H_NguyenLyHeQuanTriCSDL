@@ -49,7 +49,7 @@ public class DemandForecastController {
     @PostMapping("/predict-custom")
     @Operation(
             summary = "Dự báo nhu cầu với kịch bản giả lập tùy chỉnh trên Swagger UI",
-            description = "Cho phép Quản lý kho chủ động đưa vào các tham số giả lập đặc biệt (ngày lễ, giá khuyến mãi, Lag_1, Lag_7, Rolling_Mean) để đánh giá khả năng phản ứng của AI."
+            description = "Thử tham số giả lập và xem kết quả trực tiếp, không ghi lịch sử hay cảnh báo vận hành."
     )
     public ResponseEntity<ApiResponse<ForecastResponse>> predictCustom(@Valid @RequestBody ForecastCustomRequest request) {
         ForecastResponse response = demandForecastService.predictCustom(request);

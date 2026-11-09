@@ -2,12 +2,12 @@
   display: grid;
   grid-template-columns: 224px minmax(0, 1fr);
   min-height: 100vh;
-  background: #f6f8f5;
+  background: #f4f7f5;
   color: #19271e;
-  font-size: 14px;
+  font-size: 0.9375rem;
 }
 .admin-sidebar {
-  background: #fff;
+  background: linear-gradient(180deg, #fafffc, #fff 38%);
   border-right: 1px solid #dce4dc;
   padding: 28px 16px;
   display: flex;
@@ -15,13 +15,24 @@
   gap: 26px;
 }
 .admin-brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-radius: 10px;
   font-size: 26px;
   font-weight: 800;
   color: #08783c;
-  padding: 0 12px;
+  padding: 6px 12px;
   letter-spacing: -0.03em;
 }
-.admin-brand span {
+.admin-brand:hover {
+  background: #e5f3e8;
+}
+.admin-brand > svg {
+  flex-shrink: 0;
+}
+.admin-brand-subtitle {
   display: block;
   margin-top: 4px;
   font-size: 12px;
@@ -34,47 +45,47 @@
   flex-direction: column;
   gap: 5px;
 }
-.admin-sidebar nav a,
-.admin-sidebar-footer a,
-.admin-sidebar-footer button {
+.admin-sidebar nav a {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 11px 12px;
-  border-radius: 8px;
+  border-radius: 10px;
   text-align: left;
   color: #405448;
   font-weight: 600;
 }
-.admin-sidebar nav a:hover,
-.admin-sidebar-footer a:hover,
-.admin-sidebar-footer button:hover {
+.admin-sidebar nav a:hover {
   background: #f1f6f1;
 }
 .admin-sidebar nav a.active {
   background: #e5f3e8;
   color: #096535;
-}
-.admin-sidebar-footer {
-  margin-top: auto;
-  border-top: 1px solid #dce4dc;
-  padding-top: 16px;
-  display: grid;
-  gap: 4px;
+  box-shadow: inset 0 0 0 1px #cfe5d4;
 }
 .admin-workspace {
   min-width: 0;
 }
 .admin-topbar {
-  height: 68px;
+  min-height: 68px;
   border-bottom: 1px solid #dce4dc;
   background: #fff;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   padding: 0 32px;
   color: #536559;
 }
+.admin-topbar-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-inline-start: auto;
+}
+.admin-topbar-actions .ad-btn { border-radius: 10px; }
 .admin-content {
   max-width: 1440px;
   padding: 32px;
@@ -85,19 +96,58 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 20px;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #dce4dc;
 }
 .ad-title h1 {
-  font-size: 28px;
+  font-size: clamp(1.75rem, 1.5rem + 0.7vw, 2.125rem);
   line-height: 1.2;
   font-weight: 750;
   letter-spacing: -0.025em;
 }
 .ad-title p {
-  color: #536559;
+  color: #405448;
   margin-top: 9px;
-  max-width: 72ch;
+  max-width: 65ch;
+  font-size: 1rem;
+  line-height: 1.65;
+}
+.ad-guide-section {
+  margin-bottom: 24px;
+}
+.ad-guide-section h2 {
+  margin-bottom: 12px;
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+.ad-guides {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
+  gap: 12px;
+}
+.ad-guide {
+  min-width: 0;
+  padding: 14px 16px;
+  border: 1px solid #d5e4d8;
+  border-radius: 10px;
+  background: #f5faf6;
+}
+.ad-guide dt {
+  margin-bottom: 6px;
+  color: #255039;
+  font-weight: 700;
+}
+.ad-guide dd {
+  max-width: 60ch;
+  color: #405448;
   line-height: 1.6;
+}
+.ad-guides + .ad-toolbar,
+.ad-help + .ad-toolbar,
+.ad-help + .ad-table-wrap,
+.ad-help + .ad-form-grid {
+  margin-top: 16px;
 }
 .ad-btn {
   display: inline-flex;
@@ -133,8 +183,7 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
-.admin-shell :focus-visible,
-.admin-login :focus-visible {
+.admin-shell :focus-visible {
   outline: 2px solid #08783c;
   outline-offset: 3px;
 }
@@ -183,20 +232,89 @@
 }
 .ad-toolbar .ad-select {
   width: auto;
+  min-width: min(13rem, 100%);
   max-width: 100%;
+}
+.ad-select {
+  min-height: 44px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.ad-select:hover {
+  border-color: #6c997b;
+}
+.ad-select:focus-visible {
+  outline: 2px solid #08783c;
+  outline-offset: 2px;
+}
+@supports (appearance: base-select) and selector(::picker(select)) {
+  .ad-select,
+  .ad-select::picker(select) {
+    appearance: base-select;
+  }
+  .ad-select::picker-icon {
+    color: #4b6b55;
+    margin-inline-start: 12px;
+  }
+  .ad-select:open {
+    border-color: #08783c;
+  }
+  .ad-select:open::picker-icon {
+    rotate: 180deg;
+    color: #08783c;
+  }
+  .ad-select::picker(select) {
+    margin-block: 6px;
+    max-inline-size: calc(100dvw - 24px);
+    max-block-size: min(20rem, 45dvh);
+    overflow: auto;
+    border: 1px solid #d3e0d6;
+    border-radius: 12px;
+    padding: 5px;
+    background: #fff;
+    color: #19271e;
+    box-shadow: 0 10px 26px #19271e22;
+  }
+  .ad-select option {
+    min-height: 40px;
+    border-radius: 7px;
+    padding: 8px 10px;
+    font-weight: 500;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+  }
+  .ad-select option:checked {
+    background: #e6f4ea;
+    color: #096535;
+    font-weight: 700;
+  }
+  .ad-select option:hover,
+  .ad-select option:focus-visible {
+    background: #eef6ef;
+    outline: 2px solid #6c997b;
+    outline-offset: -2px;
+  }
+  .ad-select option::checkmark {
+    color: #08783c;
+  }
 }
 .ad-field {
   display: grid;
   gap: 7px;
-  font-size: 13px;
+  font-size: 0.875rem;
   font-weight: 650;
 }
 .ad-field small,
 .ad-help {
-  font-size: 12px;
-  color: #536559;
+  font-size: 0.9375rem;
+  color: #405448;
   font-weight: 400;
-  line-height: 1.6;
+  line-height: 1.65;
+}
+.ad-field small {
+  font-size: 0.875rem;
 }
 .ad-form-grid {
   display: grid;
@@ -238,13 +356,13 @@
   border-collapse: collapse;
   width: 100%;
   text-align: left;
-  font-size: 13px;
+  font-size: 0.875rem;
 }
 .ad-table th {
   padding: 13px 16px;
   background: #f0f4ef;
   color: #536559;
-  font-size: 12px;
+  font-size: 0.8125rem;
   font-weight: 700;
   white-space: nowrap;
 }
@@ -262,8 +380,10 @@
 }
 .ad-table td small {
   display: block;
-  color: #536559;
-  margin-top: 4px;
+  color: #405448;
+  margin-top: 6px;
+  font-size: 0.8125rem;
+  line-height: 1.55;
 }
 .ad-table .number {
   font-variant-numeric: tabular-nums;
@@ -289,7 +409,7 @@
   border: 1px solid #d3dfd2;
   color: #315039;
   border-radius: 5px;
-  font-size: 12px;
+  font-size: 0.8125rem;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -331,7 +451,7 @@
 }
 .ad-stats dt {
   color: #536559;
-  font-size: 12px;
+  font-size: 0.875rem;
   margin-bottom: 8px;
 }
 .ad-stats dd {
@@ -372,35 +492,6 @@
   background: #f6f8f5;
   padding: 24px;
 }
-.admin-login {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  background: #f6f8f5;
-  color: #19271e;
-}
-.admin-login > section {
-  max-width: 430px;
-  width: 100%;
-  padding: 36px;
-  background: #fff;
-  border: 1px solid #dce4dc;
-  border-radius: 14px;
-}
-.admin-login h1 {
-  font-size: 25px;
-  font-weight: 750;
-  margin-top: 28px;
-  margin-bottom: 10px;
-  letter-spacing: -0.025em;
-}
-.admin-login form {
-  display: grid;
-  gap: 20px;
-  margin-top: 26px;
-}
 .ad-log-list {
   display: grid;
   gap: 0;
@@ -417,6 +508,7 @@
   color: #536559;
   display: block;
   margin-top: 6px;
+  font-size: 0.8125rem;
 }
 .ad-json {
   white-space: pre-wrap;
@@ -431,15 +523,34 @@
 }
 .ad-status-list {
   display: grid;
-  grid-template-columns: 140px minmax(0, 1fr);
+  grid-template-columns: 8.75rem minmax(0, 1fr);
   gap: 12px;
-  font-size: 13px;
+  font-size: 0.875rem;
   margin-bottom: 20px;
 }
 .ad-status-list dt {
   color: #536559;
+  padding-block: 5px;
 }
 .ad-status-list dd {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  min-width: 0;
+}
+.ad-status-list .ad-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 7.5rem;
+  max-width: 100%;
+  min-height: 30px;
+  text-align: center;
+  white-space: normal;
+}
+.ad-status-detail {
+  padding-block: 5px;
   overflow-wrap: anywhere;
 }
 .admin-content h3 {
@@ -449,7 +560,7 @@
 }
 @media (max-width: 1050px) {
   .ad-split {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   .admin-content {
     padding: 24px;
@@ -470,9 +581,9 @@
   }
   .admin-brand {
     font-size: 23px;
-    padding: 0;
+    padding: 6px 8px;
   }
-  .admin-brand span {
+  .admin-brand-subtitle {
     display: inline;
     margin-left: 12px;
   }
@@ -488,21 +599,9 @@
     padding: 9px 11px;
     font-size: 12px;
   }
-  .admin-sidebar-footer {
-    display: flex;
-    margin: 0;
-    padding: 0;
-    border: 0;
-    gap: 15px;
-  }
-  .admin-sidebar-footer a,
-  .admin-sidebar-footer button {
-    padding: 3px 0;
-    font-size: 12px;
-  }
   .admin-topbar {
-    height: 50px;
-    padding: 0 18px;
+    min-height: 50px;
+    padding: 8px 18px;
     font-size: 12px;
   }
   .admin-content {
@@ -511,9 +610,6 @@
   .ad-title {
     flex-direction: column;
     gap: 16px;
-  }
-  .ad-title h1 {
-    font-size: 25px;
   }
   .ad-panel {
     padding: 20px 16px;
@@ -529,10 +625,7 @@
     font-size: 24px;
   }
   .ad-status-list {
-    grid-template-columns: 110px minmax(0, 1fr);
-  }
-  .admin-login > section {
-    padding: 28px 24px;
+    grid-template-columns: 6rem minmax(0, 1fr);
   }
   .ad-pagination {
     justify-content: center;
@@ -549,8 +642,18 @@
   }
 }
 
-.admin-shell ::selection,
-.admin-login ::selection {
+@media (max-width: 540px) {
+  .ad-status-list dd {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+  }
+  .ad-status-detail {
+    padding-block: 0;
+  }
+  .admin-topbar { flex-wrap: wrap; gap: 8px 12px; }
+}
+
+.admin-shell ::selection {
   background: #c2e5ca;
   color: #173c23;
 }

@@ -30,9 +30,13 @@ public class WalletController {
     private final WalletService walletService;
 
     @PostMapping("/top-up")
-    @Operation(summary = "Nạp tiền vào ví điện tử", description = "Thực thi sp_NapTienVi có khóa UPDLOCK ngăn Lost Update và ghi sổ cái kiểm toán LichSuGiaoDichVi")
-    public ResponseEntity<ApiResponse<WalletResponse>> topUpWallet(@Valid @RequestBody TopUpWalletRequest request) {
-        customer.owner(request.getMaKH());
+    @Operation(summary = "Quản trị viên nạp tiền demo vào ví", description = "Ghi khoản nạp thử và người thực hiện vào sổ cái")
+    public ResponseEntity<ApiResponse<WalletResponse>> topUpWallet(
+            @Valid @RequestBody TopUpWalletRequest request,
+            org.springframework.security.core.Authentication admin) {
+        String note = request.getNoiDung() == null ? "" : request.getNoiDung().trim();
+        String auditedNote = "Nạp ví demo bởi " + admin.getName() + ". " + note;
+        request.setNoiDung(auditedNote.substring(0, Math.min(auditedNote.length(), 255)));
         WalletResponse response = walletService.topUpWallet(request);
         return ResponseEntity.ok(ApiResponse.<WalletResponse>builder()
                 .success(true)

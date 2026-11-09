@@ -11,7 +11,7 @@ class AdminOrderServiceTest {
     JdbcTemplate jdbc=mock(JdbcTemplate.class);
     AdminOrderService service=new AdminOrderService(jdbc);
     void order(String state){
-        when(jdbc.queryForList("SELECT MaKH FROM DonHang WHERE MaDH = ?",1)).thenReturn(List.of(Map.of("MaKH",2)));
+        when(jdbc.queryForList("SELECT MaKH FROM DonHang WHERE MaDH = ? AND NguonDon = 'SALE'",1)).thenReturn(List.of(Map.of("MaKH",2)));
         when(jdbc.queryForObject(anyString(),eq(BigDecimal.class),eq(2))).thenReturn(new BigDecimal("500"));
         when(jdbc.queryForMap(anyString(),eq(1))).thenReturn(Map.of("TrangThai",state,"TongTien",new BigDecimal("100")));
     }

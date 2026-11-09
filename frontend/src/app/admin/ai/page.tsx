@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { RevenueForecast } from "@/components/admin/RevenueForecast";
 import {
   AIStatus,
   AdminPage,
@@ -107,6 +108,19 @@ export default function AIPage() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [batch, setBatch] = useState(false);
+  const [batchForecast, setBatchForecast] = useState<{
+    ngayDuBao: string;
+    danhSachDuBao: ForecastResult[];
+    tongSoMatHang: number;
+    giaTriNhuCauDuKien: number;
+  } | null>(null);
+  const [rankingUnit, setRankingUnit] = useState("");
+  const rankingUnits = [...new Set(batchForecast?.danhSachDuBao.map((row) => row.donViTinh))].sort();
+  const activeRankingUnit = rankingUnits.includes(rankingUnit) ? rankingUnit : rankingUnits[0];
+  const rankedProducts = batchForecast?.danhSachDuBao
+    .filter((row) => row.donViTinh === activeRankingUnit)
+    .sort((left, right) => right.soLuongDuBaoTieuThu - left.soLuongDuBaoTieuThu || left.maSP - right.maSP)
+    .slice(0, 10);
   async function run(kind: string, work: () => Promise<void>) {
     setPending(kind);
     setError("");
@@ -148,9 +162,10 @@ export default function AIPage() {
                   className={`ad-tag ${status.data.embedding.ready ? "" : "bad"}`}
                 >
                   {status.data.embedding.ready ? "Sẵn sàng" : "Chưa sẵn sàng"}
-                </span>{" "}
-                {status.data.embedding.name} · {status.data.embedding.dimension}{" "}
-                chiều
+                </span>
+                <span className="ad-status-detail">
+                  {status.data.embedding.name} · {status.data.embedding.dimension} chiều
+                </span>
               </dd>
               <dt>Qdrant</dt>
               <dd>
@@ -158,10 +173,11 @@ export default function AIPage() {
                   className={`ad-tag ${status.data.qdrant.status === "ONLINE" ? "" : "bad"}`}
                 >
                   {status.data.qdrant.status}
-                </span>{" "}
-                {status.data.qdrant.pointsCount} vector ·{" "}
-                {status.data.qdrant.collectionName} ·{" "}
-                {status.data.qdrant.distanceMetric}
+                </span>
+                <span className="ad-status-detail">
+                  {status.data.qdrant.pointsCount} vector ·{" "}
+                  {status.data.qdrant.collectionName} · {status.data.qdrant.distanceMetric}
+                </span>
               </dd>
               <dt>Dự báo</dt>
               <dd>
@@ -169,8 +185,8 @@ export default function AIPage() {
                   className={`ad-tag ${status.data.forecast.ready ? "" : "bad"}`}
                 >
                   {status.data.forecast.ready ? "Sẵn sàng" : "Chưa sẵn sàng"}
-                </span>{" "}
-                {status.data.forecast.name}
+                </span>
+                <span className="ad-status-detail">{status.data.forecast.name}</span>
               </dd>
             </dl>
             {status.data.forecast.evaluation && (
@@ -294,10 +310,10 @@ export default function AIPage() {
           onCancel={() => setBatch(false)}
           onConfirm={() =>
             void run("batch", async () => {
-              const result = await adminRequest<{
-                danhSachDuBao: ForecastResult[];
-                tongSoMatHang: number;
-              }>("/api/v1/ai/forecast/run-batch", { method: "POST" });
+              const result = await adminRequest<NonNullable<typeof batchForecast>>(
+                "/api/v1/ai/forecast/run-batch", { method: "POST" },
+              );
+              setBatchForecast(result);
               setForecasts(result.danhSachDuBao);
               setHistory(null);
               setBatch(false);
@@ -306,15 +322,66 @@ export default function AIPage() {
           }
         />
       )}
+      <RevenueForecast />
+      <section className="ad-panel" aria-labelledby="popular-forecast-heading">
+        <h2 id="popular-forecast-heading">Dự báo sản phẩm bán chạy</h2>
+        <dl className="ad-guides">
+          <div className="ad-guide">
+            <dt>Cách xếp hạng</dt>
+            <dd>Hiển thị tối đa 10 sản phẩm theo số lượng dự báo trong cùng một đơn vị tính.</dd>
+          </div>
+          <div className="ad-guide">
+            <dt>Cách tính giá trị nhu cầu</dt>
+            <dd>Nhân số lượng dự báo với giá niêm yết. Phép tính chưa xét khuyến mãi và giới hạn tồn kho.</dd>
+          </div>
+        </dl>
+        <div className="ad-toolbar">
+          <button type="button" className="ad-btn" disabled={!!pending || batch} onClick={() => setBatch(true)}>
+            {pending === "batch" ? "Đang dự báo…" : "Cập nhật bảng dự báo bán chạy"}
+          </button>
+          {rankingUnits.length > 0 && (
+            <select className="ad-select" aria-label="Đơn vị tính để xếp hạng" value={activeRankingUnit} onChange={(e) => setRankingUnit(e.target.value)}>
+              {rankingUnits.map((unit) => <option key={unit}>{unit}</option>)}
+            </select>
+          )}
+        </div>
+        {batchForecast && (
+          <p className="ad-help">
+            Ngày {batchForecast.ngayDuBao} · {batchForecast.tongSoMatHang} sản phẩm · Giá trị nhu cầu dự báo {money(batchForecast.giaTriNhuCauDuKien)}
+          </p>
+        )}
+        {rankedProducts?.length ? (
+          <div className="ad-table-wrap">
+            <table className="ad-table">
+              <thead>
+                <tr><th>Hạng</th><th>Sản phẩm</th><th>Số lượng dự báo</th><th>Tồn kho</th><th>Đề xuất nhập</th></tr>
+              </thead>
+              <tbody>
+                {rankedProducts.map((row, index) => (
+                  <tr key={row.maSP}>
+                    <td>{index + 1}</td><td>{row.tenSP}</td>
+                    <td>{row.soLuongDuBaoTieuThu.toLocaleString("vi-VN", { maximumFractionDigits: 2 })} {row.donViTinh}</td>
+                    <td>{row.soLuongTonHienTai}</td><td>{row.soLuongDeXuatNhap}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : <p className="ad-help">{batchForecast ? "Chưa có sản phẩm trong danh mục dự báo." : "Chạy dự báo toàn bộ để xem bảng xếp hạng."}</p>}
+      </section>
       <section className="ad-panel">
         <h2>Dự báo nhu cầu & đề xuất nhập</h2>
-        <p className="ad-help">
-          Đầu vào lấy từ doanh số SQL trong 7 ngày trước ngày dự báo; ngày không
-          bán ghi nhận 0. Dữ liệu bán hàng ít có thể làm dự báo kém tin cậy. Mô
-          hình chưa hiệu chỉnh độ tin cậy nên không hiển thị phần trăm chính
-          xác.
-        </p>
-        <div className="ad-toolbar" style={{ marginTop: 16 }}>
+        <dl className="ad-guides">
+          <div className="ad-guide">
+            <dt>Dữ liệu đầu vào</dt>
+            <dd>Lấy doanh số trong SQL Server của 7 ngày trước ngày dự báo. Ngày không có đơn bán được tính là 0.</dd>
+          </div>
+          <div className="ad-guide">
+            <dt>Độ tin cậy</dt>
+            <dd>Dữ liệu ít có thể làm dự báo kém tin cậy. Mô hình chưa hiệu chỉnh độ tin cậy cho từng dự báo.</dd>
+          </div>
+        </dl>
+        <div className="ad-toolbar">
           <select
             className="ad-select"
             aria-label="Sản phẩm dự báo"
@@ -399,11 +466,7 @@ export default function AIPage() {
                 );
                 setForecasts([result]);
                 setHistory(null);
-                setMessage(
-                  result.ruiRoHuHong === "CAO"
-                    ? "Đã chạy kịch bản giả lập: phát hiện rủi ro CAO và tự động ghi cảnh báo kho."
-                    : "Đã chạy kịch bản dự báo giả lập và lưu kết quả.",
-                );
+                setMessage("Kết quả giả lập chỉ hiển thị trong phiên này.");
               });
             }}
           >

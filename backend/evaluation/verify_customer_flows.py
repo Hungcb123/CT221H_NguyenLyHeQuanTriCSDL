@@ -64,7 +64,8 @@ recipe = next(r for r in available if not any(i['maSP'] in old for i in r['nguye
 status, chat = request('/api/v1/ai/chatbot/chat','POST',{'message':'Nấu '+recipe['tenMonAn']})
 assert status == 200 and chat['data']['recipeSuggested']['maCongThuc'] == recipe['maCongThuc'], chat
 assert chat['data']['canAddToCart']
-status, unavailable = request('/api/v1/ai/chatbot/chat','POST',{'message':'Nấu canh chua cá lóc'})
+# Request more servings than the demo inventory can supply.
+status, unavailable = request('/api/v1/ai/chatbot/chat','POST',{'message':'Nấu canh chua cá lóc cho 1000000 người'})
 assert status == 200 and unavailable['data']['suggestedRecipes'], unavailable
 assert unavailable['data'].get('recipeSuggested') is None
 assert all(r['duNguyenLieuTrongKho'] for r in unavailable['data']['suggestedRecipes'])

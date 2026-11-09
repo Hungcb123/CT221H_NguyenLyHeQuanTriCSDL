@@ -1,6 +1,8 @@
 # Khách hàng và lịch sử đơn hàng
 
-Trang `/login` dùng email và mật khẩu, tạo phiên khách hàng ở server. Menu tên khách hàng chứa **Đơn hàng của tôi** và **Đăng xuất**. `/orders` có phân trang, `/orders/{id}` có chi tiết sản phẩm, tổng tiền, giao hàng và trạng thái. Các đơn sinh để benchmark và dự báo không được trộn vào lịch sử mua thật.
+Trang `/login` dùng email và mật khẩu, tạo phiên khách hàng ở server. Menu tên khách hàng có **Đơn hàng của tôi**, **Ví DailyMart** và **Đăng xuất**. `/orders` có phân trang, `/orders/{id}` có chi tiết sản phẩm, tổng tiền, giao hàng và trạng thái. Lịch sử chỉ lấy đơn có nguồn `SALE`.
+
+Trang `/wallet` và liên kết trong bước thanh toán hiển thị số dư cùng lịch sử giao dịch của chính khách hàng. Quản trị viên bổ sung số dư demo từ mục **Khách hàng**. Giỏ hàng cho phép tăng, giảm hoặc xóa từng món. Khi đổi số lượng, backend kiểm tra hàng và trả lại giá, suất ưu đãi và tổng tiền hiện tại.
 
 Trang `/register` tạo tài khoản mới bằng họ tên, email, số điện thoại và mật khẩu (từ 8 ký tự); địa chỉ không bắt buộc. Email và số điện thoại không được trùng. Tạo hồ sơ, mật khẩu BCrypt và giỏ hàng rỗng trong một transaction, số dư ví ban đầu bằng 0, sau đó tự đăng nhập. Trang đăng nhập có liên kết **Đăng ký ngay**.
 

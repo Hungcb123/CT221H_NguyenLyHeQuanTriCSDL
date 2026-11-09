@@ -22,6 +22,9 @@ public class CartItemResponse {
     @Schema(description = "Tên sản phẩm", example = "Cá lóc tươi làm sạch")
     private String tenSP;
 
+    @Schema(description = "Đường dẫn ảnh sản phẩm")
+    private String hinhAnh;
+
     @Schema(description = "Đơn giá áp dụng (đã trừ khuyến mãi nếu có)", example = "52500.00")
     private BigDecimal donGia;
 

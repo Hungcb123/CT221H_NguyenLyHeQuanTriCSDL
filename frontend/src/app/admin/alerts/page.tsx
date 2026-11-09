@@ -3,6 +3,8 @@ import { useState } from "react";
 import { datetime } from "@/services/admin-api";
 import { useAdminResource } from "@/components/admin/useAdminResource";
 import { AdminTitle, Empty, Notice } from "@/components/admin/AdminUI";
+import { alertLabels, AuditEntry } from "@/components/admin/AuditEntry";
+
 type Alert = {
   maLog: number;
   loaiSuKien: string;
@@ -39,14 +41,8 @@ export default function AlertsPage() {
           }}
         >
           <option value="">20 sự kiện mới nhất</option>
-          {[
-            "CANH_BAO_HET_HANG",
-            "CANH_BAO_GIA_BAT_THUONG",
-            "CANH_BAO_CAN_DATE",
-            "XOA_MEM_SAN_PHAM",
-            "ADMIN_ORDER_STATUS",
-          ].map((t) => (
-            <option key={t}>{t}</option>
+          {Object.entries(alertLabels).map(([value, label]) => (
+            <option key={value} value={value}>{label}</option>
           ))}
         </select>
         <input
@@ -85,9 +81,9 @@ export default function AlertsPage() {
                   <small>#{a.maLog}</small>
                 </td>
                 <td>
-                  <span className="ad-tag">{a.loaiSuKien}</span>
+                  <span className="ad-tag">{alertLabels[a.loaiSuKien] ?? a.loaiSuKien}</span>
                 </td>
-                <td>{a.noiDung}</td>
+                <td><AuditEntry event={a.loaiSuKien} content={a.noiDung} /></td>
                 <td>{a.maSP ? `#${a.maSP}` : "—"}</td>
                 <td>{a.nguoiThucHien || "Hệ thống"}</td>
               </tr>

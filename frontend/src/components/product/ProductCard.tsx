@@ -22,7 +22,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) =
         <div className="relative aspect-square w-full bg-stone-50 overflow-hidden flex items-center justify-center p-2.5">
           {badgeText && (
             <span
-              className={`absolute top-2.5 left-2.5 z-10 text-[10px] font-extrabold px-2 py-0.5 rounded-sm uppercase tracking-wider shadow-xs ${
+              className={`absolute left-2.5 top-2.5 z-10 max-w-[85%] rounded-sm px-2 py-0.5 text-xs font-bold leading-snug shadow-xs ${
                 isNew
                   ? "bg-emerald-600 text-white"
                   : "bg-[#B91C1C] text-white"
@@ -49,17 +49,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) =
 
         {/* Product Details */}
         <div className="p-3">
-          <h3 className="text-xs sm:text-sm font-semibold text-stone-800 line-clamp-2 min-h-[36px] sm:min-h-[40px] group-hover:text-[#08783c] transition-colors leading-snug">
+          <h3 className="line-clamp-2 min-h-10 text-sm font-semibold leading-snug text-stone-800 transition-colors group-hover:text-[#08783c]">
             {product.tenSP}
           </h3>
 
           {/* Price Area */}
           <div className="mt-2.5 flex items-baseline gap-2 flex-wrap">
-            <span className="text-sm sm:text-base font-extrabold text-[#B91C1C]">
+            <span className="text-base font-extrabold text-[#B91C1C]">
               {product.giaHienTai.toLocaleString("vi-VN")}đ
             </span>
             {product.giaGoc > product.giaHienTai && (
-              <span className="text-xs text-stone-400 line-through">
+              <span className="text-sm text-stone-600 line-through">
                 {product.giaGoc.toLocaleString("vi-VN")}đ
               </span>
             )}
@@ -71,7 +71,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) =
       <div className="p-3 pt-0">
         <button
           onClick={() => onSelect(product)}
-          className="min-h-11 w-full rounded-lg border border-[#079447] px-3 py-2 text-xs font-bold text-[#08783c] transition-all hover:bg-[#079447] hover:text-white"
+          className="min-h-11 w-full rounded-lg border border-[#079447] px-3 py-2 text-sm font-bold text-[#08783c] transition-colors hover:bg-[#079447] hover:text-white"
         >
           Mua
         </button>

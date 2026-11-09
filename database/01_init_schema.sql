@@ -98,8 +98,27 @@ BEGIN
         DiaChiGiaoHang NVARCHAR(255) NULL,
         GhiChu NVARCHAR(255) NULL,
         TrangThai VARCHAR(20) NOT NULL DEFAULT 'PENDING' CHECK (TrangThai IN ('PENDING', 'PAID', 'DELIVERED', 'CANCELLED')),
+        NguonDon VARCHAR(20) NOT NULL CONSTRAINT DF_DonHang_NguonDon DEFAULT 'SALE'
+            CONSTRAINT CK_DonHang_NguonDon CHECK (NguonDon IN ('SALE', 'DEMO_FORECAST', 'BENCHMARK')),
         CONSTRAINT FK_DonHang_KhachHang FOREIGN KEY (MaKH) REFERENCES KhachHang(MaKH)
     );
+END
+GO
+
+IF COL_LENGTH(N'dbo.DonHang', N'NguonDon') IS NULL
+BEGIN
+    SET XACT_ABORT ON;
+    BEGIN TRANSACTION;
+    ALTER TABLE dbo.DonHang ADD NguonDon VARCHAR(20) NOT NULL
+        CONSTRAINT DF_DonHang_NguonDon DEFAULT 'SALE'
+        CONSTRAINT CK_DonHang_NguonDon CHECK (NguonDon IN ('SALE', 'DEMO_FORECAST', 'BENCHMARK'));
+    EXEC sp_executesql N'
+        UPDATE dbo.DonHang SET NguonDon = ''DEMO_FORECAST''
+        WHERE GhiChu = N''Đơn hàng lịch sử 7 ngày phục vụ thống kê & AI dự báo nhu cầu'';
+        UPDATE dbo.DonHang SET NguonDon = ''BENCHMARK''
+        WHERE GhiChu LIKE N''Đơn hàng sinh tự động phục vụ Benchmark CT221H #%''
+           OR GhiChu IN (N''Kiểm thử tranh chấp đồng thời Luồng A'', N''Kiểm thử tranh chấp đồng thời Luồng B'');';
+    COMMIT TRANSACTION;
 END
 GO
 
@@ -147,6 +166,13 @@ BEGIN
         CONSTRAINT FK_LichSuGiaoDichVi_DonHang FOREIGN KEY (MaDH) REFERENCES DonHang(MaDH)
     );
 END
+GO
+
+IF COL_LENGTH(N'dbo.LichSuGiaoDichVi', N'MaYeuCauNap') IS NULL
+    ALTER TABLE dbo.LichSuGiaoDichVi ADD MaYeuCauNap UNIQUEIDENTIFIER NULL;
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID(N'dbo.LichSuGiaoDichVi') AND name = 'UX_Vi_MaYeuCauNap')
+    CREATE UNIQUE INDEX UX_Vi_MaYeuCauNap ON dbo.LichSuGiaoDichVi (MaKH, MaYeuCauNap) WHERE MaYeuCauNap IS NOT NULL;
 GO
 
 -- 9. BẢNG NHẬT KÝ CẢNH BÁO (AUDIT LOG CHO QUẢN TRỊ VIÊN)

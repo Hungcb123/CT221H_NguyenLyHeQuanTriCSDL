@@ -44,6 +44,8 @@ public class OrderDetailResponse {
     @Schema(description = "Trạng thái đơn hàng", example = "PAID")
     private String trangThai;
 
+    private String nguonDon;
+
     @Schema(description = "Danh sách sản phẩm trong hóa đơn")
     private List<OrderItemDetailDto> items;
 

@@ -24,6 +24,7 @@ public class BenchmarkServiceImpl implements BenchmarkService {
         // 1. Kiểm tra số lượng bản ghi hiện có
         Long totalCount = jdbcTemplate.queryForObject("SELECT COUNT_BIG(1) FROM DonHang", Long.class);
         if (totalCount == null) totalCount = 0L;
+        Long benchmarkCount = jdbcTemplate.queryForObject("SELECT COUNT_BIG(*) FROM DonHang WHERE NguonDon = 'BENCHMARK'", Long.class);
 
         // Đảm bảo chỉ mục tồn tại trước khi đo
         ensureCoveringIndexExists();
@@ -37,6 +38,7 @@ public class BenchmarkServiceImpl implements BenchmarkService {
                 FROM DonHang dh WITH (INDEX(0))
                 WHERE dh.NgayTao >= DATEADD(MONTH, -6, GETDATE()) 
                   AND dh.TrangThai IN ('PAID', 'DELIVERED')
+                  AND dh.NguonDon = 'BENCHMARK'
                 GROUP BY dh.MaKH
                 """;
 
@@ -53,6 +55,7 @@ public class BenchmarkServiceImpl implements BenchmarkService {
                 FROM DonHang dh WITH (INDEX(IX_DonHang_NgayTao_TrangThai_Covering))
                 WHERE dh.NgayTao >= DATEADD(MONTH, -6, GETDATE()) 
                   AND dh.TrangThai IN ('PAID', 'DELIVERED')
+                  AND dh.NguonDon = 'BENCHMARK'
                 GROUP BY dh.MaKH
                 """;
 
@@ -90,6 +93,7 @@ public class BenchmarkServiceImpl implements BenchmarkService {
 
         return BenchmarkComparisonResponse.builder()
                 .totalOrdersInDatabase(totalCount)
+                .benchmarkOrdersInDatabase(benchmarkCount)
                 .withoutIndex(scanResult)
                 .withCoveringIndex(seekResult)
                 .speedupFactor(String.format("%.1fx", speedup))
@@ -111,7 +115,7 @@ public class BenchmarkServiceImpl implements BenchmarkService {
                   E4(N) AS (SELECT 1 FROM E3 a CROSS JOIN E1 b),
                   E5(N) AS (SELECT 1 FROM E4 a CROSS JOIN E1 b),
                   Numbers(N) AS (SELECT ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) FROM E5)
-                INSERT INTO DonHang (MaKH, NgayTao, TongTien, DiaChiGiaoHang, GhiChu, TrangThai)
+                INSERT INTO DonHang (MaKH, NgayTao, TongTien, DiaChiGiaoHang, GhiChu, TrangThai, NguonDon)
                 SELECT 
                     (ABS(CHECKSUM(NEWID())) %% 3) + 1 AS MaKH,
                     DATEADD(MINUTE, - (N %% 525600), GETDATE()) AS NgayTao,
@@ -123,7 +127,8 @@ public class BenchmarkServiceImpl implements BenchmarkService {
                         WHEN 1 THEN 'DELIVERED'
                         WHEN 2 THEN 'PENDING'
                         ELSE 'CANCELLED' 
-                    END AS TrangThai
+                    END AS TrangThai,
+                    'BENCHMARK'
                 FROM Numbers
                 WHERE N <= %d;
                 """, safeCount);
@@ -165,7 +170,7 @@ public class BenchmarkServiceImpl implements BenchmarkService {
                 BEGIN
                     CREATE NONCLUSTERED INDEX IX_DonHang_NgayTao_TrangThai_Covering
                     ON DonHang (NgayTao, TrangThai)
-                    INCLUDE (MaKH, TongTien);
+                    INCLUDE (MaKH, TongTien, NguonDon);
                 END
                 """;
         jdbcTemplate.execute(sql);

@@ -79,25 +79,12 @@ public class ProductServiceImpl implements ProductService {
     public ApiResponse<String> deleteProduct(Integer id) {
         log.info("Triggering delete for product ID={}", id);
 
-        Optional<ProductResponse> existing = productSpRepository.callLayChiTietSanPham(id);
-        if (existing.isEmpty() || Boolean.TRUE.equals(existing.get().getTrangThaiXoa())) {
+        if (!productSpRepository.callXoaSanPham(id)) {
             return ApiResponse.error(-1, "Sản phẩm không tồn tại hoặc đã bị xóa mềm trước đó.");
         }
 
-        // Lệnh này kích hoạt trigger INSTEAD OF DELETE trên MS SQL Server
-        int rowsAffected = productSpRepository.executeDeleteTrigger(id);
-        log.info("DELETE statement executed. Rows affected: {}", rowsAffected);
-
-        // Gỡ vector tương ứng khỏi CSDL Vector Qdrant
         semanticSearchService.removeProduct(id);
-
-        // Kiểm tra lại trạng thái sau khi trigger thực thi
-        Optional<ProductResponse> afterDelete = productSpRepository.callLayChiTietSanPham(id);
-        if (afterDelete.isPresent() && Boolean.TRUE.equals(afterDelete.get().getTrangThaiXoa())) {
-            return ApiResponse.ok(1, "Trigger [trg_SanPham_NganChanXoaVatLy] đã bẫy lệnh xóa thành công! Bản ghi được chuyển sang Xóa mềm (TrangThaiXoa = 1) và đã ghi nhật ký kiểm toán.", "Soft-deleted successfully");
-        }
-
-        return ApiResponse.ok(1, "Đã thực thi yêu cầu xóa sản phẩm.", "Completed");
+        return ApiResponse.ok(1, "Đã ẩn sản phẩm và ghi nhật ký xóa mềm.", "Soft-deleted successfully");
     }
 
     @Override
@@ -178,6 +165,7 @@ public class ProductServiceImpl implements ProductService {
 
         Optional<ProductResponse> productOpt = productSpRepository.callLayChiTietSanPham(id);
         return productOpt
+                .filter(product -> !Boolean.TRUE.equals(product.getTrangThaiXoa()))
                 .map(prod -> ApiResponse.ok("Lấy thông tin chi tiết sản phẩm thành công", prod))
                 .orElseGet(() -> ApiResponse.error(-1, "Không tìm thấy sản phẩm có mã: " + id));
     }

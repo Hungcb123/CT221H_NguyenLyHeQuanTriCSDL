@@ -8,8 +8,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: "Segoe UI", system-ui, Tahoma, sans-serif;
 }
 
 :root { color-scheme: light; }
@@ -17,7 +16,6 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: "Segoe UI", Tahoma, sans-serif;
 }
 
 ::selection {
@@ -37,6 +35,33 @@ body {
 
 input, textarea { caret-color: #08783c; }
 button:not(:disabled), a { touch-action: manipulation; }
+
+@layer components {
+  .customer-action {
+    @apply inline-flex min-h-11 max-w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-white px-4 py-2 text-sm font-semibold text-emerald-800 transition-colors;
+  }
+
+  .customer-action:where(:not(.customer-action-primary)):hover:not(:disabled) {
+    @apply border-emerald-400 bg-emerald-50;
+  }
+
+  .customer-action-primary {
+    @apply border-emerald-800 bg-emerald-800 text-white;
+  }
+
+  .customer-action-primary:hover {
+    @apply border-emerald-900 bg-emerald-900;
+  }
+
+  .customer-action:disabled {
+    @apply cursor-not-allowed opacity-50;
+  }
+
+  .customer-action svg {
+    @apply size-4 shrink-0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-spin { animation-duration: 3s; }
   .animate-pulse { animation: none; }

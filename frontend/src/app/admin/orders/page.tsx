@@ -17,6 +17,13 @@ import {
   Pagination,
 } from "@/components/admin/AdminUI";
 
+const orderStatuses: Record<string, string> = {
+  PENDING: "Chờ xác nhận",
+  PAID: "Đã thanh toán",
+  DELIVERED: "Đã giao hàng",
+  CANCELLED: "Đã hủy",
+};
+
 interface Detail {
   maDH: number;
   tenKhachHang: string;
@@ -98,8 +105,8 @@ export default function OrdersPage() {
           }}
         >
           <option value="">Tất cả trạng thái</option>
-          {["PENDING", "PAID", "DELIVERED", "CANCELLED"].map((s) => (
-            <option key={s}>{s}</option>
+          {Object.entries(orderStatuses).map(([value, label]) => (
+            <option key={value} value={value}>{label}</option>
           ))}
         </select>
         <label>
@@ -111,7 +118,7 @@ export default function OrdersPage() {
               setPage(1);
             }}
           />{" "}
-          Bao gồm dữ liệu không có chi tiết (benchmark)
+          Hiển thị thêm đơn benchmark
         </label>
         <button className="ad-btn secondary" onClick={list.refresh}>
           Tải lại
@@ -176,6 +183,7 @@ export default function OrdersPage() {
                 <td>
                   <strong>#{o.MaDH}</strong>
                   <small>{datetime(o.NgayTao)}</small>
+                  {o.NguonDon === "BENCHMARK" && <span className="ad-tag">Benchmark</span>}
                 </td>
                 <td>
                   {o.HoTen}
@@ -183,7 +191,7 @@ export default function OrdersPage() {
                 </td>
                 <td className="number">{money(o.TongTien)}</td>
                 <td>
-                  <span className="ad-tag">{o.TrangThai}</span>
+                  <span className="ad-tag">{orderStatuses[o.TrangThai] ?? o.TrangThai}</span>
                 </td>
                 <td>
                   <div className="ad-row-actions">
@@ -204,7 +212,7 @@ export default function OrdersPage() {
                     >
                       Chi tiết
                     </button>
-                    {o.TrangThai === "PAID" && (
+                    {o.NguonDon === "SALE" && o.TrangThai === "PAID" && (
                       <button
                         onClick={() =>
                           setChange({
@@ -217,7 +225,7 @@ export default function OrdersPage() {
                         Đã giao
                       </button>
                     )}
-                    {["PAID", "PENDING"].includes(o.TrangThai) && (
+                    {o.NguonDon === "SALE" && ["PAID", "PENDING"].includes(o.TrangThai) && (
                       <button
                         onClick={() =>
                           setChange({

@@ -150,14 +150,14 @@ BEGIN
         END;
 
         DECLARE @NewOrderId INT;
-        INSERT INTO DonHang (MaKH, NgayTao, TongTien, DiaChiGiaoHang, GhiChu, TrangThai)
+        INSERT INTO DonHang (MaKH, NgayTao, TongTien, DiaChiGiaoHang, GhiChu, TrangThai, NguonDon)
         VALUES (
             @CustomerId,
             @OrderDate,
             0,
             N'Quận Ninh Kiều, TP. Cần Thơ',
             N'Đơn hàng lịch sử 7 ngày phục vụ thống kê & AI dự báo nhu cầu',
-            'DELIVERED'
+            'DELIVERED', 'DEMO_FORECAST'
         );
         SET @NewOrderId = SCOPE_IDENTITY();
 

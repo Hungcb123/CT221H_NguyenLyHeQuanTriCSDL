@@ -108,12 +108,13 @@ Bạn có thể mở **http://localhost:8080/swagger-ui.html** và thực hiện
 ### 💳 KỊCH BẢN KIỂM THỬ MODULE 2 TRÊN SWAGGER UI (TRANSACTION ACID & VÍ ĐIỆN TỬ)
 
 #### 1. Kiểm thử Nạp tiền Ví & Ghi sổ cái kiểm toán (`sp_NapTienVi` & `LichSuGiaoDichVi`):
-* Gọi `POST /api/v1/wallets/top-up` với:
+* Đăng nhập quản trị và gửi CSRF của phiên admin khi gọi `POST /api/v1/wallets/top-up`.
   ```json
   {
     "maKH": 3,
     "soTien": 150000,
-    "noiDung": "Nạp tiền ví Bách Hóa Xanh qua ngân hàng"
+    "noiDung": "Nạp số dư demo",
+    "maYeuCau": "9b464315-f576-4f91-af15-ff23c77cb408"
   }
   ```
 * **Kết quả kiểm chứng:**
@@ -181,7 +182,7 @@ Bạn có thể mở **http://localhost:8080/swagger-ui.html** và thực hiện
   ```
 * **Kết quả kiểm chứng:**
   * Do tồn kho lớn (80 con) trong khi hạn sử dụng chỉ còn 1 ngày và dự báo tiêu thụ thấp, AI đánh giá mức độ rủi ro: **`ruiRoHuHong = "CAO"`**.
-  * **Chu trình khép kín:** Stored Procedure `sp_LuuKetQuaDuBaoNhapHang` tự động kích hoạt sinh một bản ghi mới trong bảng **`NhatKyCanhBao`** loại **`CANH_BAO_RUI_RO_THUC_PHAM`** để cảnh báo Quản lý kho khẩn cấp giảm giá hoặc xả hàng thanh lý!
+  * Giả lập hiển thị mức rủi ro ngay trong kết quả. Dự báo vận hành lưu kết quả và ghi cảnh báo kho khi rủi ro cao.
 
 #### 3. Kiểm thử Chạy dự báo hàng loạt toàn bộ danh mục (`POST /api/v1/ai/forecast/run-batch`):
 * Bấm **Execute** tại:

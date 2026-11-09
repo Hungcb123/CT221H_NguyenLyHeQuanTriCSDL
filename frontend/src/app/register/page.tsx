@@ -2,8 +2,10 @@
 
 import {useEffect, useState} from "react";
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import {useRouter} from "next/navigation";
 import {useCustomer} from "@/components/customer/CustomerProvider";
+import {customerDestination} from "@/services/customer-session";
 
 export default function RegisterPage() {
   const {customer, loading, register} = useCustomer();
@@ -16,11 +18,7 @@ export default function RegisterPage() {
   const [confirmation, setConfirmation] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
-  const destination = () => {
-    const next = new URLSearchParams(window.location.search).get("next");
-    return next?.startsWith("/") && !next.startsWith("//") ? next : "/";
-  };
-  useEffect(() => {if (!loading && customer) router.replace(destination());}, [customer, loading, router]);
+  useEffect(() => {if (!loading && customer) router.replace(customerDestination());}, [customer, loading, router]);
 
   return <main className="flex min-h-screen items-center justify-center bg-emerald-50 px-4 py-10">
     <form className="w-full max-w-lg space-y-5 rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8" onSubmit={async event => {
@@ -32,7 +30,7 @@ export default function RegisterPage() {
       setPending(true);
       try {
         await register({hoTen: hoTen.trim(), email: email.trim(), soDienThoai: phone.trim(), diaChi: address.trim(), password});
-        router.replace(destination());
+        router.replace(customerDestination());
       } catch(cause) {setError(cause instanceof Error ? cause.message : "Không tạo được tài khoản. Vui lòng thử lại.");}
       finally {setPending(false);}
     }}>
@@ -48,8 +46,8 @@ export default function RegisterPage() {
         <label className="block font-medium">Nhập lại mật khẩu<input type="password" autoComplete="new-password" required minLength={8} maxLength={72} value={confirmation} onChange={e=>setConfirmation(e.target.value)} className="mt-2 min-h-12 w-full rounded-lg border border-stone-300 px-3"/></label>
         <button className="min-h-12 w-full rounded-lg bg-emerald-800 px-4 font-bold text-white hover:bg-emerald-900">{pending?"Đang tạo tài khoản…":"Đăng ký"}</button>
       </fieldset>
-      <p className="text-center text-sm text-stone-600">Đã có tài khoản? <Link href="/login" onClick={event=>{const next=destination();if(next!=="/"){event.preventDefault();router.push(`/login?next=${encodeURIComponent(next)}`);}}} className="font-semibold text-emerald-800 underline">Đăng nhập</Link></p>
-      <Link href="/" className="block text-center text-sm text-emerald-800 underline">Tiếp tục xem sản phẩm</Link>
+      <p className="text-center text-sm text-stone-600">Đã có tài khoản? <Link href="/login" onClick={event=>{const next=customerDestination();if(next!=="/"){event.preventDefault();router.push(`/login?next=${encodeURIComponent(next)}`);}}} className="font-semibold text-emerald-800 underline">Đăng nhập</Link></p>
+      <div className="text-center"><Link href="/" className="customer-action"><ArrowLeft aria-hidden="true" />Tiếp tục xem sản phẩm</Link></div>
     </form>
   </main>;
 }

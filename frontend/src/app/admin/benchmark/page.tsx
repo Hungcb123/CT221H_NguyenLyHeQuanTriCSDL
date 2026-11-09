@@ -60,7 +60,7 @@ export default function BenchmarkPage() {
     <>
       <AdminTitle
         title="Đo hiệu năng chỉ mục"
-        description="So sánh hai truy vấn trên SQL Server đang chạy. Số liệu được đo khi bấm chạy; không dùng kết quả mẫu."
+        description="So sánh hai truy vấn trên các đơn được gắn nguồn benchmark trong SQL Server đang chạy."
       />
       <Notice error={error} message={message} />
       {action && (
@@ -84,12 +84,16 @@ export default function BenchmarkPage() {
       )}
       <section className="ad-panel">
         <h2>Chạy đối chứng</h2>
-        <p className="ad-help">
-          Chạy tuần tự trên cùng dữ liệu, đo thời gian tại ứng dụng. Lệnh so
-          sánh bảo đảm chỉ mục bao phủ tồn tại. Cache, tải máy và thứ tự chạy
-          ảnh hưởng kết quả; cần execution plan và STATISTICS IO để kết luận
-          Scan/Seek hoặc I/O.
-        </p>
+        <dl className="ad-guides">
+          <div className="ad-guide">
+            <dt>Cách đo</dt>
+            <dd>Chạy hai truy vấn tuần tự trên cùng dữ liệu, đo thời gian tại ứng dụng. Lệnh so sánh bảo đảm chỉ mục bao phủ tồn tại.</dd>
+          </div>
+          <div className="ad-guide">
+            <dt>Cách đọc kết quả</dt>
+            <dd>Bộ đệm, tải máy và thứ tự chạy có thể ảnh hưởng thời gian. Xem kế hoạch thực thi để phân biệt Scan và Seek, dùng STATISTICS IO để xem lượt đọc.</dd>
+          </div>
+        </dl>
         <div className="ad-actions">
           <button
             className="ad-btn"
@@ -104,8 +108,8 @@ export default function BenchmarkPage() {
         <section className="ad-panel">
           <h2>Kết quả đo vừa chạy</h2>
           <p className="ad-help">
-            {result.totalOrdersInDatabase.toLocaleString("vi-VN")} đơn trong cơ
-            sở dữ liệu.
+            {result.benchmarkOrdersInDatabase.toLocaleString("vi-VN")} đơn benchmark trên tổng{" "}
+            {result.totalOrdersInDatabase.toLocaleString("vi-VN")} đơn trong cơ sở dữ liệu.
           </p>
           <div className="ad-table-wrap">
             <table className="ad-table">

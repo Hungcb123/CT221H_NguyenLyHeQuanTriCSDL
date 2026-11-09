@@ -23,10 +23,10 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ onSelectPromotion }) => 
         />
 
         <div className="relative z-10 sm:w-1/2 sm:pr-5">
-          <h2 className="text-2xl font-extrabold text-stone-900 leading-tight mb-2 font-serif">
+          <h2 className="mb-2 text-2xl font-bold leading-snug text-stone-900">
             Hải sản cho bữa cơm nhà
           </h2>
-          <p className="text-stone-600 text-xs sm:text-sm mb-4 leading-relaxed">
+          <p className="mb-4 text-sm leading-relaxed text-stone-600 sm:text-base">
             Khám phá các loại cá và hải sản, xem giá và chọn số lượng phù hợp cho bữa ăn.
           </p>
           <button
@@ -45,8 +45,8 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({ onSelectPromotion }) => 
           <ChefHat className="w-6 h-6" />
         </div>
         <div className="space-y-2">
-          <h3 className="text-lg font-bold text-stone-900 font-serif">Đi chợ theo món ăn</h3>
-          <p className="text-stone-600 text-xs leading-relaxed max-w-xs">
+          <h3 className="text-lg font-bold text-stone-900">Đi chợ theo món ăn</h3>
+          <p className="max-w-xs text-sm leading-relaxed text-stone-600">
             Hỏi Bếp Trưởng AI để tìm công thức, xem nguyên liệu và thêm sản phẩm vào giỏ hàng.
           </p>
         </div>

@@ -31,8 +31,8 @@ public class AdminSchemaMigration implements ApplicationRunner {
                             WHEN 3 THEN 1.04 WHEN 2 THEN 1.08 WHEN 1 THEN 1.25 ELSE 1.12
                         END;
                         DECLARE @NewOrderId INT;
-                        INSERT INTO DonHang (MaKH, NgayTao, TongTien, DiaChiGiaoHang, GhiChu, TrangThai)
-                        VALUES (@CustomerId, @OrderDate, 0, N'Quận Ninh Kiều, TP. Cần Thơ', N'Đơn hàng lịch sử 7 ngày phục vụ thống kê & AI dự báo nhu cầu', 'DELIVERED');
+                        INSERT INTO DonHang (MaKH, NgayTao, TongTien, DiaChiGiaoHang, GhiChu, TrangThai, NguonDon)
+                        VALUES (@CustomerId, @OrderDate, 0, N'Quận Ninh Kiều, TP. Cần Thơ', N'Đơn hàng lịch sử 7 ngày phục vụ thống kê & AI dự báo nhu cầu', 'DELIVERED', 'DEMO_FORECAST');
                         SET @NewOrderId = SCOPE_IDENTITY();
                         INSERT INTO ChiTietDonHang (MaDH, MaSP, SoLuong, DonGia, GiaGoc, TienGiam, MaKM)
                         SELECT @NewOrderId, sp.MaSP,

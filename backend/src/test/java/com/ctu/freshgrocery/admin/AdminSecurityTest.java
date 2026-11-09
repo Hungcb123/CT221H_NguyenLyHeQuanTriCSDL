@@ -34,6 +34,7 @@ class AdminSecurityTest {
         @GetMapping("/api/v1/benchmark/compare") String compare(){return "ok";}
         @PostMapping("/api/v1/search/sync") String sync(){return "ok";}
         @PostMapping("/api/v1/orders/checkout") String checkout(){return "ok";}
+        @PostMapping("/api/v1/wallets/top-up") String walletTopUp(){return "ok";}
     }
     @Test void sessionAndBrowsingRemainPublic() throws Exception {
         mvc.perform(get("/api/v1/admin/auth/session")).andExpect(status().isOk()).andExpect(jsonPath("$.data.authenticated").value(false)).andExpect(jsonPath("$.data.csrfToken").isNotEmpty());
@@ -44,6 +45,13 @@ class AdminSecurityTest {
         mvc.perform(get("/api/v1/admin/probe")).andExpect(status().isUnauthorized());
         mvc.perform(get("/api/v1/admin/probe").with(user("customer").roles("CUSTOMER"))).andExpect(status().isForbidden());
         mvc.perform(get("/api/v1/admin/probe").with(user("admin").roles("ADMIN"))).andExpect(status().isOk());
+    }
+    @Test void walletTopUpRequiresAdminAndCsrf() throws Exception {
+        String endpoint = "/api/v1/wallets/top-up";
+        mvc.perform(post(endpoint).with(csrf())).andExpect(status().isUnauthorized());
+        mvc.perform(post(endpoint).with(user("customer").roles("CUSTOMER")).with(csrf())).andExpect(status().isForbidden());
+        mvc.perform(post(endpoint).with(user("admin").roles("ADMIN"))).andExpect(status().isForbidden());
+        mvc.perform(post(endpoint).with(user("admin").roles("ADMIN")).with(csrf())).andExpect(status().isOk());
     }
     @Test void writesAndLegacyMutatingGetRequireCsrf() throws Exception {
         mvc.perform(post("/api/v1/products").with(user("admin").roles("ADMIN"))).andExpect(status().isForbidden());
@@ -58,9 +66,13 @@ class AdminSecurityTest {
                 .andExpect(status().isOk()).andReturn();
         var session=(MockHttpSession)response.getRequest().getSession(false);
         org.junit.jupiter.api.Assertions.assertNotNull(session);
+        session.setAttribute(com.ctu.freshgrocery.customer.CustomerAccess.ID, 1);
+        String sessionId = session.getId();
         mvc.perform(get("/api/v1/admin/auth/session").session(session)).andExpect(jsonPath("$.data.authenticated").value(true));
         mvc.perform(post("/api/v1/admin/auth/logout").session(session).with(csrf())).andExpect(status().isOk());
-        org.junit.jupiter.api.Assertions.assertTrue(session.isInvalid());
+        org.junit.jupiter.api.Assertions.assertNotEquals(sessionId, session.getId());
+        org.junit.jupiter.api.Assertions.assertEquals(1, session.getAttribute(com.ctu.freshgrocery.customer.CustomerAccess.ID));
+        mvc.perform(get("/api/v1/admin/auth/session").session(session)).andExpect(jsonPath("$.data.authenticated").value(false));
     }
     @Test void loginAndLogoutRejectMissingToken() throws Exception {
         mvc.perform(post("/api/v1/admin/auth/login").param("username","admin").param("password","wrong")).andExpect(status().isForbidden());

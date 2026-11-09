@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {useRouter} from "next/navigation";
 import {useCustomer} from "@/components/customer/CustomerProvider";
-import { ArrowLeft, CheckCircle2, MapPin, ShoppingBag, Wallet } from "lucide-react";
+import { CartItemThumbnail } from "@/components/cart/CartItemThumbnail";
+import { ArrowLeft, ArrowRight, CheckCircle2, MapPin, ShoppingBag, Wallet } from "lucide-react";
 import { apiService } from "@/services/api";
 import type { CartResponse, CheckoutResponse } from "@/types";
 
@@ -64,18 +65,20 @@ export default function CheckoutPage() {
   return (
     <main className="min-h-screen bg-stone-50 px-4 py-8 text-stone-900 sm:px-6">
       <div className="mx-auto max-w-4xl">
-        <Link href="/" className="mb-6 inline-flex min-h-11 items-center gap-2 font-semibold text-emerald-800 hover:underline"><ArrowLeft className="h-4 w-4" />Tiếp tục mua sắm</Link>
+        <Link href="/" className="customer-action mb-6"><ArrowLeft aria-hidden="true" />Tiếp tục mua sắm</Link>
         {result ? (
           <section className="rounded-xl bg-white p-6 text-center shadow-sm sm:p-10">
             <CheckCircle2 className="mx-auto mb-4 h-14 w-14 text-emerald-700" aria-hidden="true" />
             <h1 ref={headingRef} tabIndex={-1} className="text-2xl font-bold">Thanh toán thành công</h1>
             <p className="mt-2 text-stone-600">Đơn hàng #{result.maDH} đã được xác nhận.</p>
-            <Link href={`/orders/${result.maDH}`} className="mt-3 inline-block font-semibold text-emerald-800 underline">Xem chi tiết và theo dõi đơn hàng</Link>
             <dl className="mx-auto my-6 max-w-md space-y-3 text-left">
               <div className="flex justify-between gap-4"><dt>Tổng thanh toán</dt><dd className="font-bold">{money(result.tongTien)}</dd></div>
               <div className="flex justify-between gap-4"><dt>Số dư ví còn lại</dt><dd className="font-bold text-emerald-800">{money(result.soDuConLai)}</dd></div>
             </dl>
-            <Link href="/" className="inline-flex min-h-11 items-center rounded-lg bg-emerald-800 px-6 font-semibold text-white hover:bg-emerald-900">Tiếp tục đi chợ</Link>
+            <div className="flex flex-wrap justify-center gap-3">
+              <Link href={`/orders/${result.maDH}`} className="customer-action customer-action-primary">Xem chi tiết và theo dõi đơn hàng <ArrowRight aria-hidden="true" /></Link>
+              <Link href="/" className="customer-action"><ShoppingBag aria-hidden="true" />Tiếp tục đi chợ</Link>
+            </div>
           </section>
         ) : (
           <>
@@ -97,15 +100,20 @@ export default function CheckoutPage() {
                   <section className="rounded-xl border border-stone-200 bg-white p-5 sm:p-6">
                     <h2 className="mb-3 flex items-center gap-2 text-lg font-bold"><Wallet className="h-5 w-5 text-emerald-800" />Ví DailyMart</h2>
                     <p>Số dư khả dụng: <strong className="text-emerald-800">{balance === null ? "Chưa tải được" : money(balance)}</strong></p>
-                    {insufficient && <p role="status" className="mt-3 text-red-800">Số dư ví chưa đủ. Vui lòng nạp thêm tiền trước khi thanh toán.</p>}
+                    {insufficient && <p role="status" className="mt-3 text-red-800">Số dư ví chưa đủ. Liên hệ quản trị viên để bổ sung tiền demo.</p>}
+                    <Link href="/wallet" className="customer-action mt-3">Xem ví và giao dịch</Link>
                   </section>
                 </div>
                 <section className="self-start rounded-xl border border-stone-200 bg-white p-5">
                   <h2 className="mb-4 flex items-center gap-2 text-lg font-bold"><ShoppingBag className="h-5 w-5 text-emerald-800" />Đơn hàng của bạn</h2>
                   {!cart?.danhSachMon.length ? <p className="text-stone-600">Giỏ hàng đang trống. Hãy chọn sản phẩm trước khi thanh toán.</p> : (
-                    <ul className="max-h-80 space-y-4 overflow-y-auto">{cart.danhSachMon.map((item) => <li key={item.maSP} className="text-sm">
-                      <p className="break-words font-semibold">{item.tenSP}</p><div className="mt-1 flex justify-between gap-3 text-stone-600"><span>{item.soLuong} × {item.donViTinh}</span><span className="shrink-0">{money(item.thanhTien)}</span></div>
-                      {item.conDuHang === false && <p className="mt-1 text-red-800">Không đủ hàng. Vui lòng điều chỉnh giỏ hàng.</p>}
+                    <ul className="max-h-80 space-y-4 overflow-y-auto">{cart.danhSachMon.map((item) => <li key={item.maSP} className="flex items-start gap-3 text-sm">
+                      <CartItemThumbnail item={item} />
+                      <div className="min-w-0 flex-1">
+                        <p className="break-words font-semibold">{item.tenSP}</p>
+                        <div className="mt-1 flex flex-wrap justify-between gap-x-3 text-stone-600"><span>{item.soLuong} × {item.donViTinh}</span><span>{money(item.thanhTien)}</span></div>
+                        {item.conDuHang === false && <p className="mt-1 text-red-800">Không đủ hàng. Vui lòng điều chỉnh giỏ hàng.</p>}
+                      </div>
                     </li>)}</ul>
                   )}
                   <div className="my-5 flex flex-wrap justify-between gap-2 border-t border-stone-200 pt-4 font-bold"><span>Tổng thanh toán</span><span className="text-red-800">{money(cart?.tongTien ?? 0)}</span></div>

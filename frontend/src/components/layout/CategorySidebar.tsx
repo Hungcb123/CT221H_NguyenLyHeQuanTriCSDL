@@ -18,12 +18,14 @@ interface CategorySidebarProps {
   categories: Category[];
   selectedCategoryId: number | null;
   onSelectCategory: (id: number | null) => void;
+  hideOnMobile?: boolean;
 }
 
 export const CategorySidebar: React.FC<CategorySidebarProps> = ({
   categories,
   selectedCategoryId,
   onSelectCategory,
+  hideOnMobile,
 }) => {
   // Helper to map category name to Lucide icon
   const getCategoryIcon = (name: string) => {
@@ -50,7 +52,7 @@ export const CategorySidebar: React.FC<CategorySidebarProps> = ({
   };
 
   return (
-    <aside className="w-full lg:w-[325px] bg-white border-r border-[#CFE3D6] flex flex-col justify-between shrink-0">
+    <aside className={`w-full shrink-0 flex-col justify-between border-r border-[#CFE3D6] bg-white lg:w-[325px] ${hideOnMobile ? "hidden lg:flex" : "flex"}`}>
       <div>
         {/* Sidebar Title Header matching mockup */}
         <div className="m-4 mb-2 lg:mb-6 rounded-lg bg-[#079447] text-white px-7 py-4 flex items-center space-x-3 font-bold tracking-wide text-base uppercase">

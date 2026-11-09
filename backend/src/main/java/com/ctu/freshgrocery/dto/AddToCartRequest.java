@@ -24,7 +24,7 @@ public class AddToCartRequest {
     private Integer maSP;
 
     @NotNull(message = "Số lượng không được để trống")
-    @Min(value = 1, message = "Số lượng thêm vào giỏ phải từ 1 trở lên")
+    @Min(value = 1, message = "Số lượng trong giỏ phải từ 1 trở lên")
     @Schema(description = "Số lượng mua", example = "2")
     private Integer soLuong;
 }

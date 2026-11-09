@@ -6,6 +6,10 @@
 USE FreshGroceryDB;
 GO
 
+SET ANSI_NULLS ON;
+SET QUOTED_IDENTIFIER ON;
+GO
+
 -- 1. THỦ TỤC THÊM MỚI SẢN PHẨM TƯƠI SỐNG (REQ-SP-01)
 CREATE OR ALTER PROCEDURE sp_ThemSanPhamMoi
     @TenSP NVARCHAR(200),
@@ -314,6 +318,25 @@ END;
 GO
 
 -- =========================================================================
+-- Xóa sản phẩm qua thủ tục lưu. Trigger INSTEAD OF DELETE xử lý xóa mềm.
+-- =========================================================================
+CREATE OR ALTER PROCEDURE dbo.sp_XoaSanPham
+    @MaSP INT,
+    @DaXoa BIT OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @DaXuLy TABLE (MaSP INT);
+    DELETE FROM dbo.SanPham
+    OUTPUT deleted.MaSP INTO @DaXuLy
+    WHERE MaSP = @MaSP AND TrangThaiXoa = 0;
+
+    SET @DaXoa = CASE WHEN EXISTS (SELECT 1 FROM @DaXuLy) THEN 1 ELSE 0 END;
+END;
+GO
+
+-- =========================================================================
 -- PHÂN HỆ MODULE 2: GIAO DỊCH VÍ ĐIỆN TỬ, GIỎ HÀNG & THANH TOÁN ĐƠN HÀNG
 -- =========================================================================
 
@@ -324,13 +347,14 @@ CREATE OR ALTER PROCEDURE sp_NapTienVi
     @NoiDung NVARCHAR(255),
     @StatusCode INT OUTPUT,
     @Message NVARCHAR(255) OUTPUT,
-    @SoDuMoi DECIMAL(18,2) OUTPUT
+    @SoDuMoi DECIMAL(18,2) OUTPUT,
+    @MaYeuCauNap UNIQUEIDENTIFIER = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
     SET XACT_ABORT ON;
 
-    DECLARE @SoDuTruoc DECIMAL(18,2) = 0;
+    DECLARE @SoDuTruoc DECIMAL(18,2);
 
     BEGIN TRY
         IF (@SoTien IS NULL OR @SoTien <= 0)
@@ -357,6 +381,21 @@ BEGIN
             RETURN;
         END
 
+        DECLARE @SoTienDaNap DECIMAL(18,2);
+        IF @MaYeuCauNap IS NOT NULL
+            SELECT @SoTienDaNap = SoTienThayDoi FROM LichSuGiaoDichVi
+            WHERE MaKH = @MaKH AND MaYeuCauNap = @MaYeuCauNap;
+
+        IF @SoTienDaNap IS NOT NULL
+        BEGIN
+            SET @StatusCode = CASE WHEN @SoTienDaNap = @SoTien THEN 1 ELSE -3 END;
+            SET @Message = CASE WHEN @StatusCode = 1 THEN N'Yêu cầu nạp này đã được xử lý.'
+                                ELSE N'Mã yêu cầu đã được dùng với số tiền khác.' END;
+            SET @SoDuMoi = @SoDuTruoc;
+            COMMIT TRANSACTION;
+            RETURN;
+        END
+
         SET @SoDuMoi = @SoDuTruoc + @SoTien;
 
         -- 1. Cập nhật số dư ví
@@ -365,7 +404,7 @@ BEGIN
         WHERE MaKH = @MaKH;
 
         -- 2. Ghi sổ cái kiểm toán giao dịch (Audit Trail)
-        INSERT INTO LichSuGiaoDichVi (MaKH, MaDH, LoaiGiaoDich, SoDuTruoc, SoTienThayDoi, SoDuSau, NgayGiaoDich, NoiDung)
+        INSERT INTO LichSuGiaoDichVi (MaKH, MaDH, LoaiGiaoDich, SoDuTruoc, SoTienThayDoi, SoDuSau, NgayGiaoDich, NoiDung, MaYeuCauNap)
         VALUES (
             @MaKH, 
             NULL, 
@@ -374,7 +413,8 @@ BEGIN
             @SoTien, 
             @SoDuMoi, 
             GETDATE(), 
-            ISNULL(@NoiDung, N'Nạp tiền vào ví điện tử Bách Hóa Xanh')
+            ISNULL(@NoiDung, N'Nạp tiền vào ví điện tử Bách Hóa Xanh'),
+            @MaYeuCauNap
         );
 
         COMMIT TRANSACTION;
@@ -397,51 +437,57 @@ CREATE OR ALTER PROCEDURE sp_ThemVaoGioHang
     @MaSP INT,
     @SoLuong INT,
     @StatusCode INT OUTPUT,
-    @Message NVARCHAR(255) OUTPUT
+    @Message NVARCHAR(255) OUTPUT,
+    @ThayThe BIT = 0
 AS
 BEGIN
     SET NOCOUNT ON;
+    SET XACT_ABORT ON;
     BEGIN TRY
-        IF (@SoLuong IS NULL OR @SoLuong <= 0)
-        BEGIN
-            SET @StatusCode = -1;
-            SET @Message = N'Số lượng thêm vào giỏ phải lớn hơn 0.';
-            RETURN;
-        END
+        IF @SoLuong IS NULL OR @SoLuong <= 0
+            THROW 50001, N'Số lượng trong giỏ phải lớn hơn 0.', 1;
 
-        -- Kiểm tra sản phẩm tồn tại, còn hàng và chưa hết hạn
-        IF NOT EXISTS (SELECT 1 FROM SanPham WHERE MaSP = @MaSP AND TrangThaiXoa = 0 AND HanSuDung > GETDATE())
-        BEGIN
-            SET @StatusCode = -2;
-            SET @Message = N'Sản phẩm không tồn tại, đã hết hạn hoặc tạm ngừng kinh doanh.';
-            RETURN;
-        END
+        BEGIN TRANSACTION;
+        -- Cùng thứ tự khóa với luồng thanh toán.
+        IF NOT EXISTS (SELECT 1 FROM KhachHang WITH (UPDLOCK, HOLDLOCK) WHERE MaKH = @MaKH)
+            THROW 50001, N'Không tìm thấy khách hàng.', 1;
 
-        -- Đảm bảo khách hàng đã có giỏ hàng (nếu chưa có thì tự tạo)
-        DECLARE @MaGioHang INT;
+        DECLARE @MaGioHang INT, @SoLuongCu INT, @TonKho INT;
+        SELECT @TonKho = SoLuongTon FROM SanPham WITH (UPDLOCK)
+        WHERE MaSP = @MaSP AND TrangThaiXoa = 0 AND HanSuDung > GETDATE();
+        IF @TonKho IS NULL
+            THROW 50001, N'Sản phẩm không tồn tại, đã hết hạn hoặc tạm ngừng kinh doanh.', 1;
+
         SELECT @MaGioHang = MaGioHang FROM GioHang WHERE MaKH = @MaKH;
-        IF (@MaGioHang IS NULL)
+        SELECT @SoLuongCu = SoLuong FROM ChiTietGioHang WITH (UPDLOCK, HOLDLOCK)
+        WHERE MaGioHang = @MaGioHang AND MaSP = @MaSP;
+
+        IF @ThayThe = 1 AND @SoLuongCu IS NULL
+            THROW 50001, N'Sản phẩm không còn trong giỏ hàng.', 1;
+
+        DECLARE @SoLuongMoi BIGINT = @SoLuong + CASE WHEN @ThayThe = 1 THEN 0 ELSE CONVERT(BIGINT, ISNULL(@SoLuongCu, 0)) END;
+        IF @SoLuongMoi > @TonKho AND @SoLuongMoi >= ISNULL(@SoLuongCu, 0)
+            THROW 50001, N'Số lượng vượt quá tồn kho hiện tại.', 1;
+
+        IF @MaGioHang IS NULL
         BEGIN
             INSERT INTO GioHang (MaKH, NgayCapNhat) VALUES (@MaKH, GETDATE());
             SET @MaGioHang = SCOPE_IDENTITY();
         END
 
-        -- Thêm hoặc cộng dồn số lượng vào ChiTietGioHang
-        MERGE ChiTietGioHang AS target
-        USING (SELECT @MaGioHang AS MaGioHang, @MaSP AS MaSP, @SoLuong AS SoLuong) AS source
-        ON (target.MaGioHang = source.MaGioHang AND target.MaSP = source.MaSP)
-        WHEN MATCHED THEN
-            UPDATE SET target.SoLuong = target.SoLuong + source.SoLuong
-        WHEN NOT MATCHED THEN
-            INSERT (MaGioHang, MaSP, SoLuong) VALUES (source.MaGioHang, source.MaSP, source.SoLuong);
+        IF @SoLuongCu IS NULL
+            INSERT INTO ChiTietGioHang (MaGioHang, MaSP, SoLuong) VALUES (@MaGioHang, @MaSP, @SoLuongMoi);
+        ELSE
+            UPDATE ChiTietGioHang SET SoLuong = @SoLuongMoi WHERE MaGioHang = @MaGioHang AND MaSP = @MaSP;
 
         UPDATE GioHang SET NgayCapNhat = GETDATE() WHERE MaGioHang = @MaGioHang;
-
+        COMMIT TRANSACTION;
         SET @StatusCode = 1;
-        SET @Message = N'Đã thêm sản phẩm vào giỏ hàng thành công.';
+        SET @Message = N'Đã cập nhật giỏ hàng.';
     END TRY
     BEGIN CATCH
-        SET @StatusCode = -99;
+        IF XACT_STATE() <> 0 ROLLBACK TRANSACTION;
+        SET @StatusCode = CASE WHEN ERROR_NUMBER() = 50001 THEN -1 ELSE -99 END;
         SET @Message = ERROR_MESSAGE();
     END CATCH
 END;
@@ -506,7 +552,8 @@ BEGIN
              ELSE 0 END AS TienTietKiem,
         sp.SoLuongTon,
         sp.HanSuDung,
-        CASE WHEN sp.SoLuongTon < ctgh.SoLuong THEN 0 ELSE 1 END AS ConDuHang
+        CASE WHEN sp.SoLuongTon < ctgh.SoLuong OR sp.HanSuDung <= GETDATE() THEN 0 ELSE 1 END AS ConDuHang,
+        sp.HinhAnh
     FROM ChiTietGioHang ctgh
     INNER JOIN SanPham sp ON ctgh.MaSP = sp.MaSP
     OUTER APPLY (
@@ -520,7 +567,7 @@ BEGIN
         WHERE ctkm.MaSP = sp.MaSP
           AND km.TrangThai = 1
           AND GETDATE() BETWEEN km.NgayBatDau AND km.NgayKetThuc
-          AND (ctkm.SoLuongKhuyenMai IS NULL OR ctkm.SoLuongDaBan < ctkm.SoLuongKhuyenMai)
+          AND (ctkm.SoLuongKhuyenMai IS NULL OR ctgh.SoLuong <= ctkm.SoLuongKhuyenMai - ctkm.SoLuongDaBan)
         ORDER BY ctkm.GiaKhuyenMai ASC
     ) km_active
     WHERE ctgh.MaGioHang = @MaGioHang AND sp.TrangThaiXoa = 0;
@@ -535,7 +582,8 @@ CREATE OR ALTER PROCEDURE sp_ThanhToanDonHang
     @GhiChu NVARCHAR(255) = NULL,
     @MaDH_Output INT OUTPUT,
     @StatusCode INT OUTPUT,
-    @Message NVARCHAR(255) OUTPUT
+    @Message NVARCHAR(255) OUTPUT,
+    @NguonDon VARCHAR(20) = 'SALE'
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -619,7 +667,7 @@ BEGIN
             WHERE ctkm.MaSP = sp.MaSP
               AND km.TrangThai = 1
               AND GETDATE() BETWEEN km.NgayBatDau AND km.NgayKetThuc
-              AND (ctkm.SoLuongKhuyenMai IS NULL OR ctkm.SoLuongDaBan < ctkm.SoLuongKhuyenMai)
+              AND (ctkm.SoLuongKhuyenMai IS NULL OR ctgh.SoLuong <= ctkm.SoLuongKhuyenMai - ctkm.SoLuongDaBan)
             ORDER BY ctkm.GiaKhuyenMai ASC
         ) km_active
         WHERE ctgh.MaGioHang = @MaGioHang;
@@ -667,8 +715,8 @@ BEGIN
         WHERE MaKH = @MaKH;
 
         -- 10. TẠO HÓA ĐƠN ĐƠN HÀNG (Trạng thái: PAID)
-        INSERT INTO DonHang (MaKH, NgayTao, TongTien, DiaChiGiaoHang, GhiChu, TrangThai)
-        VALUES (@MaKH, GETDATE(), @TongTien, @DiaChiGiaoHang, @GhiChu, 'PAID');
+        INSERT INTO DonHang (MaKH, NgayTao, TongTien, DiaChiGiaoHang, GhiChu, TrangThai, NguonDon)
+        VALUES (@MaKH, GETDATE(), @TongTien, @DiaChiGiaoHang, @GhiChu, 'PAID', @NguonDon);
         SET @MaDH_Output = SCOPE_IDENTITY();
 
         -- 11. TẠO CHI TIẾT ĐƠN HÀNG (LƯU CẢ GIÁ GỐC, TIỀN GIẢM VÀ MÃ KHUYẾN MÃI)

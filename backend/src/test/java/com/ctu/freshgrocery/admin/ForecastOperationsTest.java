@@ -1,4 +1,5 @@
 package com.ctu.freshgrocery.admin;
+import com.ctu.freshgrocery.dto.ForecastCustomRequest;
 import com.ctu.freshgrocery.exception.AppException;
 import com.ctu.freshgrocery.model.Product;
 import com.ctu.freshgrocery.repository.*;
@@ -29,9 +30,10 @@ class ForecastOperationsTest {
     }
     @Test void usesActualSalesAndZeroFillsMissingDates(){
         service.init(); assertEquals(true,service.getModelStatus().get("ready"));
-        var target=LocalDate.now().plusDays(1);
+        var target=LocalDate.now(ZoneId.of("Asia/Ho_Chi_Minh")).plusDays(1);
         when(jdbc.queryForList(anyString(),eq(1),any(java.sql.Date.class),any(java.sql.Date.class))).thenReturn(List.of(Map.of("SaleDate",java.sql.Date.valueOf(target.minusDays(7)),"Quantity",7),Map.of("SaleDate",java.sql.Date.valueOf(target.minusDays(1)),"Quantity",14)));
         var prediction=service.predictForProduct(1);
+        assertEquals(target,prediction.getNgayDuBao());
         assertEquals(14.0,prediction.getFeaturesUsed().get("Lag_1"));
         assertEquals(7.0,prediction.getFeaturesUsed().get("Lag_7"));
         assertEquals(3.0,prediction.getFeaturesUsed().get("Rolling_Mean_7"));
@@ -46,5 +48,18 @@ class ForecastOperationsTest {
         service.init();
         when(jdbc.queryForList(anyString(),eq(1),any(java.sql.Date.class),any(java.sql.Date.class))).thenThrow(new org.springframework.dao.DataAccessResourceFailureException("offline"));
         assertThrows(org.springframework.dao.DataAccessException.class,()->service.predictForProduct(1));verifyNoInteractions(sp);
+    }
+    @Test void highRiskSimulationNeverSavesForecastOrAlert() {
+        service.init();
+        var request = ForecastCustomRequest.builder()
+                .maSP(1).targetDate(LocalDate.of(2026, 10, 17))
+                .currentStock(150).daysUntilExpiry(1)
+                .lag1(48.0).lag7(45.0).rollingMean7(46.5).rollingStd7(4.2)
+                .build();
+        var result = service.predictCustom(request);
+        assertEquals("CAO", result.getRuiRoHuHong());
+        assertNull(result.getMaDuBao());
+        assertNull(result.getCanhBaoLienKet());
+        verifyNoInteractions(sp);
     }
 }

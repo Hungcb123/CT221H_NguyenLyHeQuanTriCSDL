@@ -36,6 +36,7 @@ public class ProductSpRepository {
     private SimpleJdbcCall spCapNhatSanPhamCall;
     private SimpleJdbcCall spPhanTrangSanPhamCall;
     private SimpleJdbcCall spChiTietSanPhamCall;
+    private SimpleJdbcCall spXoaSanPhamCall;
 
     @PostConstruct
     public void init() {
@@ -90,6 +91,11 @@ public class ProductSpRepository {
                         new SqlOutParameter("TongSoTrang", Types.INTEGER)
                 )
                 .returningResultSet("items", new ProductRowMapper());
+
+        this.spXoaSanPhamCall = new SimpleJdbcCall(jdbcTemplate)
+                .withSchemaName("dbo")
+                .withProcedureName("sp_XoaSanPham")
+                .declareParameters(new SqlParameter("MaSP", Types.INTEGER), new SqlOutParameter("DaXoa", Types.BIT));
 
         // 4. Cấu hình Stored Procedure: sp_LayChiTietSanPham
         this.spChiTietSanPhamCall = new SimpleJdbcCall(jdbcTemplate)
@@ -176,9 +182,8 @@ public class ProductSpRepository {
     /**
      * Thực thi câu lệnh DELETE kích hoạt Trigger INSTEAD OF DELETE (Soft Delete)
      */
-    public int executeDeleteTrigger(Integer maSP) {
-        log.info("Executing DELETE FROM SanPham WHERE MaSP = {} to trigger INSTEAD OF DELETE trigger", maSP);
-        return jdbcTemplate.update("DELETE FROM SanPham WHERE MaSP = ?", maSP);
+    public boolean callXoaSanPham(Integer maSP) {
+        return Boolean.TRUE.equals(spXoaSanPhamCall.execute(Map.of("MaSP", maSP)).get("DaXoa"));
     }
 
     /**

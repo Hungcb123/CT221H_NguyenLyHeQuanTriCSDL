@@ -21,14 +21,21 @@ Có thể đặt `ADMIN_USERNAME` và `ADMIN_PASSWORD` (ít nhất 12 ký tự) 
 | `/admin/categories` | Tạo, sửa, xóa danh mục trống; không xóa danh mục còn sản phẩm ẩn |
 | `/admin/orders` | Hóa đơn, lọc trạng thái, giao hàng, hủy đơn; hủy PAID hoàn ví, kho và suất KM trong cùng transaction |
 | `/admin/promotions` | Tạo/sửa, bật/tạm dừng, quản lý mặt hàng/giá/suất, xả kho cận hạn |
-| `/admin/customers` | Tra cứu thông tin khách, số dư và 100 giao dịch ví gần nhất |
+| `/admin/customers` | Tra cứu khách, lọc nhóm, xem 100 giao dịch ví gần nhất và nạp số dư demo có xác nhận |
 | `/admin/alerts` | Nhật ký trigger và audit; lọc loại sự kiện hoặc mã sản phẩm |
-| `/admin/ai` | Trạng thái embedding/Qdrant/forecast, đồng bộ vector, thử hybrid search, chạy và xem lịch sử dự báo |
+| `/admin/ai` | Trạng thái mô hình, đồng bộ vector, thử hybrid search, dự báo nhu cầu, xếp hạng sản phẩm bán chạy và dự báo doanh thu theo kỳ |
 | `/admin/benchmark` | Đo truy vấn thật, sinh dữ liệu và tạo/gỡ chỉ mục có xác nhận |
 
 Admin không gọi nhánh mock trong `apiService`; mọi yêu cầu qua `admin-api.ts`, lỗi hiển thị để xử lý. API admin và API ghi catalog/khuyến mãi, đồng bộ vector, dự báo, benchmark được bảo vệ tại backend. Các luồng khách hàng có sẵn vẫn giữ cơ chế định danh hiện hữu; phân quyền tài khoản khách hàng không nằm trong thay đổi này.
 
 ## AI và tính trung thực của dữ liệu
+
+- SQL Server phân loại nguồn đơn bằng `DonHang.NguonDon`. Tổng quan và lịch sử khách dùng `SALE`. Đơn huấn luyện mẫu có nguồn `DEMO_FORECAST`, còn bài đo hiệu năng dùng `BENCHMARK`. Chạy các script khởi tạo theo thứ tự để nâng cấp bản cũ.
+- Mục **Khách hàng → Xem ví** cho phép admin nạp số dư demo, có xác nhận số tiền và tên người nhận. Sổ cái ghi tài khoản admin. Gửi lại cùng mã yêu cầu cho cùng khách và cùng số tiền trả kết quả mà chỉ cộng một lần.
+- Phân nhóm khách hàng dựa trên lần mua gần nhất, số đơn và chi tiêu. Chỉ tính đơn đã thanh toán hoặc đã giao có chi tiết, bỏ qua dữ liệu benchmark và lịch sử giả lập huấn luyện. Bốn nhóm gồm chưa mua, cần tương tác lại (lần cuối cách hơn 30 ngày), thân thiết (có mua trong 30 ngày, ít nhất 3 đơn và chi từ 500.000 đ trong 90 ngày) và đang hoạt động (các khách mới mua còn lại).
+- Bảng dự báo bán chạy dùng kết quả mô hình cho ngày kế tiếp. Bảng xếp tối đa 10 sản phẩm trong cùng đơn vị tính. Giá trị nhu cầu dự kiến lấy số lượng dự báo nhân giá niêm yết, chưa áp khuyến mãi hoặc giới hạn tồn kho. Chạy dự báo toàn bộ để cập nhật bảng.
+- **Dự báo doanh thu theo kỳ** dùng trung bình sản lượng theo thứ trong tối đa 56 ngày, với kỳ 1, 7 hoặc 30 ngày. Nguồn đơn bán và nguồn mô phỏng được chọn riêng. Dự báo phân bổ tồn kho hiện tại qua các ngày trước hạn và áp suất khuyến mãi còn lại theo giá hiệu lực lúc 12 giờ.
+- Kịch bản giả lập nhu cầu hiển thị kết quả trực tiếp. Chỉ các lần dự báo vận hành ghi lịch sử và cảnh báo kho.
 
 - Embedding hiện tại: `all-MiniLM-L6-v2` ONNX, 384 chiều. Hybrid search dùng BM25 + vector/RRF; khi embedding/Qdrant không khả dụng, trả `KEYWORD_FALLBACK` trên catalog SQL. Không tìm thấy mặt hàng được yêu cầu thì kết quả chính trống, thay thế tách riêng.
 - Đồng bộ vector upsert sản phẩm đang bán. Sửa/xóa sản phẩm cũng cập nhật/xóa vector qua dịch vụ sẵn có. Đổi tên danh mục nên chạy đồng bộ lại để nội dung embedding phản ánh tên mới. Qdrant có thể còn vector cũ nếu lần xóa trước bị lỗi; tìm kiếm vẫn đối chiếu sản phẩm đang bán trong SQL.
@@ -39,7 +46,7 @@ Admin không gọi nhánh mock trong `apiService`; mọi yêu cầu qua `admin-a
 
 ## Benchmark
 
-Sinh dữ liệu ghi thêm vào bảng `DonHang` thật; không tự hoàn tác. Dashboard tách đơn không có chi tiết khỏi thống kê bán hàng. Đây là quy ước phân biệt dataset hiện hữu, chưa phải một cờ dataset độc lập. Phép so sánh đảm bảo chỉ mục tồn tại, đo một lượt wall-clock; kết quả có thể cho chỉ mục chậm hơn. Không suy ra Scan/Seek hoặc I/O chỉ từ thời gian: kiểm tra execution plan và `STATISTICS IO` riêng.
+Sinh dữ liệu ghi đơn có nguồn `BENCHMARK` vào database hiện tại. Phép so sánh lọc nguồn benchmark và đo thời gian tại ứng dụng. Đối chiếu Scan/Seek và lượt đọc bằng kế hoạch thực thi và `STATISTICS IO` trên database benchmark riêng.
 
 ## Kiểm thử
 

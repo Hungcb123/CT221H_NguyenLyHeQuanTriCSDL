@@ -3,10 +3,11 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { LockKeyhole } from "lucide-react";
+import { ArrowLeft, LockKeyhole } from "lucide-react";
 import { adminError, adminLogin } from "@/services/admin-api";
 import { useAdminAuth } from "@/components/admin/AdminShell";
-import { Notice } from "@/components/admin/AdminUI";
+import { LoginLayout } from "@/components/auth/LoginLayout";
+import styles from "@/components/auth/LoginLayout.module.css";
 
 export default function AdminLoginPage() {
   const { session, refresh } = useAdminAuth();
@@ -15,68 +16,47 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
+
   useEffect(() => {
     if (session?.authenticated) router.replace("/admin");
   }, [session, router]);
+
   return (
-    <main className="admin-login">
-      <section>
-        <Link href="/" className="admin-brand">
-          DailyMart
-        </Link>
-        <h1>Đăng nhập quản trị</h1>
-        <p className="ad-help">
-          Quản lý cửa hàng, theo dõi tồn kho và vận hành AI.
-        </p>
-        <form
-          onSubmit={async (e) => {
-            e.preventDefault();
-            setError("");
-            setPending(true);
-            try {
-              await adminLogin(username.trim(), password);
-              setPassword("");
-              await refresh();
-              router.replace("/admin");
-            } catch (failure) {
-              setError(adminError(failure));
-            } finally {
-              setPending(false);
-            }
-          }}
-        >
-          <Notice error={error} />
-          <label className="ad-field">
-            Tên đăng nhập
-            <input
-              className="ad-input"
-              autoComplete="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              autoFocus
-            />
-          </label>
-          <label className="ad-field">
-            Mật khẩu
-            <input
-              type="password"
-              className="ad-input"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </label>
-          <button className="ad-btn" disabled={pending}>
-            <LockKeyhole size={17} aria-hidden="true" />
-            {pending ? "Đang xác thực…" : "Đăng nhập"}
-          </button>
-          <Link href="/" className="ad-help">
-            Quay lại cửa hàng
-          </Link>
-        </form>
-      </section>
-    </main>
+    <LoginLayout
+      role="admin"
+      title="Đăng nhập quản trị"
+      description="Quản lý cửa hàng, theo dõi tồn kho và vận hành AI."
+      footer={<Link href="/" className="customer-action justify-self-center"><ArrowLeft aria-hidden="true" />Quay lại cửa hàng</Link>}
+    >
+      <form className={styles.form} onSubmit={async (event) => {
+        event.preventDefault();
+        setError("");
+        setPending(true);
+        try {
+          await adminLogin(username.trim(), password);
+          setPassword("");
+          await refresh();
+          router.replace("/admin");
+        } catch (failure) {
+          setError(adminError(failure));
+        } finally {
+          setPending(false);
+        }
+      }}>
+        {error && <p role="alert" className={styles.error}>{error}</p>}
+        <label className={styles.field}>
+          Tên đăng nhập
+          <input autoComplete="username" value={username} onChange={(event) => setUsername(event.target.value)} required />
+        </label>
+        <label className={styles.field}>
+          Mật khẩu
+          <input type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} required />
+        </label>
+        <button type="submit" className={styles.submit} disabled={pending}>
+          <LockKeyhole size={17} aria-hidden="true" />
+          {pending ? "Đang xác thực…" : "Đăng nhập"}
+        </button>
+      </form>
+    </LoginLayout>
   );
 }

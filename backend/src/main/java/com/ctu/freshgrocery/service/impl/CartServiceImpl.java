@@ -30,6 +30,15 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public void addToCart(AddToCartRequest request) {
+        changeQuantity(request, false);
+    }
+
+    @Override
+    public void updateQuantity(AddToCartRequest request) {
+        changeQuantity(request, true);
+    }
+
+    private void changeQuantity(AddToCartRequest request, boolean replace) {
         if (!customerRepository.existsById(request.getMaKH())) {
             throw new AppException(HttpStatus.NOT_FOUND, "Không tìm thấy khách hàng với ID: " + request.getMaKH());
         }
@@ -37,14 +46,15 @@ public class CartServiceImpl implements CartService {
         Map<String, Object> result = orderSpRepository.executeThemVaoGioHang(
                 request.getMaKH(),
                 request.getMaSP(),
-                request.getSoLuong()
+                request.getSoLuong(),
+                replace
         );
 
         Integer statusCode = (Integer) result.get("StatusCode");
         String message = (String) result.get("Message");
 
         if (statusCode == null || statusCode < 0) {
-            throw new AppException(HttpStatus.BAD_REQUEST, message != null ? message : "Lỗi thêm sản phẩm vào giỏ hàng");
+            throw new AppException(HttpStatus.BAD_REQUEST, message != null ? message : "Không cập nhật được giỏ hàng.");
         }
     }
 

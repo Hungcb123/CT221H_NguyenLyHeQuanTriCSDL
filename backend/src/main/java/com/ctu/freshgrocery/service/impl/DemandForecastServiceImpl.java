@@ -32,6 +32,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,6 +45,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class DemandForecastServiceImpl implements DemandForecastService {
+
+    private static final ZoneId STORE_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
 
     private final ProductRepository productRepository;
     private final DemandForecastRepository demandForecastRepository;
@@ -152,12 +155,16 @@ public class DemandForecastServiceImpl implements DemandForecastService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Không tìm thấy sản phẩm với ID: " + productId));
 
-        LocalDate targetDate = LocalDate.now().plusDays(1); // Mặc định dự báo nhu cầu ngày mai
+        return predictForProduct(product, LocalDate.now(STORE_ZONE));
+    }
+
+    private ForecastResponse predictForProduct(Product product, LocalDate today) {
+        LocalDate targetDate = today.plusDays(1);
         int currentStock = product.getSoLuongTon();
-        int daysUntilExpiry = (int) Math.max(0, ChronoUnit.DAYS.between(LocalDate.now(), product.getHanSuDung().toLocalDate()));
+        int daysUntilExpiry = (int) Math.max(0, ChronoUnit.DAYS.between(today, product.getHanSuDung().toLocalDate()));
 
         // Real sales for the seven dates before the prediction date.
-        double[] histFeatures = estimateHistoryFeatures(productId, targetDate);
+        double[] histFeatures = estimateHistoryFeatures(product.getMaSP(), targetDate);
         double lag1 = histFeatures[0];
         double lag7 = histFeatures[1];
         double rollingMean7 = histFeatures[2];
@@ -174,7 +181,8 @@ public class DemandForecastServiceImpl implements DemandForecastService {
                 lag1,
                 lag7,
                 rollingMean7,
-                rollingStd7
+                rollingStd7,
+                true
         );
     }
 
@@ -183,11 +191,12 @@ public class DemandForecastServiceImpl implements DemandForecastService {
         Product product = productRepository.findById(request.getMaSP())
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Không tìm thấy sản phẩm với ID: " + request.getMaSP()));
 
-        LocalDate targetDate = request.getTargetDate() != null ? request.getTargetDate() : LocalDate.now().plusDays(1);
+        LocalDate today = LocalDate.now(STORE_ZONE);
+        LocalDate targetDate = request.getTargetDate() != null ? request.getTargetDate() : today.plusDays(1);
         BigDecimal unitPrice = request.getUnitPrice() != null ? request.getUnitPrice() : product.getGia();
         int currentStock = request.getCurrentStock() != null ? request.getCurrentStock() : product.getSoLuongTon();
         int daysUntilExpiry = request.getDaysUntilExpiry() != null ? request.getDaysUntilExpiry() :
-                (int) Math.max(0, ChronoUnit.DAYS.between(LocalDate.now(), product.getHanSuDung().toLocalDate()));
+                (int) Math.max(0, ChronoUnit.DAYS.between(today, product.getHanSuDung().toLocalDate()));
 
         double[] hist = estimateHistoryFeatures(product.getMaSP(), targetDate);
         double lag1 = request.getLag1() != null ? request.getLag1() : hist[0];
@@ -206,7 +215,8 @@ public class DemandForecastServiceImpl implements DemandForecastService {
                 lag1,
                 lag7,
                 rollingMean7,
-                rollingStd7
+                rollingStd7,
+                false
         );
     }
 
@@ -217,25 +227,28 @@ public class DemandForecastServiceImpl implements DemandForecastService {
                 .filter(p -> Boolean.FALSE.equals(p.getTrangThaiXoa()))
                 .collect(Collectors.toList());
 
-        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        LocalDate today = LocalDate.now(STORE_ZONE);
         List<ForecastResponse> results = new ArrayList<>();
         int totalRestock = 0;
         int highRiskCount = 0;
+        BigDecimal expectedDemandValue = BigDecimal.ZERO;
 
         for (Product prod : products) {
-            ForecastResponse res = predictForProduct(prod.getMaSP());
+            ForecastResponse res = predictForProduct(prod, today);
             results.add(res);
             totalRestock += res.getSoLuongDeXuatNhap();
+            expectedDemandValue = expectedDemandValue.add(prod.getGia().multiply(BigDecimal.valueOf(res.getSoLuongDuBaoTieuThu())));
             if ("CAO".equalsIgnoreCase(res.getRuiRoHuHong())) {
                 highRiskCount++;
             }
         }
 
         return BatchForecastResponse.builder()
-                .ngayDuBao(tomorrow)
+                .ngayDuBao(today.plusDays(1))
                 .tongSoMatHang(results.size())
                 .tongSoLuongDeXuatNhap(totalRestock)
                 .soMatHangRuiRoCao(highRiskCount)
+                .giaTriNhuCauDuKien(expectedDemandValue)
                 .danhSachDuBao(results)
                 .build();
     }
@@ -279,7 +292,8 @@ public class DemandForecastServiceImpl implements DemandForecastService {
             double lag1,
             double lag7,
             double rollingMean7,
-            double rollingStd7
+            double rollingStd7,
+            boolean save
     ) {
         if (session == null) throw new AppException(HttpStatus.SERVICE_UNAVAILABLE, "Mô hình dự báo chưa sẵn sàng.");
         long startTime = System.currentTimeMillis();
@@ -354,25 +368,20 @@ public class DemandForecastServiceImpl implements DemandForecastService {
         String thuatToan = "PyTorch-MLP-ONNX";
 
         // 5. Lưu kết quả vào CSDL thông qua Stored Procedure sp_LuuKetQuaDuBaoNhapHang
-        Map<String, Object> spResult = forecastSpRepository.executeLuuKetQuaDuBao(
-                productId,
-                targetDate,
-                BigDecimal.valueOf(predictedDemand).setScale(2, RoundingMode.HALF_UP),
-                currentStock,
-                recommendedRestock,
-                null,
-                thuatToan,
-                ruiRo
-        );
-
-        Number code = (Number) spResult.get("StatusCode");
-        if (code == null || code.intValue() != 1) {
-            throw new AppException(HttpStatus.CONFLICT, "Không lưu được dự báo: " + spResult.get("Message"));
+        Long maDuBao = null;
+        if (save) {
+            Map<String, Object> result = forecastSpRepository.executeLuuKetQuaDuBao(
+                    productId, targetDate, BigDecimal.valueOf(predictedDemand).setScale(2, RoundingMode.HALF_UP),
+                    currentStock, recommendedRestock, null, thuatToan, ruiRo
+            );
+            Number code = (Number) result.get("StatusCode");
+            if (code == null || code.intValue() != 1) {
+                throw new AppException(HttpStatus.CONFLICT, "Không lưu được dự báo: " + result.get("Message"));
+            }
+            maDuBao = ((Number) result.get("MaDuBao_Output")).longValue();
         }
-        Long maDuBao = ((Number) spResult.get("MaDuBao_Output")).longValue();
-        String message = (String) spResult.get("Message");
 
-        String canhBaoLienKet = "CAO".equals(ruiRo)
+        String canhBaoLienKet = save && "CAO".equals(ruiRo)
                 ? "Đã tự động tạo bản ghi [CANH_BAO_RUI_RO_THUC_PHAM] trong bảng NhatKyCanhBao!"
                 : null;
 
@@ -390,7 +399,7 @@ public class DemandForecastServiceImpl implements DemandForecastService {
         featuresUsed.put("Rolling_Std_7", rollingStd7);
 
         return ForecastResponse.builder()
-                .maDuBao(maDuBao != null ? maDuBao : 0L)
+                .maDuBao(maDuBao)
                 .maSP(productId)
                 .tenSP(productName)
                 .donViTinh(donViTinh)
@@ -422,7 +431,7 @@ public class DemandForecastServiceImpl implements DemandForecastService {
         var days = jdbcTemplate.queryForList("""
                 SELECT CAST(d.NgayTao AS DATE) AS SaleDate, SUM(c.SoLuong) AS Quantity
                 FROM ChiTietDonHang c JOIN DonHang d ON c.MaDH=d.MaDH
-                WHERE c.MaSP=? AND d.TrangThai IN ('PAID','DELIVERED')
+                WHERE c.MaSP=? AND d.NguonDon = 'SALE' AND d.TrangThai IN ('PAID','DELIVERED')
                   AND d.NgayTao >= ? AND d.NgayTao < ?
                 GROUP BY CAST(d.NgayTao AS DATE)
                 """, productId, java.sql.Date.valueOf(targetDate.minusDays(7)), java.sql.Date.valueOf(targetDate));

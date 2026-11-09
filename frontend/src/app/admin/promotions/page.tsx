@@ -9,6 +9,12 @@ import {
 } from "@/services/admin-api";
 import { useAdminResource } from "@/components/admin/useAdminResource";
 import { AdminTitle, Confirm, Empty, Notice } from "@/components/admin/AdminUI";
+const promotionTypes = {
+  FLASH_SALE: "Giảm giá chớp nhoáng",
+  XA_KHO_CAN_DATE: "Xả kho cận hạn",
+  GIAM_THEO_MUA: "Giảm giá theo mùa",
+  TRI_AN_KHACH_HANG: "Tri ân khách hàng",
+};
 const fresh = () => ({
   tenKM: "",
   moTa: "",
@@ -154,13 +160,8 @@ export default function PromotionsPage() {
                     setDraft({ ...draft, loaiKM: e.target.value })
                   }
                 >
-                  {[
-                    "FLASH_SALE",
-                    "XA_KHO_CAN_DATE",
-                    "GIAM_THEO_MUA",
-                    "TRI_AN_KHACH_HANG",
-                  ].map((t) => (
-                    <option key={t}>{t}</option>
+                  {Object.entries(promotionTypes).map(([value, label]) => (
+                    <option key={value} value={value}>{label}</option>
                   ))}
                 </select>
               </label>

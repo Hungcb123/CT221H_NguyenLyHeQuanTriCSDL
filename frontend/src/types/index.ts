@@ -63,7 +63,7 @@ export interface CartItem {
   soLuong: number;
   thanhTien: number;
   donViTinh: string;
-  hinhAnh?: string;
+  hinhAnh?: string | null;
   soLuongTonHienTai?: number;
   conDuHang?: boolean;
 }
@@ -74,6 +74,16 @@ export interface CartResponse {
   tongTien: number;
   tongSoLuong: number;
   danhSachMon: CartItem[];
+}
+
+export interface WalletTransaction {
+  maGiaoDich: number;
+  maDH: number | null;
+  loaiGiaoDich: string;
+  soTienThayDoi: number;
+  soDuSau: number;
+  ngayGiaoDich: string;
+  noiDung: string;
 }
 
 export interface AddToCartRequest {

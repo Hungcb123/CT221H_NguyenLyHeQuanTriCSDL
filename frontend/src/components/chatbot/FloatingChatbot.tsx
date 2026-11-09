@@ -184,7 +184,7 @@ export const FloatingChatbot: React.FC<FloatingChatbotProps> = ({
                 <ChefHat className="w-5 h-5 text-amber-300" />
               </div>
               <div>
-                <div className="font-extrabold text-sm flex items-center gap-1.5 font-serif">
+                <div className="flex items-center gap-1.5 text-base font-bold">
                   <span>Bếp Trưởng AI - DailyMart</span>
                 </div>
                 <div className="text-[11px] text-amber-100 flex items-center gap-1">

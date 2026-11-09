@@ -82,7 +82,7 @@ public class ProductController {
     @Operation(
             summary = "Xóa sản phẩm - Test Trigger chặn xóa vật lý Soft Delete (Trigger: trg_SanPham_NganChanXoaVatLy)",
             description = """
-                    Thực thi câu lệnh `DELETE FROM SanPham WHERE MaSP = {id}`.
+                    Gọi thủ tục `dbo.sp_XoaSanPham` để thực thi lệnh DELETE trên sản phẩm đang hoạt động.
                     
                     💡 **Kịch bản kiểm thử Trigger INSTEAD OF DELETE:**
                     - Lệnh xóa vật lý bị chặn hoàn toàn!

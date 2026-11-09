@@ -18,7 +18,7 @@ public class AdminOrderService {
     public Map<String, Object> changeStatus(int id, String target, String actor) {
         if (!Set.of("DELIVERED", "CANCELLED").contains(target))
             throw new AppException(HttpStatus.BAD_REQUEST, "Chỉ được giao hàng hoặc hủy đơn; thanh toán phải qua giao dịch checkout.");
-        var owners = jdbc.queryForList("SELECT MaKH FROM DonHang WHERE MaDH = ?", id);
+        var owners = jdbc.queryForList("SELECT MaKH FROM DonHang WHERE MaDH = ? AND NguonDon = 'SALE'", id);
         if (owners.isEmpty()) throw new AppException(HttpStatus.NOT_FOUND, "Không tìm thấy đơn hàng.");
         int customer = ((Number) owners.getFirst().get("MaKH")).intValue();
         // Same customer -> inventory lock order as checkout; all refund effects share one transaction.

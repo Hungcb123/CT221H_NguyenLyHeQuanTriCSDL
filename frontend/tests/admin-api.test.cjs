@@ -8,7 +8,7 @@ const source = fs.readFileSync(path.join(__dirname, '../src/services/admin-api.t
 const compiled = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText;
 function load(fetch) {
   const events = [];
-  const context = { exports: {}, fetch, Headers, URLSearchParams, Intl, Event, window: { dispatchEvent: event => events.push(event.type) } };
+  const context = { exports: {}, fetch, FormData, Headers, URLSearchParams, Intl, Event, window: { dispatchEvent: event => events.push(event.type) } };
   vm.runInNewContext(compiled, context);
   return { ...context.exports, events };
 }

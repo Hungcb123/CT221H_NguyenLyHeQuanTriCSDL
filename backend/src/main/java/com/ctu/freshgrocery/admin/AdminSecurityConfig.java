@@ -26,6 +26,7 @@ public class AdminSecurityConfig {
         if (path.startsWith("/api/v1/benchmark") || path.startsWith("/api/v1/ai/forecast")) return true;
         if (path.equals("/api/v1/orders/concurrency-test")) return true;
         if (path.equals("/api/v1/search/sync")) return true;
+        if (path.equals("/api/v1/wallets/top-up")) return true;
         return !request.getMethod().equals("GET") && (path.startsWith("/api/v1/products")
                 || path.startsWith("/api/v1/categories") || path.startsWith("/api/v1/promotions"));
     }
@@ -35,6 +36,7 @@ public class AdminSecurityConfig {
                 .requestMatchers("/api/v1/admin/auth/session", "/api/v1/admin/auth/login").permitAll()
                 .requestMatchers("/api/v1/admin/**", "/api/v1/benchmark/**", "/api/v1/ai/forecast/**", "/api/v1/alerts/**").hasRole("ADMIN")
                 .requestMatchers("/api/v1/search/sync", "/api/v1/orders/concurrency-test").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/v1/wallets/top-up").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/v1/products/**", "/api/v1/categories/**", "/api/v1/promotions/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/api/v1/products/**", "/api/v1/categories/**", "/api/v1/promotions/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PATCH, "/api/v1/products/**", "/api/v1/categories/**", "/api/v1/promotions/**").hasRole("ADMIN")
@@ -54,8 +56,9 @@ public class AdminSecurityConfig {
                     response.setStatus(401); response.setContentType("application/json;charset=UTF-8");
                     mapper.writeValue(response.getWriter(), ApiResponse.error(401, "Tên đăng nhập hoặc mật khẩu không đúng."));
                 }));
-        http.logout(logout -> logout.logoutUrl("/api/v1/admin/auth/logout").invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID").logoutSuccessHandler((request, response, auth) -> {
+        http.logout(logout -> logout.logoutUrl("/api/v1/admin/auth/logout").invalidateHttpSession(false)
+                .logoutSuccessHandler((request, response, auth) -> {
+                    if (request.getSession(false) != null) request.changeSessionId();
                     response.setContentType("application/json;charset=UTF-8");
                     mapper.writeValue(response.getWriter(), ApiResponse.ok("Đã đăng xuất", true));
                 }));

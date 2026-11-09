@@ -54,6 +54,9 @@ public class Order {
     @Column(name = "TrangThai", nullable = false, length = 20)
     private String trangThai;
 
+    @Column(name = "NguonDon", nullable = false, insertable = false, updatable = false)
+    private String nguonDon;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaKH", insertable = false, updatable = false)
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})

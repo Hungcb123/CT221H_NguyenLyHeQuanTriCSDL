@@ -16,7 +16,7 @@ import java.util.Map;
 @Schema(description = "Kết quả dự báo nhu cầu & khuyến nghị nhập hàng tươi sống từ AI")
 public class ForecastResponse {
 
-    @Schema(description = "Mã bản ghi dự báo đã lưu vào CSDL (bảng DuBaoNhapHang)", example = "1")
+    @Schema(description = "Mã dự báo đã lưu. Kịch bản giả lập trả null.", example = "1")
     private Long maDuBao;
 
     @Schema(description = "Mã sản phẩm", example = "1")

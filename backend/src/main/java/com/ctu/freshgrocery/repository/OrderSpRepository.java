@@ -46,7 +46,8 @@ public class OrderSpRepository {
                         new SqlParameter("NoiDung", Types.NVARCHAR),
                         new SqlOutParameter("StatusCode", Types.INTEGER),
                         new SqlOutParameter("Message", Types.NVARCHAR),
-                        new SqlOutParameter("SoDuMoi", Types.DECIMAL)
+                        new SqlOutParameter("SoDuMoi", Types.DECIMAL),
+                        new SqlParameter("MaYeuCauNap", Types.VARCHAR)
                 );
 
         // 2. sp_ThemVaoGioHang
@@ -57,7 +58,8 @@ public class OrderSpRepository {
                         new SqlParameter("MaSP", Types.INTEGER),
                         new SqlParameter("SoLuong", Types.INTEGER),
                         new SqlOutParameter("StatusCode", Types.INTEGER),
-                        new SqlOutParameter("Message", Types.NVARCHAR)
+                        new SqlOutParameter("Message", Types.NVARCHAR),
+                        new SqlParameter("ThayThe", Types.BIT)
                 );
 
         // 3. sp_XoaKhoiGioHang
@@ -88,25 +90,32 @@ public class OrderSpRepository {
                         new SqlParameter("GhiChu", Types.NVARCHAR),
                         new SqlOutParameter("MaDH_Output", Types.INTEGER),
                         new SqlOutParameter("StatusCode", Types.INTEGER),
-                        new SqlOutParameter("Message", Types.NVARCHAR)
+                        new SqlOutParameter("Message", Types.NVARCHAR),
+                        new SqlParameter("NguonDon", Types.VARCHAR)
                 );
 
         log.info("Khởi tạo OrderSpRepository và nạp thành công 5 Stored Procedures Module 2.");
     }
 
     public Map<String, Object> executeNapTienVi(Integer maKH, BigDecimal soTien, String noiDung) {
+        return executeNapTienVi(maKH, soTien, noiDung, null);
+    }
+
+    public Map<String, Object> executeNapTienVi(Integer maKH, BigDecimal soTien, String noiDung, java.util.UUID requestId) {
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("MaKH", maKH)
                 .addValue("SoTien", soTien)
-                .addValue("NoiDung", noiDung);
+                .addValue("NoiDung", noiDung)
+                .addValue("MaYeuCauNap", requestId == null ? null : requestId.toString());
         return spNapTienViCall.execute(params);
     }
 
-    public Map<String, Object> executeThemVaoGioHang(Integer maKH, Integer maSP, Integer soLuong) {
+    public Map<String, Object> executeThemVaoGioHang(Integer maKH, Integer maSP, Integer soLuong, boolean thayThe) {
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("MaKH", maKH)
                 .addValue("MaSP", maSP)
-                .addValue("SoLuong", soLuong);
+                .addValue("SoLuong", soLuong)
+                .addValue("ThayThe", thayThe);
         return spThemVaoGioHangCall.execute(params);
     }
 
@@ -127,11 +136,17 @@ public class OrderSpRepository {
     }
 
     public Map<String, Object> executeThanhToanDonHang(Integer maKH, Integer maGioHang, String diaChiGiaoHang, String ghiChu) {
+        return executeThanhToanDonHang(maKH, maGioHang, diaChiGiaoHang, ghiChu, "SALE");
+    }
+
+    public Map<String, Object> executeThanhToanDonHang(Integer maKH, Integer maGioHang, String diaChiGiaoHang,
+                                                      String ghiChu, String nguonDon) {
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("MaKH", maKH)
                 .addValue("MaGioHang", maGioHang)
                 .addValue("DiaChiGiaoHang", diaChiGiaoHang)
-                .addValue("GhiChu", ghiChu);
+                .addValue("GhiChu", ghiChu)
+                .addValue("NguonDon", nguonDon);
         return spThanhToanDonHangCall.execute(params);
     }
 
@@ -142,6 +157,7 @@ public class OrderSpRepository {
             return CartItemResponse.builder()
                     .maSP(rs.getInt("MaSP"))
                     .tenSP(rs.getString("TenSP"))
+                    .hinhAnh(rs.getString("HinhAnh"))
                     .donGia(rs.getBigDecimal("DonGia"))
                     .giaGoc(hasColumn(rs, "GiaGoc") ? rs.getBigDecimal("GiaGoc") : rs.getBigDecimal("DonGia"))
                     .dangKhuyenMai(hasColumn(rs, "DangKhuyenMai") && rs.getBoolean("DangKhuyenMai"))

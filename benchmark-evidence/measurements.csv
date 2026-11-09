@@ -1,0 +1,11 @@
+mode,step,scan_count,logical_reads,physical_reads,cpu_ms,elapsed_ms,operator,index,plan_cpu_ms,plan_elapsed_ms
+COVERING,2,1,1401,0,96,95,Index Seek,[IX_DonHang_NgayTao_TrangThai_Covering],93,93
+SCAN,3,1,13942,0,171,171,Clustered Index Scan,[PK__DonHang__27258661994142D6],169,169
+SCAN,4,1,13942,0,204,205,Clustered Index Scan,[PK__DonHang__27258661994142D6],203,203
+COVERING,5,1,1401,0,100,103,Index Seek,[IX_DonHang_NgayTao_TrangThai_Covering],97,97
+COVERING,6,1,1401,0,112,109,Index Seek,[IX_DonHang_NgayTao_TrangThai_Covering],106,106
+SCAN,7,1,13942,0,280,301,Clustered Index Scan,[PK__DonHang__27258661994142D6],293,293
+SCAN,8,1,13942,0,179,195,Clustered Index Scan,[PK__DonHang__27258661994142D6],192,192
+COVERING,9,1,1401,0,112,113,Index Seek,[IX_DonHang_NgayTao_TrangThai_Covering],111,111
+COVERING,10,1,1401,0,92,95,Index Seek,[IX_DonHang_NgayTao_TrangThai_Covering],93,93
+SCAN,11,1,13942,0,156,161,Clustered Index Scan,[PK__DonHang__27258661994142D6],158,158

@@ -30,7 +30,7 @@ BEGIN
           E4(N) AS (SELECT 1 FROM E3 a CROSS JOIN E1 b), -- 100.000
           E5(N) AS (SELECT 1 FROM E4 a CROSS JOIN E1 b), -- 1.000.000
           Numbers(N) AS (SELECT ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) FROM E5)
-        INSERT INTO DonHang (MaKH, NgayTao, TongTien, DiaChiGiaoHang, GhiChu, TrangThai)
+        INSERT INTO DonHang (MaKH, NgayTao, TongTien, DiaChiGiaoHang, GhiChu, TrangThai, NguonDon)
         SELECT 
             (ABS(CHECKSUM(NEWID())) % 3) + 1 AS MaKH, -- Phân bổ cho 3 khách hàng mẫu
             DATEADD(MINUTE, - (N % 525600), GETDATE()) AS NgayTao, -- Trải dài trong 1 năm gần nhất
@@ -42,7 +42,8 @@ BEGIN
                 WHEN 1 THEN 'DELIVERED'
                 WHEN 2 THEN 'PENDING'
                 ELSE 'CANCELLED' 
-            END AS TrangThai
+            END AS TrangThai,
+            'BENCHMARK'
         FROM Numbers
         WHERE N <= @SoLuongDonHang;
 
@@ -61,8 +62,18 @@ IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = N'IX_DonHang_NgayTao_Trang
 BEGIN
     CREATE NONCLUSTERED INDEX IX_DonHang_NgayTao_TrangThai_Covering
     ON DonHang (NgayTao, TrangThai)
-    INCLUDE (MaKH, TongTien);
+    INCLUDE (MaKH, TongTien, NguonDon);
     PRINT N'Đã tạo chỉ mục bao phủ: IX_DonHang_NgayTao_TrangThai_Covering';
+END
+ELSE IF NOT EXISTS (
+    SELECT 1 FROM sys.index_columns ic JOIN sys.indexes i ON i.object_id = ic.object_id AND i.index_id = ic.index_id
+    WHERE i.object_id = OBJECT_ID('DonHang') AND i.name = 'IX_DonHang_NgayTao_TrangThai_Covering'
+      AND ic.column_id = COLUMNPROPERTY(OBJECT_ID('DonHang'), 'NguonDon', 'ColumnId')
+)
+BEGIN
+    CREATE NONCLUSTERED INDEX IX_DonHang_NgayTao_TrangThai_Covering
+    ON DonHang (NgayTao, TrangThai)
+    INCLUDE (MaKH, TongTien, NguonDon) WITH (DROP_EXISTING = ON);
 END
 GO
 
@@ -98,6 +109,7 @@ BEGIN
         FROM DonHang dh WITH (INDEX(IX_DonHang_NgayTao_TrangThai_Covering))
         WHERE dh.NgayTao >= DATEADD(MONTH, -6, GETDATE()) 
           AND dh.TrangThai IN ('PAID', 'DELIVERED')
+          AND dh.NguonDon = 'BENCHMARK'
         GROUP BY dh.MaKH;
 
         SET @TotalRecords = @@ROWCOUNT;
@@ -112,6 +124,7 @@ BEGIN
         FROM DonHang dh WITH (INDEX(0))
         WHERE dh.NgayTao >= DATEADD(MONTH, -6, GETDATE()) 
           AND dh.TrangThai IN ('PAID', 'DELIVERED')
+          AND dh.NguonDon = 'BENCHMARK'
         GROUP BY dh.MaKH;
 
         SET @TotalRecords = @@ROWCOUNT;

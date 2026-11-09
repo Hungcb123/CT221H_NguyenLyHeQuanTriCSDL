@@ -49,6 +49,7 @@ export default function HomePage() {
   }, [customer]);
 
   const [search, setSearch] = useState<{ keyword: string } | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [retry, setRetry] = useState(0);
@@ -136,11 +137,13 @@ export default function HomePage() {
     setIsLoading(true);
     setLoadError(null);
     setSearch(null);
+    setSearchTerm("");
     setRetry((value) => value + 1);
   };
 
   const handleSearch = (keyword: string) => {
     resetProducts();
+    setSearchTerm(keyword);
     setSearch({ keyword });
   };
 
@@ -157,6 +160,8 @@ export default function HomePage() {
         cartCount={cart?.tongSoLuong ?? 0}
         onOpenCart={() => { if(!customer){router.push("/login?next=/");return;} setIsCartOpen(true); void loadCart(); }}
         onSearch={handleSearch}
+        searchTerm={searchTerm}
+        onSearchTermChange={setSearchTerm}
         activeFilter={activeNavFilter}
         setActiveFilter={(filter) => {
           resetProducts();
@@ -173,6 +178,7 @@ export default function HomePage() {
           {/* Left Category Sidebar */}
           <CategorySidebar
             categories={categories}
+            hideOnMobile={Boolean(search)}
             selectedCategoryId={selectedCategoryId}
             onSelectCategory={(id) => {
               setSelectedCategoryId(id);
@@ -183,25 +189,26 @@ export default function HomePage() {
           {/* Right Main Content Area */}
           <div className="flex-1 min-w-0 w-full bg-[#F7F9FC] px-5 py-5">
             {/* Hero Banners */}
-            <HeroBanner
+            {!search && <HeroBanner
               onSelectPromotion={() => {
                 resetProducts();
                 setActiveNavFilter("HANG_MOI");
                 const seafood = categories.find((category) => /hải sản|thủy sản/i.test(category.tenDanhMuc));
                 setSelectedCategoryId(seafood?.maDanhMuc ?? null);
               }}
-            />
+            />}
 
             {/* Semantic Search AI Alert Banner (when active) */}
             {isSemanticResult && (
-              <div className="mb-4 bg-emerald-50 border border-emerald-300 rounded-xl p-3 text-xs text-emerald-900 flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Sparkles className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span className="font-semibold">{semanticScoreNotice}</span>
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm leading-relaxed text-emerald-900 sm:text-base">
+                <div className="flex min-w-0 items-start gap-2.5" role="status">
+                  <Sparkles className="mt-1 size-4 shrink-0 text-emerald-700" aria-hidden="true" />
+                  <span className="font-medium">{semanticScoreNotice ?? (isLoading ? "Đang tìm sản phẩm…" : "")}</span>
                 </div>
                 <button
+                  type="button"
                   onClick={resetProducts}
-                  className="font-bold underline text-emerald-800 hover:text-emerald-950"
+                  className="customer-action"
                 >
                   Xóa tìm kiếm
                 </button>
@@ -209,19 +216,20 @@ export default function HomePage() {
             )}
 
             {/* Product Section Header */}
-            <div className="flex items-center justify-between border-b border-stone-200 pb-3 mb-5">
-              <h1 className="text-lg sm:text-xl font-bold tracking-tight text-stone-900 uppercase font-serif">
-                {search ? "KẾT QUẢ TÌM KIẾM" : "SẢN PHẨM NỔI BẬT"}
+            <div className="mb-5 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-stone-200 pb-3">
+              <h1 className="text-xl font-bold leading-snug text-stone-900 sm:text-2xl">
+                {search ? "Kết quả tìm kiếm" : "Sản phẩm nổi bật"}
               </h1>
               <button
+                type="button"
                 onClick={() => {
                   setSelectedCategoryId(null);
                   resetProducts();
                 }}
-                className="text-xs font-semibold text-stone-600 hover:text-[#08783C] flex items-center space-x-1"
+                className="customer-action"
               >
                 <span>Xem tất cả</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                <ArrowRight aria-hidden="true" />
               </button>
             </div>
 
@@ -303,6 +311,11 @@ export default function HomePage() {
         error={cartError}
         onRetry={loadCart}
         onRemove={async (productId) => { if(customer)await apiService.removeFromCart(customer.maKH, productId); await loadCart(); }}
+        onChangeQuantity={async (productId, quantity) => {
+          if (!customer) return;
+          setCart(await apiService.updateCartQuantity({ customerId: customer.maKH, productId, quantity }));
+          setCartError(null);
+        }}
         onCheckout={() => router.push("/checkout")}
       />
     </div>

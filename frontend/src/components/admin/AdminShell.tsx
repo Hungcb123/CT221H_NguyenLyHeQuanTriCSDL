@@ -20,7 +20,7 @@ import {
   Gauge,
   Users,
   LogOut,
-  ArrowUpRight,
+  ArrowRight,
   LoaderCircle,
 } from "lucide-react";
 import {
@@ -128,8 +128,11 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     <AuthContext.Provider value={{ session, refresh }}>
       <div className="admin-shell">
         <aside className="admin-sidebar">
-          <Link href="/admin" className="admin-brand">
-            DailyMart<span>Quản trị cửa hàng</span>
+          <Link href="/" className="admin-brand" aria-label="DailyMart, mở cửa hàng">
+            <span>
+              DailyMart<span className="admin-brand-subtitle">Quản trị cửa hàng</span>
+            </span>
+            <ArrowRight size={18} aria-hidden="true" />
           </Link>
           <nav aria-label="Điều hướng quản trị">
             {links.map(([href, label, Icon]) => (
@@ -144,31 +147,29 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               </Link>
             ))}
           </nav>
-          <div className="admin-sidebar-footer">
-            <Link href="/">
-              <ArrowUpRight size={17} aria-hidden="true" />
-              Mở cửa hàng
-            </Link>
-            <button
-              onClick={async () => {
-                try {
-                  await adminLogout();
-                  setSession(null);
-                  router.replace("/admin/login");
-                } catch (e) {
-                  setError(adminError(e));
-                }
-              }}
-            >
-              <LogOut size={17} aria-hidden="true" />
-              Đăng xuất
-            </button>
-          </div>
         </aside>
         <div className="admin-workspace">
           <header className="admin-topbar">
             <span>Không gian quản trị</span>
-            <span className="ad-tag">{session?.username}</span>
+            <div className="admin-topbar-actions">
+              <span className="ad-tag">{session?.username}</span>
+              <button
+                type="button"
+                className="ad-btn secondary"
+                onClick={async () => {
+                  try {
+                    await adminLogout();
+                    setSession(null);
+                    router.replace("/admin/login");
+                  } catch (e) {
+                    setError(adminError(e));
+                  }
+                }}
+              >
+                <LogOut size={17} aria-hidden="true" />
+                Đăng xuất
+              </button>
+            </div>
           </header>
           <main className="admin-content">{children}</main>
         </div>

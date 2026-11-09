@@ -10,11 +10,21 @@ import {
   HybridSearchResponse,
   ProductCreateRequest,
   WalletResponse,
+  WalletTransaction,
   CheckoutResponse,
 } from "@/types";
 
 import { customerHeaders } from "./customer-session";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
+
+type CartPayload = Omit<CartResponse, "danhSachMon"> & {
+  items: (CartResponse["danhSachMon"][number] & { soLuongTon?: number })[];
+};
+
+function mapCart(data: CartPayload): CartResponse {
+  if (!Array.isArray(data?.items)) throw new Error("Dữ liệu giỏ hàng không hợp lệ. Vui lòng thử lại.");
+  return { ...data, danhSachMon: data.items.map((item) => ({ ...item, soLuongTonHienTai: item.soLuongTon })) };
+}
 
 // Keep the browser model stable while mapping the backend's Vietnamese DTO fields.
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
@@ -104,9 +114,16 @@ export const apiService = {
   },
 
   async getCart(customerId: number): Promise<CartResponse> {
-    const data = await request<Omit<CartResponse, "danhSachMon"> & { items: (CartResponse["danhSachMon"][number] & { soLuongTon?: number })[] }>(`/api/v1/cart/${customerId}`);
-    if (!Array.isArray(data?.items)) throw new Error("Dữ liệu giỏ hàng không hợp lệ. Vui lòng thử lại.");
-    return { ...data, danhSachMon: data.items.map((item) => ({ ...item, soLuongTonHienTai: item.soLuongTon })) };
+    return mapCart(await request<CartPayload>(`/api/v1/cart/${customerId}`));
+  },
+
+  async updateCartQuantity(req: AddToCartRequest): Promise<CartResponse> {
+    const data = await request<CartPayload>("/api/v1/cart/items", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ maKH: req.customerId, maSP: req.productId, soLuong: req.quantity }),
+    });
+    return mapCart(data);
   },
 
   async addToCart(req: AddToCartRequest): Promise<void> {
@@ -128,6 +145,10 @@ export const apiService = {
     const data = await request<WalletResponse>(`/api/v1/wallets/${customerId}`);
     if (!data || !Number.isFinite(data.soDuVi)) throw new Error("Không đọc được số dư ví. Vui lòng thử lại.");
     return data;
+  },
+
+  async getWalletTransactions(customerId: number): Promise<WalletTransaction[]> {
+    return request<WalletTransaction[]>(`/api/v1/wallets/${customerId}/transactions`);
   },
 
   async checkout(address: string, note: string, customerId: number): Promise<CheckoutResponse> {

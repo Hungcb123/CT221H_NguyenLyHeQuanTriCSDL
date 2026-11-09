@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import { Search, ShoppingCart, Sparkles } from "lucide-react";
 import { AccountMenu } from "@/components/customer/AccountMenu";
@@ -9,6 +9,8 @@ interface HeaderProps {
   cartCount: number;
   onOpenCart: () => void;
   onSearch: (keyword: string) => void;
+  searchTerm: string;
+  onSearchTermChange: (value: string) => void;
   activeFilter: string;
   setActiveFilter: (filter: string) => void;
 }
@@ -17,11 +19,11 @@ export const Header: React.FC<HeaderProps> = ({
   cartCount,
   onOpenCart,
   onSearch,
+  searchTerm,
+  onSearchTermChange,
   activeFilter,
   setActiveFilter,
 }) => {
-  const [searchTerm, setSearchTerm] = useState("");
-
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchTerm.trim()) {
@@ -50,12 +52,12 @@ export const Header: React.FC<HeaderProps> = ({
               <input
                 type="text"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => onSearchTermChange(e.target.value)}
                 placeholder="Tìm tên sản phẩm hoặc nhu cầu: nguyên liệu nấu canh chua…"
                 aria-label="Tìm kiếm sản phẩm theo tên hoặc nhu cầu"
-                className="w-full h-11 pl-4 pr-20 sm:pr-32 rounded-full border border-white/30 bg-white text-stone-900 text-base transition-all outline-hidden focus:border-emerald-300"
+                className="w-full h-11 pl-4 pr-20 sm:pr-40 rounded-full border border-white/30 bg-white text-stone-900 text-base transition-all outline-hidden focus:border-emerald-300"
               />
-              <span className="absolute right-12 flex items-center gap-1 text-xs font-semibold text-emerald-800 pointer-events-none">
+              <span className="absolute right-12 flex items-center gap-1 text-sm font-semibold text-emerald-800 pointer-events-none">
                 <Sparkles className="w-3 h-3" aria-hidden="true" />
                 <span className="hidden sm:inline">Thông minh</span>
               </span>

@@ -12,7 +12,8 @@ const compiled = ts.transpileModule(source, {
 }).outputText;
 
 function serviceWith(fetch) {
-  const context = { exports: {}, process: { env: {} }, fetch, URLSearchParams };
+  const context = { exports: {}, process: { env: {} }, fetch, URLSearchParams,
+    require: id => { assert.equal(id, './customer-session'); return {}; } };
   vm.runInNewContext(compiled, context);
   return context.exports.apiService;
 }

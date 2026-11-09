@@ -10,6 +10,7 @@ import {
   money,
 } from "@/services/admin-api";
 import { AdminTitle, Empty, Notice } from "@/components/admin/AdminUI";
+import { alertLabels, AuditEntry } from "@/components/admin/AuditEntry";
 
 export default function AdminDashboard() {
   const [data, setData] = useState<AdminOverview | null>(null);
@@ -63,8 +64,8 @@ export default function AdminDashboard() {
                 <ul className="ad-log-list">
                   {data.recentAlerts.map((a) => (
                     <li key={a.MaLog}>
-                      <span className="ad-tag">{a.LoaiSuKien}</span>
-                      <p>{a.NoiDung}</p>
+                      <span className="ad-tag">{alertLabels[a.LoaiSuKien] ?? a.LoaiSuKien}</span>
+                      <AuditEntry event={a.LoaiSuKien} content={a.NoiDung} />
                       <small>
                         {datetime(a.NgayGhi)} · {a.NguoiThucHien}
                       </small>
@@ -87,9 +88,9 @@ export default function AdminDashboard() {
                   {money(data.revenue)}
                 </p>
                 <p className="ad-help" style={{ marginTop: 12 }}>
-                  Tính từ đơn PAID/DELIVERED có chi tiết.{" "}
-                  {data.benchmarkOrders.toLocaleString("vi-VN")} đơn không có
-                  chi tiết được tách khỏi số liệu nghiệp vụ.
+                  Tính từ đơn bán đã thanh toán hoặc đã giao. Tách riêng{" "}
+                  {(data.demoOrders ?? 0).toLocaleString("vi-VN")} đơn mô phỏng AI và{" "}
+                  {data.benchmarkOrders.toLocaleString("vi-VN")} đơn benchmark.
                 </p>
               </section>
               <section className="ad-panel">

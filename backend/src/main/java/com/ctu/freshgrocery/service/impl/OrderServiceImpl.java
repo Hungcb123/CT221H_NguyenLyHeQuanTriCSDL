@@ -46,8 +46,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public CheckoutResponse checkout(CheckoutRequest request) {
-        Customer customer = customerRepository.findById(request.getMaKH())
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Không tìm thấy khách hàng với ID: " + request.getMaKH()));
+        if (!customerRepository.existsById(request.getMaKH())) {
+            throw new AppException(HttpStatus.NOT_FOUND, "Không tìm thấy khách hàng với ID: " + request.getMaKH());
+        }
 
         Cart cart = cartRepository.findByMaKH(request.getMaKH())
                 .orElseThrow(() -> new AppException(HttpStatus.BAD_REQUEST, "Khách hàng chưa có giỏ hàng để thanh toán"));
@@ -70,14 +71,16 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findById(maDH).orElse(null);
         BigDecimal tongTien = order != null ? order.getTongTien() : BigDecimal.ZERO;
 
-        Customer updatedCustomer = customerRepository.findById(request.getMaKH()).orElse(customer);
+        BigDecimal balanceAfterPayment = jdbcTemplate.queryForObject(
+                "SELECT SoDuSau FROM LichSuGiaoDichVi WHERE MaDH = ? AND MaKH = ? AND LoaiGiaoDich = 'THANH_TOAN'",
+                BigDecimal.class, maDH, request.getMaKH());
 
         return CheckoutResponse.builder()
                 .maDH(maDH)
                 .statusCode(statusCode)
                 .message(message)
                 .tongTien(tongTien)
-                .soDuConLai(updatedCustomer.getSoDuVi())
+                .soDuConLai(balanceAfterPayment)
                 .build();
     }
 
@@ -172,10 +175,8 @@ public class OrderServiceImpl implements OrderService {
         jdbcTemplate.update("INSERT INTO ChiTietGioHang (MaGioHang, MaSP, SoLuong) VALUES (?, ?, 1)", cart2.getMaGioHang(), testProductId);
 
         // Ghi nhận số dư ví trước khi tranh chấp
-        Customer freshCust1 = customerRepository.findById(cust1.getMaKH()).orElseThrow();
-        Customer freshCust2 = customerRepository.findById(cust2.getMaKH()).orElseThrow();
-        BigDecimal balanceBefore1 = freshCust1.getSoDuVi();
-        BigDecimal balanceBefore2 = freshCust2.getSoDuVi();
+        BigDecimal balanceBefore1 = readWalletBalance(cust1.getMaKH());
+        BigDecimal balanceBefore2 = readWalletBalance(cust2.getMaKH());
 
         // 3. Kích hoạt 2 luồng cùng nhấn thanh toán đồng thời (1 mili-giây) bằng CountDownLatch
         CountDownLatch startGate = new CountDownLatch(1);
@@ -188,10 +189,11 @@ public class OrderServiceImpl implements OrderService {
             try {
                 startGate.await();
                 resHolderA[0] = orderSpRepository.executeThanhToanDonHang(
-                        freshCust1.getMaKH(),
+                        cust1.getMaKH(),
                         cart1.getMaGioHang(),
                         "Địa chỉ test luồng A",
-                        "Kiểm thử tranh chấp đồng thời Luồng A"
+                        "Kiểm thử tranh chấp đồng thời Luồng A",
+                        "BENCHMARK"
                 );
             } catch (Exception e) {
                 log.error("Lỗi trong Thread A: ", e);
@@ -204,10 +206,11 @@ public class OrderServiceImpl implements OrderService {
             try {
                 startGate.await();
                 resHolderB[0] = orderSpRepository.executeThanhToanDonHang(
-                        freshCust2.getMaKH(),
+                        cust2.getMaKH(),
                         cart2.getMaGioHang(),
                         "Địa chỉ test luồng B",
-                        "Kiểm thử tranh chấp đồng thời Luồng B"
+                        "Kiểm thử tranh chấp đồng thời Luồng B",
+                        "BENCHMARK"
                 );
             } catch (Exception e) {
                 log.error("Lỗi trong Thread B: ", e);
@@ -227,9 +230,10 @@ public class OrderServiceImpl implements OrderService {
         }
 
         // 4. Lấy số dư ví sau giao dịch và số lượng tồn kho thực tế sau đối chứng
-        Customer afterCust1 = customerRepository.findById(cust1.getMaKH()).orElseThrow();
-        Customer afterCust2 = customerRepository.findById(cust2.getMaKH()).orElseThrow();
-        Product afterProduct = productRepository.findById(testProductId).orElseThrow();
+        BigDecimal balanceAfter1 = readWalletBalance(cust1.getMaKH());
+        BigDecimal balanceAfter2 = readWalletBalance(cust2.getMaKH());
+        int remainingStock = jdbcTemplate.queryForObject(
+                "SELECT SoLuongTon FROM SanPham WHERE MaSP = ?", Integer.class, testProductId);
 
         Map<String, Object> rA = resHolderA[0];
         Map<String, Object> rB = resHolderB[0];
@@ -246,29 +250,29 @@ public class OrderServiceImpl implements OrderService {
         boolean successB = statusB != null && statusB > 0;
 
         ConcurrencyTestResponse.ThreadResult threadResultA = ConcurrencyTestResponse.ThreadResult.builder()
-                .customerName(freshCust1.getHoTen())
-                .customerId(freshCust1.getMaKH())
+                .customerName(cust1.getHoTen())
+                .customerId(cust1.getMaKH())
                 .statusCode(statusA)
                 .message(msgA)
                 .orderId(orderIdA)
                 .balanceBefore(balanceBefore1)
-                .balanceAfter(afterCust1.getSoDuVi())
+                .balanceAfter(balanceAfter1)
                 .isSuccess(successA)
                 .build();
 
         ConcurrencyTestResponse.ThreadResult threadResultB = ConcurrencyTestResponse.ThreadResult.builder()
-                .customerName(freshCust2.getHoTen())
-                .customerId(freshCust2.getMaKH())
+                .customerName(cust2.getHoTen())
+                .customerId(cust2.getMaKH())
                 .statusCode(statusB)
                 .message(msgB)
                 .orderId(orderIdB)
                 .balanceBefore(balanceBefore2)
-                .balanceAfter(afterCust2.getSoDuVi())
+                .balanceAfter(balanceAfter2)
                 .isSuccess(successB)
                 .build();
 
         boolean isOneSuccessOneRollback = (successA && !successB) || (!successA && successB);
-        boolean isStockZero = afterProduct.getSoLuongTon() == 0;
+        boolean isStockZero = remainingStock == 0;
 
         String evaluation = (isOneSuccessOneRollback && isStockZero)
                 ? "PASS - Đảm bảo chuẩn ACID: Khóa dòng độc quyền (UPDLOCK, ROWLOCK) và SET XACT_ABORT ON thành công 100%. Đúng 1 đơn hàng được tạo, tồn kho về đúng 0 (không âm), luồng còn lại bị Rollback an toàn và bảo toàn số dư ví."
@@ -282,7 +286,7 @@ public class OrderServiceImpl implements OrderService {
                 .timestamp(LocalDateTime.now())
                 .threadA(threadResultA)
                 .threadB(threadResultB)
-                .remainingStock(afterProduct.getSoLuongTon())
+                .remainingStock(remainingStock)
                 .acidEvaluation(evaluation)
                 .build();
     }
@@ -315,7 +319,12 @@ public class OrderServiceImpl implements OrderService {
                 .ngayTao(order.getNgayTao())
                 .tongTien(order.getTongTien())
                 .trangThai(order.getTrangThai())
+                .nguonDon(order.getNguonDon())
                 .items(itemDtos)
                 .build();
+    }
+
+    private BigDecimal readWalletBalance(int customerId) {
+        return jdbcTemplate.queryForObject("SELECT SoDuVi FROM KhachHang WHERE MaKH = ?", BigDecimal.class, customerId);
     }
 }

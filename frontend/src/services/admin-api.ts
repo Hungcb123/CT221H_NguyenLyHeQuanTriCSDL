@@ -29,6 +29,7 @@ export interface AdminOrder {
   TongTien: number;
   TrangThai: string;
   DiaChiGiaoHang: string;
+  NguonDon: "SALE" | "BENCHMARK" | "DEMO_FORECAST";
 }
 export interface AdminAlert {
   MaLog: number;
@@ -45,12 +46,14 @@ export interface AdminOverview {
   orders: number;
   revenue: number;
   benchmarkOrders: number;
+  demoOrders: number;
   recentAlerts: AdminAlert[];
 }
 export interface ForecastResult {
-  maDuBao: number;
+  maDuBao: number | null;
   maSP: number;
   tenSP: string;
+  donViTinh: string;
   ngayDuBao: string;
   soLuongDuBaoTieuThu: number;
   soLuongTonHienTai: number;
@@ -96,6 +99,7 @@ export interface AIStatus {
 }
 export interface BenchmarkResult {
   totalOrdersInDatabase: number;
+  benchmarkOrdersInDatabase: number;
   withoutIndex: {
     executionTimeMs: number;
     recordsReturned: number;
@@ -135,6 +139,10 @@ export interface CustomerRow {
   SoDienThoai: string;
   DiaChi: string;
   SoDuVi: number;
+  NhomKhachHang: "CHUA_MUA" | "CAN_TUONG_TAC_LAI" | "THAN_THIET" | "DANG_HOAT_DONG";
+  LanMuaCuoi: string | null;
+  SoDon90Ngay: number;
+  ChiTieu90Ngay: number;
 }
 
 let currentSession: AdminSession | null = null;

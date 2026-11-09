@@ -54,6 +54,9 @@ public class OrderController {
         customer.requireId();
         OrderDetailResponse response = orderService.getOrderById(orderId);
         customer.owner(response.getMaKH());
+        if (!"SALE".equals(response.getNguonDon())) {
+            throw new com.ctu.freshgrocery.exception.AppException(org.springframework.http.HttpStatus.NOT_FOUND, "Không tìm thấy đơn hàng.");
+        }
         return ResponseEntity.ok(ApiResponse.<OrderDetailResponse>builder()
                 .success(true)
                 .statusCode(1)

@@ -35,7 +35,8 @@ public class WalletServiceImpl implements WalletService {
         Map<String, Object> result = orderSpRepository.executeNapTienVi(
                 request.getMaKH(),
                 request.getSoTien(),
-                request.getNoiDung()
+                request.getNoiDung(),
+                request.getMaYeuCau()
         );
 
         Integer statusCode = (Integer) result.get("StatusCode");
@@ -71,6 +72,6 @@ public class WalletServiceImpl implements WalletService {
             throw new AppException(HttpStatus.NOT_FOUND, "Không tìm thấy khách hàng với ID: " + customerId);
         }
 
-        return walletTransactionRepository.findByMaKHOrderByNgayGiaoDichDesc(customerId);
+        return walletTransactionRepository.findCustomerHistory(customerId);
     }
 }

@@ -16,6 +16,8 @@ public class BenchmarkComparisonResponse {
     @Schema(description = "Tổng số lượng dòng dữ liệu đơn hàng hiện có trong bảng DonHang", example = "500000")
     private Long totalOrdersInDatabase;
 
+    private Long benchmarkOrdersInDatabase;
+
     @Schema(description = "Kịch bản 1: Không sử dụng Index (Clustered Index Scan / Table Scan)")
     private ScenarioResult withoutIndex;
 

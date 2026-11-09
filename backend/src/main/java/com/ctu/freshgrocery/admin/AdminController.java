@@ -31,6 +31,13 @@ public class AdminController {
     private final BenchmarkService benchmark;
     private final OrderService orders;
     private final AdminOrderService orderAdmin;
+    private final SalesForecastService salesForecast;
+
+    @GetMapping("/ai/revenue-forecast")
+    public ApiResponse<SalesForecastService.Estimate> revenueForecast(
+            @RequestParam(defaultValue = "7") int days, @RequestParam(defaultValue = "SALE") String source) {
+        return ApiResponse.ok("Ước tính doanh thu theo kỳ", salesForecast.estimate(days, source));
+    }
 
     @GetMapping("/overview")
     public ApiResponse<?> overview() {
@@ -38,9 +45,10 @@ public class AdminController {
             "products", jdbc.queryForObject("SELECT COUNT(*) FROM SanPham WHERE TrangThaiXoa = 0", Long.class),
             "lowStock", jdbc.queryForObject("SELECT COUNT(*) FROM SanPham WHERE TrangThaiXoa = 0 AND SoLuongTon <= 5", Long.class),
             "expiring", jdbc.queryForObject("SELECT COUNT(*) FROM SanPham WHERE TrangThaiXoa = 0 AND HanSuDung <= DATEADD(DAY, 2, GETDATE())", Long.class),
-            "orders", jdbc.queryForObject("SELECT COUNT_BIG(*) FROM DonHang d WHERE EXISTS (SELECT 1 FROM ChiTietDonHang c WHERE c.MaDH = d.MaDH)", Long.class),
-            "revenue", jdbc.queryForObject("SELECT ISNULL(SUM(TongTien),0) FROM DonHang d WHERE TrangThai IN ('PAID','DELIVERED') AND EXISTS (SELECT 1 FROM ChiTietDonHang c WHERE c.MaDH = d.MaDH)", java.math.BigDecimal.class),
-            "benchmarkOrders", jdbc.queryForObject("SELECT COUNT_BIG(*) FROM DonHang d WHERE NOT EXISTS (SELECT 1 FROM ChiTietDonHang c WHERE c.MaDH = d.MaDH)", Long.class),
+            "orders", jdbc.queryForObject("SELECT COUNT_BIG(*) FROM DonHang d WHERE d.NguonDon = 'SALE' AND EXISTS (SELECT 1 FROM ChiTietDonHang c WHERE c.MaDH = d.MaDH)", Long.class),
+            "revenue", jdbc.queryForObject("SELECT ISNULL(SUM(d.TongTien),0) FROM DonHang d WHERE d.NguonDon = 'SALE' AND d.TrangThai IN ('PAID','DELIVERED') AND EXISTS (SELECT 1 FROM ChiTietDonHang c WHERE c.MaDH = d.MaDH)", java.math.BigDecimal.class),
+            "benchmarkOrders", jdbc.queryForObject("SELECT COUNT_BIG(*) FROM DonHang WHERE NguonDon = 'BENCHMARK'", Long.class),
+            "demoOrders", jdbc.queryForObject("SELECT COUNT_BIG(*) FROM DonHang WHERE NguonDon = 'DEMO_FORECAST'", Long.class),
             "recentAlerts", jdbc.queryForList("SELECT TOP 8 MaLog, LoaiSuKien, NoiDung, MaSP, NguoiThucHien, NgayGhi FROM NhatKyCanhBao ORDER BY MaLog DESC")));
     }
 
@@ -96,9 +104,9 @@ public class AdminController {
             @RequestParam(defaultValue="1") int page,@RequestParam(defaultValue="20") int size) {
         if(!status.isBlank()&&!Set.of("PENDING","PAID","DELIVERED","CANCELLED").contains(status))throw new AppException(HttpStatus.BAD_REQUEST,"Trạng thái không hợp lệ.");
         int limit=Math.clamp(size,1,100);long start=(long)(Math.max(1,page)-1)*limit;
-        String where=" WHERE (? = '' OR d.TrangThai = ?) AND (? = 1 OR EXISTS (SELECT 1 FROM ChiTietDonHang c WHERE c.MaDH=d.MaDH))";
+        String where=" WHERE (? = '' OR d.TrangThai = ?) AND ((d.NguonDon = 'SALE' AND EXISTS (SELECT 1 FROM ChiTietDonHang c WHERE c.MaDH=d.MaDH)) OR (? = 1 AND d.NguonDon = 'BENCHMARK'))";
         Long total=jdbc.queryForObject("SELECT COUNT_BIG(*) FROM DonHang d"+where,Long.class,status,status,includeBenchmark?1:0);
-        var items=jdbc.queryForList("SELECT d.MaDH, d.MaKH, k.HoTen, d.NgayTao, d.TongTien, d.TrangThai, d.DiaChiGiaoHang FROM DonHang d JOIN KhachHang k ON k.MaKH=d.MaKH"+where+" ORDER BY d.MaDH DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY",status,status,includeBenchmark?1:0,start,limit);
+        var items=jdbc.queryForList("SELECT d.MaDH, d.MaKH, k.HoTen, d.NgayTao, d.TongTien, d.TrangThai, d.DiaChiGiaoHang, d.NguonDon FROM DonHang d JOIN KhachHang k ON k.MaKH=d.MaKH"+where+" ORDER BY d.MaDH DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY",status,status,includeBenchmark?1:0,start,limit);
         return ApiResponse.ok("Danh sách đơn hàng",Map.of("items",items,"totalElements",total,"page",Math.max(1,page),"size",limit,"totalPages",(total+limit-1)/limit));
     }
     @GetMapping("/orders/{id}")
@@ -131,7 +139,33 @@ public class AdminController {
     }
 
     @GetMapping("/customers")
-    public ApiResponse<?> customers(){return ApiResponse.ok("Khách hàng",jdbc.queryForList("SELECT MaKH, HoTen, Email, SoDienThoai, DiaChi, SoDuVi FROM KhachHang ORDER BY MaKH"));}
+    public ApiResponse<?> customers() {
+        var customersWithSegments = jdbc.queryForList("""
+                WITH PurchaseHistory AS (
+                    SELECT d.MaKH, MAX(d.NgayTao) AS LanMuaCuoi,
+                        COUNT_BIG(CASE WHEN d.NgayTao >= DATEADD(DAY, -90, GETDATE()) THEN 1 END) AS SoDon90Ngay,
+                        SUM(CASE WHEN d.NgayTao >= DATEADD(DAY, -90, GETDATE()) THEN d.TongTien ELSE 0 END) AS ChiTieu90Ngay
+                    FROM dbo.DonHang d
+                    WHERE d.TrangThai IN ('PAID', 'DELIVERED')
+                      AND EXISTS (SELECT 1 FROM dbo.ChiTietDonHang c WHERE c.MaDH = d.MaDH)
+                      AND d.NguonDon = 'SALE'
+                    GROUP BY d.MaKH
+                )
+                SELECT k.MaKH, k.HoTen, k.Email, k.SoDienThoai, k.DiaChi, k.SoDuVi,
+                    p.LanMuaCuoi, COALESCE(p.SoDon90Ngay, 0) AS SoDon90Ngay,
+                    COALESCE(p.ChiTieu90Ngay, 0) AS ChiTieu90Ngay,
+                    CASE
+                        WHEN p.LanMuaCuoi IS NULL THEN 'CHUA_MUA'
+                        WHEN p.LanMuaCuoi < DATEADD(DAY, -30, GETDATE()) THEN 'CAN_TUONG_TAC_LAI'
+                        WHEN p.SoDon90Ngay >= 3 AND p.ChiTieu90Ngay >= 500000 THEN 'THAN_THIET'
+                        ELSE 'DANG_HOAT_DONG'
+                    END AS NhomKhachHang
+                FROM dbo.KhachHang k
+                LEFT JOIN PurchaseHistory p ON p.MaKH = k.MaKH
+                ORDER BY k.MaKH
+                """);
+        return ApiResponse.ok("Khách hàng", customersWithSegments);
+    }
     @GetMapping("/customers/{id}/wallet")
     public ApiResponse<?> wallet(@PathVariable int id){return ApiResponse.ok("Lịch sử ví",jdbc.queryForList("SELECT TOP 100 * FROM LichSuGiaoDichVi WHERE MaKH=? ORDER BY MaGiaoDich DESC",id));}
 

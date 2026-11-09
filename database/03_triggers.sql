@@ -14,6 +14,29 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
+    -- Ghi một nhật ký cho mỗi sản phẩm có dữ liệu nghiệp vụ thay đổi.
+    -- Trigger xóa mềm đã có sự kiện riêng cho UPDATE nội bộ của nó.
+    IF COALESCE(TRIGGER_NESTLEVEL(OBJECT_ID(N'dbo.trg_SanPham_NganChanXoaVatLy')), 0) = 0
+    BEGIN
+        INSERT INTO dbo.NhatKyCanhBao (LoaiSuKien, NoiDung, MaSP)
+        SELECT 'CAP_NHAT_SAN_PHAM',
+               CONCAT(N'Trước: ', cu.DuLieu, N' | Sau: ', moi.DuLieu),
+               i.MaSP
+        FROM inserted i
+        JOIN deleted d ON d.MaSP = i.MaSP
+        CROSS APPLY (
+            SELECT (SELECT d.TenSP, d.MoTa, d.HinhAnh, d.Gia, d.DonViTinh, d.SoLuongTon,
+                           d.HanSuDung, d.NhietDoBaoQuan, d.MaDanhMuc, d.TrangThaiXoa
+                    FOR JSON PATH, WITHOUT_ARRAY_WRAPPER, INCLUDE_NULL_VALUES) AS DuLieu
+        ) cu
+        CROSS APPLY (
+            SELECT (SELECT i.TenSP, i.MoTa, i.HinhAnh, i.Gia, i.DonViTinh, i.SoLuongTon,
+                           i.HanSuDung, i.NhietDoBaoQuan, i.MaDanhMuc, i.TrangThaiXoa
+                    FOR JSON PATH, WITHOUT_ARRAY_WRAPPER, INCLUDE_NULL_VALUES) AS DuLieu
+        ) moi
+        WHERE cu.DuLieu COLLATE Latin1_General_100_BIN2 <> moi.DuLieu COLLATE Latin1_General_100_BIN2;
+    END;
+
     -- 1.1. Bẫy sự kiện CHÁY HÀNG (SoLuongTon giảm về <= 0)
     INSERT INTO NhatKyCanhBao (LoaiSuKien, NoiDung, MaSP, NguoiThucHien, NgayGhi)
     SELECT 

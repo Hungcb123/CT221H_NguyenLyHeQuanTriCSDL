@@ -6,6 +6,7 @@ import com.ctu.freshgrocery.dto.RemoveFromCartRequest;
 
 public interface CartService {
     void addToCart(AddToCartRequest request);
+    void updateQuantity(AddToCartRequest request);
     void removeFromCart(RemoveFromCartRequest request);
     CartResponse getCart(Integer customerId);
 }
