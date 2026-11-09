@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Schema(description = "Thông tin sản phẩm từ kết quả tìm kiếm ngữ nghĩa (Semantic Vector Search)")
 public class SemanticProductResponse {
+    private String hinhAnh;
 
     @Schema(description = "Mã sản phẩm", example = "1")
     private Integer maSP;

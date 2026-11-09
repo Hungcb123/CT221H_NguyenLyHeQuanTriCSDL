@@ -93,11 +93,18 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(readOnly = true)
     public List<OrderDetailResponse> getOrdersByCustomer(Integer customerId) {
+        return getOrdersByCustomer(customerId, 1, 20);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<OrderDetailResponse> getOrdersByCustomer(Integer customerId, int page, int size) {
         if (!customerRepository.existsById(customerId)) {
             throw new AppException(HttpStatus.NOT_FOUND, "Không tìm thấy khách hàng với ID: " + customerId);
         }
 
-        List<Order> orders = orderRepository.findByMaKHOrderByNgayTaoDesc(customerId);
+        List<Order> orders = orderRepository.findCustomerOrders(customerId,
+                org.springframework.data.domain.PageRequest.of(Math.max(0, page-1), Math.clamp(size, 1, 100)));
         return orders.stream()
                 .map(this::mapToOrderDetailResponse)
                 .collect(Collectors.toList());

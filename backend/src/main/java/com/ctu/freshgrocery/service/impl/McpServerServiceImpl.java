@@ -129,7 +129,9 @@ public class McpServerServiceImpl implements McpServerService {
 
                 case "semantic_product_search": {
                     String query = (String) args.get("query");
-                    List<SemanticProductResponse> products = semanticSearchService.search(query, 5, 0.35f);
+                    List<SemanticProductResponse> products = semanticSearchService.search(query, 20, 0.35f).stream()
+                            .filter(p -> p.getHanSuDung() != null && p.getHanSuDung().isAfter(java.time.LocalDateTime.now()))
+                            .filter(p -> p.getSoLuongTon() != null && p.getSoLuongTon() > 0).limit(5).toList();
 
                     return McpToolCallResponse.builder()
                             .toolName(toolName)

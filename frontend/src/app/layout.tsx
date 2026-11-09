@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { CustomerProvider } from "@/components/customer/CustomerProvider";
 
 export const metadata: Metadata = {
   title: "DailyMart - Bách Hóa Thực Phẩm Tươi Sống | CT221H",
@@ -22,7 +23,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="vi" className="h-full antialiased">
-      <body className="min-h-full flex flex-col font-sans">{children}</body>
+      <body className="min-h-full flex flex-col font-sans"><CustomerProvider>{children}</CustomerProvider></body>
     </html>
   );
 }

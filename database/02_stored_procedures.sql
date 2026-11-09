@@ -18,7 +18,8 @@ CREATE OR ALTER PROCEDURE sp_ThemSanPhamMoi
     @MaDanhMuc INT,
     @NewMaSP INT OUTPUT,
     @StatusCode INT OUTPUT,
-    @Message NVARCHAR(255) OUTPUT
+    @Message NVARCHAR(255) OUTPUT,
+    @HinhAnh NVARCHAR(1000) = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -70,11 +71,11 @@ BEGIN
 
         -- Thêm mới sản phẩm
         INSERT INTO SanPham (
-            TenSP, MoTa, Gia, DonViTinh, SoLuongTon, 
+            TenSP, MoTa, HinhAnh, Gia, DonViTinh, SoLuongTon, 
             HanSuDung, NhietDoBaoQuan, MaDanhMuc, TrangThaiXoa, NgayTao, NgayCapNhat
         )
         VALUES (
-            @TenSP, @MoTa, @Gia, @DonViTinh, @SoLuongTon, 
+            @TenSP, @MoTa, @HinhAnh, @Gia, @DonViTinh, @SoLuongTon, 
             @HanSuDung, @NhietDoBaoQuan, @MaDanhMuc, 0, GETDATE(), GETDATE()
         );
 
@@ -102,7 +103,8 @@ CREATE OR ALTER PROCEDURE sp_CapNhatSanPham
     @NhietDoBaoQuan NVARCHAR(50),
     @MaDanhMuc INT,
     @StatusCode INT OUTPUT,
-    @Message NVARCHAR(255) OUTPUT
+    @Message NVARCHAR(255) OUTPUT,
+    @HinhAnh NVARCHAR(1000) = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -144,6 +146,7 @@ BEGIN
         SET 
             TenSP = ISNULL(@TenSP, TenSP),
             MoTa = ISNULL(@MoTa, MoTa),
+            HinhAnh = ISNULL(@HinhAnh, HinhAnh),
             Gia = ISNULL(@Gia, Gia),
             DonViTinh = ISNULL(@DonViTinh, DonViTinh),
             SoLuongTon = ISNULL(@SoLuongTon, SoLuongTon),
@@ -216,6 +219,7 @@ BEGIN
         sp.MaSP,
         sp.TenSP,
         sp.MoTa,
+        sp.HinhAnh,
         sp.Gia AS GiaGoc,
         ISNULL(km_active.GiaKhuyenMai, sp.Gia) AS GiaHienTai,
         CASE WHEN km_active.GiaKhuyenMai IS NOT NULL THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS DangKhuyenMai,
@@ -273,6 +277,7 @@ BEGIN
         sp.MaSP,
         sp.TenSP,
         sp.MoTa,
+        sp.HinhAnh,
         sp.Gia AS GiaGoc,
         ISNULL(km_active.GiaKhuyenMai, sp.Gia) AS GiaHienTai,
         CASE WHEN km_active.GiaKhuyenMai IS NOT NULL THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS DangKhuyenMai,
@@ -867,6 +872,23 @@ BEGIN
         DECLARE @TyLe DECIMAL(10,2) = CAST(@KhauPhan AS DECIMAL(10,2)) / CAST(@KhauPhanChuan AS DECIMAL(10,2));
 
         -- Đảm bảo khách hàng đã có giỏ hàng
+        BEGIN TRANSACTION;
+        -- Serialize recipe additions for one customer, including empty carts.
+        DECLARE @LockedCustomer INT;
+        SELECT @LockedCustomer = MaKH FROM KhachHang WITH (UPDLOCK, HOLDLOCK) WHERE MaKH = @MaKH;
+        IF NOT EXISTS (SELECT 1 FROM NguyenLieuMonAn WHERE MaCongThuc = @MaCongThuc)
+            THROW 50001, N'Công thức chưa có nguyên liệu.', 1;
+        IF EXISTS (
+            SELECT 1 FROM NguyenLieuMonAn nl
+            LEFT JOIN SanPham sp WITH (UPDLOCK, HOLDLOCK) ON sp.MaSP = nl.MaSP
+            LEFT JOIN GioHang gh ON gh.MaKH = @MaKH
+            LEFT JOIN ChiTietGioHang ct ON ct.MaGioHang = gh.MaGioHang AND ct.MaSP = nl.MaSP
+            WHERE nl.MaCongThuc = @MaCongThuc
+              AND (sp.MaSP IS NULL OR sp.TrangThaiXoa = 1 OR sp.HanSuDung <= GETDATE()
+                   OR sp.SoLuongTon < CEILING(nl.SoLuongDinhLuong * @TyLe) + ISNULL(ct.SoLuong, 0))
+        )
+            THROW 50002, N'Nguyên liệu đã hết hạn, ngừng kinh doanh hoặc không đủ số lượng (kể cả trong giỏ).', 1;
+
         DECLARE @MaGioHang INT;
         SELECT @MaGioHang = MaGioHang FROM GioHang WHERE MaKH = @MaKH;
         IF (@MaGioHang IS NULL)
@@ -907,10 +929,12 @@ BEGIN
             @TongTienNguyenLieu = ISNULL(SUM(SoLuongCanMua * Gia), 0)
         FROM @NguyenLieu;
 
+        COMMIT TRANSACTION;
         SET @StatusCode = 1;
         SET @Message = N'Đã thêm ' + CAST(@SoLuongMonDaThem AS NVARCHAR(10)) + N' nguyên liệu món ăn vào giỏ hàng thành công.';
     END TRY
     BEGIN CATCH
+        IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
         SET @StatusCode = -99;
         SET @Message = N'Lỗi thêm nguyên liệu món ăn: ' + ERROR_MESSAGE();
         SET @SoLuongMonDaThem = 0;

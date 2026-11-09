@@ -36,6 +36,7 @@ export interface ProductResponse {
 }
 
 export interface ProductCreateRequest {
+  hinhAnh?: string;
   tenSP: string;
   moTa?: string;
   gia: number;
@@ -90,6 +91,8 @@ export interface IngredientItemDto {
   thanhTien: number;
   tonKhoHienTai: number;
   conHang: boolean;
+  lyDoKhongKhaDung?: string;
+  thayTheCho?: string;
 }
 
 export interface RecipeDetailDto {
@@ -104,12 +107,14 @@ export interface RecipeDetailDto {
 }
 
 export interface ChatMessageRequest {
+  recipeId?: number;
   customerId?: number;
   message: string;
   conversationId?: string;
 }
 
 export interface ChatMessageResponse {
+  suggestedRecipes?: RecipeDetailDto[];
   reply: string;
   mcpToolInvoked?: string;
   recipeSuggested?: RecipeDetailDto;

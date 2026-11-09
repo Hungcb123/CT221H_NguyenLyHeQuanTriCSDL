@@ -20,6 +20,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Schema(description = "Thông tin thêm mới sản phẩm tươi sống")
 public class ProductCreateRequest {
+    @jakarta.validation.constraints.Size(max = 1000)
+    @jakarta.validation.constraints.Pattern(regexp = "^(?:https?://[^\\s]+|/(?!/)[^\\s]*)?$", message = "Ảnh phải là URL http(s) hoặc đường dẫn nội bộ")
+    private String hinhAnh;
 
     @NotBlank(message = "Tên sản phẩm không được để trống")
     @Schema(description = "Tên mặt hàng thực phẩm", example = "Cá lóc tươi làm sạch")

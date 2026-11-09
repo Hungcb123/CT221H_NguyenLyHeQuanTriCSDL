@@ -158,7 +158,7 @@ export async function adminRequest<T>(
   const session = currentSession ?? (await getAdminSession());
   const headers = new Headers(init.headers);
   headers.set(session.csrfHeader, session.csrfToken);
-  if (init.body && !(init.body instanceof URLSearchParams))
+  if (init.body && !(init.body instanceof URLSearchParams) && !(init.body instanceof FormData))
     headers.set("Content-Type", "application/json");
   const response = await fetch(path, {
     ...init,

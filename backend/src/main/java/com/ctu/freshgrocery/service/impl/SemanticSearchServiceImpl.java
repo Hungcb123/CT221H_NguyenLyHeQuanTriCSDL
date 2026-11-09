@@ -341,6 +341,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService {
         }
 
         return SemanticProductResponse.builder()
+                .hinhAnh(p.getHinhAnh())
                 .maSP(p.getMaSP())
                 .tenSP(p.getTenSP())
                 .moTa(p.getMoTa())

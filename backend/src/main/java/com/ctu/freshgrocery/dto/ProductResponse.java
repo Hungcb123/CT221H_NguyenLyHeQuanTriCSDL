@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Schema(description = "Thông tin chi tiết sản phẩm thực phẩm tươi sống")
 public class ProductResponse {
+    private String hinhAnh;
     private Integer maSP;
     private String tenSP;
     private String moTa;
@@ -35,4 +36,3 @@ public class ProductResponse {
     private LocalDateTime ngayTao;
     private LocalDateTime ngayCapNhat;
 }
-

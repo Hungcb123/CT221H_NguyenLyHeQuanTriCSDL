@@ -25,12 +25,14 @@ import java.util.List;
 @RequiredArgsConstructor
 @Tag(name = "3. Ví điện tử & Sổ cái kiểm toán (Wallet & Audit Trail)", description = "Các API nạp tiền và theo dõi dòng tiền bảo toàn chuẩn ACID")
 public class WalletController {
+    private final com.ctu.freshgrocery.customer.CustomerAccess customer;
 
     private final WalletService walletService;
 
     @PostMapping("/top-up")
     @Operation(summary = "Nạp tiền vào ví điện tử", description = "Thực thi sp_NapTienVi có khóa UPDLOCK ngăn Lost Update và ghi sổ cái kiểm toán LichSuGiaoDichVi")
     public ResponseEntity<ApiResponse<WalletResponse>> topUpWallet(@Valid @RequestBody TopUpWalletRequest request) {
+        customer.owner(request.getMaKH());
         WalletResponse response = walletService.topUpWallet(request);
         return ResponseEntity.ok(ApiResponse.<WalletResponse>builder()
                 .success(true)
@@ -45,6 +47,7 @@ public class WalletController {
     public ResponseEntity<ApiResponse<WalletResponse>> getBalance(
             @Parameter(description = "Mã khách hàng", example = "1")
             @PathVariable Integer customerId) {
+        customer.owner(customerId);
         WalletResponse response = walletService.getBalance(customerId);
         return ResponseEntity.ok(ApiResponse.<WalletResponse>builder()
                 .success(true)
@@ -59,6 +62,7 @@ public class WalletController {
     public ResponseEntity<ApiResponse<List<WalletTransaction>>> getTransactions(
             @Parameter(description = "Mã khách hàng", example = "1")
             @PathVariable Integer customerId) {
+        customer.owner(customerId);
         List<WalletTransaction> transactions = walletService.getTransactionHistory(customerId);
         return ResponseEntity.ok(ApiResponse.<List<WalletTransaction>>builder()
                 .success(true)

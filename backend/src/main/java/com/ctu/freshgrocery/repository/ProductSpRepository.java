@@ -45,6 +45,7 @@ public class ProductSpRepository {
                 .declareParameters(
                         new SqlParameter("TenSP", Types.NVARCHAR),
                         new SqlParameter("MoTa", Types.NVARCHAR),
+                        new SqlParameter("HinhAnh", Types.NVARCHAR),
                         new SqlParameter("Gia", Types.DECIMAL),
                         new SqlParameter("DonViTinh", Types.NVARCHAR),
                         new SqlParameter("SoLuongTon", Types.INTEGER),
@@ -63,6 +64,7 @@ public class ProductSpRepository {
                         new SqlParameter("MaSP", Types.INTEGER),
                         new SqlParameter("TenSP", Types.NVARCHAR),
                         new SqlParameter("MoTa", Types.NVARCHAR),
+                        new SqlParameter("HinhAnh", Types.NVARCHAR),
                         new SqlParameter("Gia", Types.DECIMAL),
                         new SqlParameter("DonViTinh", Types.NVARCHAR),
                         new SqlParameter("SoLuongTon", Types.INTEGER),
@@ -105,6 +107,7 @@ public class ProductSpRepository {
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("TenSP", req.getTenSP())
                 .addValue("MoTa", req.getMoTa())
+                .addValue("HinhAnh", req.getHinhAnh())
                 .addValue("Gia", req.getGia())
                 .addValue("DonViTinh", req.getDonViTinh())
                 .addValue("SoLuongTon", req.getSoLuongTon())
@@ -124,6 +127,7 @@ public class ProductSpRepository {
                 .addValue("MaSP", maSP)
                 .addValue("TenSP", req.getTenSP())
                 .addValue("MoTa", req.getMoTa())
+                .addValue("HinhAnh", req.getHinhAnh())
                 .addValue("Gia", req.getGia())
                 .addValue("DonViTinh", req.getDonViTinh())
                 .addValue("SoLuongTon", req.getSoLuongTon())
@@ -194,6 +198,7 @@ public class ProductSpRepository {
                     .maSP(rs.getInt("MaSP"))
                     .tenSP(rs.getString("TenSP"))
                     .moTa(rs.getString("MoTa"))
+                    .hinhAnh(hasColumn(rs, "HinhAnh") ? rs.getString("HinhAnh") : null)
                     .gia(giaHienTai != null ? giaHienTai : giaGoc)
                     .giaGoc(giaGoc)
                     .giaHienTai(giaHienTai)

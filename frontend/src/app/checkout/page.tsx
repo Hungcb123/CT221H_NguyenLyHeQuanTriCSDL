@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import {useRouter} from "next/navigation";
+import {useCustomer} from "@/components/customer/CustomerProvider";
 import { ArrowLeft, CheckCircle2, MapPin, ShoppingBag, Wallet } from "lucide-react";
 import { apiService } from "@/services/api";
 import type { CartResponse, CheckoutResponse } from "@/types";
@@ -9,6 +11,7 @@ import type { CartResponse, CheckoutResponse } from "@/types";
 const money = (value: number) => `${value.toLocaleString("vi-VN")} đ`;
 
 export default function CheckoutPage() {
+  const {customer,loading:authLoading}=useCustomer();const router=useRouter();
   const [cart, setCart] = useState<CartResponse | null>(null);
   const [balance, setBalance] = useState<number | null>(null);
   const [address, setAddress] = useState("");
@@ -22,13 +25,15 @@ export default function CheckoutPage() {
   const headingRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
+    if(authLoading)return;
+    if(!customer){router.replace("/login?next=/checkout");return;}
     let cancelled = false;
-    Promise.all([apiService.getCart(1), apiService.getWallet(1)])
+    Promise.all([apiService.getCart(customer.maKH), apiService.getWallet(customer.maKH)])
       .then(([nextCart, wallet]) => { if (!cancelled) { setCart(nextCart); setBalance(wallet.soDuVi); } })
       .catch((cause) => { if (!cancelled) setError(cause instanceof Error ? cause.message : "Không tải được thông tin thanh toán."); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [retry]);
+  }, [retry, customer, authLoading, router]);
 
   useEffect(() => { if (result) headingRef.current?.focus(); }, [result]);
 
@@ -38,16 +43,16 @@ export default function CheckoutPage() {
 
   async function checkout(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (submittingRef.current || !canPay || !address.trim()) return;
+    if (submittingRef.current || !canPay || !address.trim() || !customer) return;
     submittingRef.current = true;
     setSubmitting(true);
     setError(null);
     try {
-      setResult(await apiService.checkout(address, note));
+      setResult(await apiService.checkout(address, note, customer.maKH));
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Chưa xác nhận được thanh toán. Vui lòng kiểm tra đơn hàng trước khi thử lại.");
       // Refresh stock and wallet after a rejected transaction, keeping the delivery fields.
-      const refreshed = await Promise.allSettled([apiService.getCart(1), apiService.getWallet(1)]);
+      const refreshed = await Promise.allSettled([apiService.getCart(customer.maKH), apiService.getWallet(customer.maKH)]);
       if (refreshed[0].status === "fulfilled") setCart(refreshed[0].value);
       if (refreshed[1].status === "fulfilled") setBalance(refreshed[1].value.soDuVi);
     } finally {
@@ -65,6 +70,7 @@ export default function CheckoutPage() {
             <CheckCircle2 className="mx-auto mb-4 h-14 w-14 text-emerald-700" aria-hidden="true" />
             <h1 ref={headingRef} tabIndex={-1} className="text-2xl font-bold">Thanh toán thành công</h1>
             <p className="mt-2 text-stone-600">Đơn hàng #{result.maDH} đã được xác nhận.</p>
+            <Link href={`/orders/${result.maDH}`} className="mt-3 inline-block font-semibold text-emerald-800 underline">Xem chi tiết và theo dõi đơn hàng</Link>
             <dl className="mx-auto my-6 max-w-md space-y-3 text-left">
               <div className="flex justify-between gap-4"><dt>Tổng thanh toán</dt><dd className="font-bold">{money(result.tongTien)}</dd></div>
               <div className="flex justify-between gap-4"><dt>Số dư ví còn lại</dt><dd className="font-bold text-emerald-800">{money(result.soDuConLai)}</dd></div>

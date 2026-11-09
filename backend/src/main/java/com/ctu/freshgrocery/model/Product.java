@@ -25,6 +25,9 @@ import java.time.LocalDateTime;
 @Table(name = "SanPham")
 public class Product {
 
+    @Column(name = "HinhAnh", length = 1000)
+    private String hinhAnh;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "MaSP")

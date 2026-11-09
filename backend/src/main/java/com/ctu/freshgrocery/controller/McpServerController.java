@@ -23,6 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Tag(name = "7. Model Context Protocol (MCP Server Tools)", description = "Cổng kết nối chuẩn giao thức MCP (Model Context Protocol) cho các LLM Agent bên ngoài")
 public class McpServerController {
+    private final com.ctu.freshgrocery.customer.CustomerAccess customer;
 
     private final McpServerService mcpServerService;
 
@@ -47,6 +48,12 @@ public class McpServerController {
             description = "Nhận lệnh Tool Call từ LLM Model, chuyển tiếp thực thi các tác vụ CSDL (tra cứu món ăn, bỏ giỏ hàng, tìm kiếm thông minh) và phản hồi kết quả chuẩn hóa."
     )
     public ResponseEntity<ApiResponse<McpToolCallResponse>> callTool(@Valid @RequestBody McpToolCallRequest request) {
+        if (java.util.Set.of("add_recipe_to_customer_cart", "create_checkout_redirect").contains(request.getName())) {
+            int id = customer.requireId();
+            var arguments = new java.util.HashMap<String,Object>(request.getArguments() == null ? java.util.Map.of() : request.getArguments());
+            arguments.put("customerId", id);
+            request.setArguments(arguments);
+        }
         McpToolCallResponse response = mcpServerService.executeTool(request);
         return ResponseEntity.ok(ApiResponse.<McpToolCallResponse>builder()
                 .success(response.getIsSuccess())

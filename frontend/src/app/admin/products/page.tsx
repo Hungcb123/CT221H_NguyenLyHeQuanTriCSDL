@@ -22,6 +22,7 @@ import {
 
 const fresh = (category: number): ProductCreateRequest => ({
   tenSP: "",
+  hinhAnh: "",
   moTa: "",
   gia: 0,
   donViTinh: "",
@@ -227,6 +228,49 @@ export default function ProductAdminPage() {
                 />
               </label>
               <label className="ad-field ad-span-full">
+                Ảnh sản phẩm
+                <input
+                  className="ad-input"
+                  value={draft.hinhAnh ?? ""}
+                  onChange={(e) => field("hinhAnh", e.target.value)}
+                  placeholder="Dán URL ảnh https://… hoặc tải ảnh từ máy bên dưới"
+                  maxLength={1000}
+                />
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  disabled={pending}
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    e.target.value = "";
+                    if (!file) return;
+                    if (file.size > 5 * 1024 * 1024) {
+                      setError("Ảnh tối đa 5 MB.");
+                      return;
+                    }
+                    setPending(true);
+                    setError("");
+                    try {
+                      const body = new FormData();
+                      body.append("file", file);
+                      const uploaded = await adminRequest<{ url: string }>("/api/v1/admin/product-images", { method: "POST", body });
+                      field("hinhAnh", uploaded.url);
+                    } catch (failure) {
+                      setError(adminError(failure));
+                    } finally {
+                      setPending(false);
+                    }
+                  }}
+                />
+                <small>Chọn ảnh JPG, PNG hoặc WebP, tối đa 5 MB. Bấm Lưu sản phẩm để áp dụng.</small>
+                {draft.hinhAnh && (
+                  <div className="flex items-center gap-4">
+                    <img src={draft.hinhAnh} alt="Xem trước ảnh sản phẩm" className="h-32 w-32 rounded-lg border object-contain bg-white" />
+                    <button type="button" className="ad-btn secondary" disabled={pending} onClick={() => field("hinhAnh", "")}>Xóa ảnh</button>
+                  </div>
+                )}
+              </label>
+              <label className="ad-field ad-span-full">
                 Mô tả và công dụng
                 <textarea
                   className="ad-textarea"
@@ -306,6 +350,7 @@ export default function ProductAdminPage() {
             {list.data?.items.map((p) => (
               <tr key={p.maSP}>
                 <td>
+                  {p.hinhAnh && <img src={p.hinhAnh} alt={p.tenSP} className="mb-2 h-14 w-14 rounded-md border bg-white object-contain" loading="lazy" />}
                   <strong>{p.tenSP}</strong>
                   <small>
                     #{p.maSP} · {p.donViTinh}

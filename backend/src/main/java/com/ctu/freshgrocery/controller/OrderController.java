@@ -26,6 +26,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Tag(name = "4. Đơn hàng & Thanh toán ACID (Orders & Concurrency Demo)", description = "Các API thanh toán đơn hàng bằng T-SQL Stored Procedure và Demo đối chứng tranh chấp đồng thời")
 public class OrderController {
+    private final com.ctu.freshgrocery.customer.CustomerAccess customer;
 
     private final OrderService orderService;
 
@@ -35,6 +36,7 @@ public class OrderController {
             description = "Thực thi thủ tục sp_ThanhToanDonHang chuẩn ACID: khóa UPDLOCK/ROWLOCK kiểm tra tồn kho, trừ tiền ví, tạo đơn hàng, ghi sổ cái kiểm toán và xóa giỏ hàng nguyên tử."
     )
     public ResponseEntity<ApiResponse<CheckoutResponse>> checkout(@Valid @RequestBody CheckoutRequest request) {
+        customer.owner(request.getMaKH());
         CheckoutResponse response = orderService.checkout(request);
         return ResponseEntity.ok(ApiResponse.<CheckoutResponse>builder()
                 .success(true)
@@ -49,7 +51,9 @@ public class OrderController {
     public ResponseEntity<ApiResponse<OrderDetailResponse>> getOrderById(
             @Parameter(description = "Mã hóa đơn đơn hàng", example = "1")
             @PathVariable Integer orderId) {
+        customer.requireId();
         OrderDetailResponse response = orderService.getOrderById(orderId);
+        customer.owner(response.getMaKH());
         return ResponseEntity.ok(ApiResponse.<OrderDetailResponse>builder()
                 .success(true)
                 .statusCode(1)
@@ -62,8 +66,11 @@ public class OrderController {
     @Operation(summary = "Xem lịch sử đơn hàng của khách hàng", description = "Truy vấn danh sách đơn hàng đã đặt theo thứ tự thời gian mới nhất")
     public ResponseEntity<ApiResponse<List<OrderDetailResponse>>> getOrdersByCustomer(
             @Parameter(description = "Mã khách hàng", example = "1")
-            @PathVariable Integer customerId) {
-        List<OrderDetailResponse> response = orderService.getOrdersByCustomer(customerId);
+            @PathVariable Integer customerId,
+            @org.springframework.web.bind.annotation.RequestParam(defaultValue="1") int page,
+            @org.springframework.web.bind.annotation.RequestParam(defaultValue="20") int size) {
+        customer.owner(customerId);
+        List<OrderDetailResponse> response = orderService.getOrdersByCustomer(customerId, page, size);
         return ResponseEntity.ok(ApiResponse.<List<OrderDetailResponse>>builder()
                 .success(true)
                 .statusCode(1)

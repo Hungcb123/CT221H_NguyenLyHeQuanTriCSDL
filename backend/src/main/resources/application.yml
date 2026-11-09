@@ -10,6 +10,10 @@ server:
         secure: ${ADMIN_COOKIE_SECURE:false}
 
 spring:
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
   application:
     name: fresh-grocery-backend
 

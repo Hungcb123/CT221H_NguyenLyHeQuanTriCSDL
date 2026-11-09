@@ -23,4 +23,5 @@ public class ChatMessageRequest {
 
     @Schema(description = "Mã phiên hội thoại (tùy chọn)", example = "conv-101")
     private String conversationId;
+    private Integer recipeId;
 }

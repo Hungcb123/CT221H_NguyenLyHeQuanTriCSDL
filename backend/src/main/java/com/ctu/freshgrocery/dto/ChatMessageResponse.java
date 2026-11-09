@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Schema(description = "Phản hồi thông minh từ AI Chatbot ẩm thực")
 public class ChatMessageResponse {
+    private java.util.List<RecipeDetailDto> suggestedRecipes;
 
     @Schema(description = "Lời phản hồi và tư vấn tự nhiên của Chatbot", example = "Dạ bách hóa có đầy đủ nguyên liệu cho món Canh chua cá lóc miền Tây (khẩu phần 4 người)...")
     private String reply;

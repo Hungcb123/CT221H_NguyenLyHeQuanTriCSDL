@@ -53,5 +53,7 @@ public class RecipeDetailDto {
         private BigDecimal thanhTien;
         private Integer tonKhoHienTai;
         private Boolean conHang;
+        private String lyDoKhongKhaDung;
+        private String thayTheCho;
     }
 }

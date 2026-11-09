@@ -1,6 +1,10 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { useCustomer } from "@/components/customer/CustomerProvider";
+import { useRouter } from "next/navigation";
 import {
   ChefHat,
   X,
@@ -8,7 +12,6 @@ import {
   Sparkles,
   ShoppingCart,
   ArrowRight,
-  Cpu,
   RefreshCw,
   UtensilsCrossed,
 } from "lucide-react";
@@ -23,6 +26,7 @@ interface Message {
   recipe?: RecipeDetailDto;
   canAddToCart?: boolean;
   cartAdded?: boolean;
+  suggestions?: RecipeDetailDto[];
 }
 
 interface FloatingChatbotProps {
@@ -34,6 +38,8 @@ export const FloatingChatbot: React.FC<FloatingChatbotProps> = ({
   onCartUpdated,
   onNavigateCheckout,
 }) => {
+  const {customer} = useCustomer();
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -46,6 +52,9 @@ export const FloatingChatbot: React.FC<FloatingChatbotProps> = ({
   ]);
 
   const messageSequence = useRef(0);
+  const lastRecipe = useRef<number | undefined>(undefined);
+  const [promptChips,setPromptChips] = useState<string[]>([]);
+  useEffect(()=>{let cancelled=false;void fetch("/api/v1/ai/chatbot/recipes",{cache:"no-store"}).then(r=>r.json()).then(j=>{if(!cancelled&&j.success)setPromptChips((j.data as RecipeDetailDto[]).filter(r=>r.duNguyenLieuTrongKho).slice(0,4).map(r=>`Nấu ${r.tenMonAn}`));}).catch(()=>{});return()=>{cancelled=true;};},[]);
   const nextMessageId = () => String(++messageSequence.current);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -60,11 +69,6 @@ export const FloatingChatbot: React.FC<FloatingChatbotProps> = ({
   }, [messages, isOpen]);
 
   // Pre-configured smart culinary prompts
-  const promptChips = [
-    "Nấu canh chua cá lóc cho 4 người 🍲",
-    "Thịt ba rọi kho tàu trứng gà 🥩",
-    "Nguyên liệu eat-clean giảm mỡ 🥗",
-  ];
 
   const handleSendMessage = async (textToSend?: string) => {
     const text = textToSend || inputMessage.trim();
@@ -82,7 +86,8 @@ export const FloatingChatbot: React.FC<FloatingChatbotProps> = ({
 
     try {
       const response: ChatMessageResponse = await apiService.chatWithBot({
-        customerId: 1,
+        customerId: customer?.maKH,
+        recipeId: lastRecipe.current,
         message: text,
       });
 
@@ -94,7 +99,10 @@ export const FloatingChatbot: React.FC<FloatingChatbotProps> = ({
         recipe: response.recipeSuggested,
         canAddToCart: response.canAddToCart,
         cartAdded: response.cartAdded,
+        suggestions: response.suggestedRecipes,
       };
+      if(response.recipeSuggested) lastRecipe.current=response.recipeSuggested.maCongThuc;
+      else if(response.suggestedRecipes?.length) lastRecipe.current=undefined;
 
       setMessages((prev) => [...prev, botMsg]);
 
@@ -108,7 +116,7 @@ export const FloatingChatbot: React.FC<FloatingChatbotProps> = ({
         {
           id: nextMessageId(),
           sender: "bot",
-          text: "Xin lỗi, hiện tại đang có gián đoạn kết nối với MCP Server. Bạn vui lòng thử lại nhé!",
+          text: "Chưa kết nối được trợ lý. Bạn vui lòng thử lại nhé!",
         },
       ]);
     } finally {
@@ -118,17 +126,14 @@ export const FloatingChatbot: React.FC<FloatingChatbotProps> = ({
 
   // Add all recipe ingredients to cart
   const handleAddRecipeToCart = async (recipe: RecipeDetailDto) => {
+    if (!customer) { router.push("/login?next=/"); return; }
     if (isLoading || !recipe.duNguyenLieuTrongKho) return;
     setIsLoading(true);
-    let added = 0;
     try {
-      for (const item of recipe.nguyenLieuList) {
-        await apiService.addToCart({ customerId: 1, productId: item.maSP, quantity: Math.max(1, Math.ceil(item.soLuongDinhLuong)) });
-        added += 1;
-      }
+      await apiService.addRecipeToCart(recipe.maCongThuc, recipe.khauPhan, customer.maKH);
       setMessages((previous) => [...previous.map((message) => message.recipe?.maCongThuc === recipe.maCongThuc ? { ...message, cartAdded: true } : message), { id: nextMessageId(), sender: "bot", text: `Đã thêm nguyên liệu cho món "${recipe.tenMonAn}" vào giỏ hàng. Bạn có thể kiểm tra giỏ trước khi thanh toán.`, cartAdded: true }]);
     } catch (cause) {
-      setMessages((previous) => [...previous, { id: nextMessageId(), sender: "bot", text: `Đã thêm ${added}/${recipe.nguyenLieuList.length} nguyên liệu. ${cause instanceof Error ? cause.message : "Vui lòng thử lại."} Hãy kiểm tra giỏ trước khi thêm tiếp.` }]);
+      setMessages((previous) => [...previous, { id: nextMessageId(), sender: "bot", text: `Chưa thêm nguyên liệu vào giỏ. ${cause instanceof Error ? cause.message : "Vui lòng thử lại."}` }]);
     } finally {
       onCartUpdated();
       setIsLoading(false);
@@ -156,7 +161,7 @@ export const FloatingChatbot: React.FC<FloatingChatbotProps> = ({
           aria-label={isOpen ? "Đóng trợ lý ẩm thực" : "Mở trợ lý ẩm thực"}
           aria-expanded={isOpen}
           aria-controls="culinary-chat"
-          title="Trợ lý Ẩm Thực AI (REQ-AI-03)"
+          title="Trợ lý Ẩm Thực AI"
         >
           {isOpen ? (
             <X className="w-6 h-6" />
@@ -181,9 +186,6 @@ export const FloatingChatbot: React.FC<FloatingChatbotProps> = ({
               <div>
                 <div className="font-extrabold text-sm flex items-center gap-1.5 font-serif">
                   <span>Bếp Trưởng AI - DailyMart</span>
-                  <span className="bg-amber-400/20 text-amber-200 text-[10px] px-1.5 py-0.2 rounded font-sans font-semibold">
-                    MCP Tools
-                  </span>
                 </div>
                 <div className="text-[11px] text-amber-100 flex items-center gap-1">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block" />
@@ -223,14 +225,6 @@ export const FloatingChatbot: React.FC<FloatingChatbotProps> = ({
                 key={msg.id}
                 className={`flex flex-col ${msg.sender === "user" ? "items-end" : "items-start"}`}
               >
-                {/* Sender badge / Tool Invocation Indicator */}
-                {msg.mcpTool && (
-                  <div className="mb-1 flex items-center gap-1 text-[10px] text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full font-mono">
-                    <Cpu className="w-3 h-3 text-amber-600" />
-                    <span>MCP Tool kích hoạt: {msg.mcpTool}</span>
-                  </div>
-                )}
-
                 {/* Message Bubble */}
                 <div
                   className={`max-w-[85%] rounded-2xl p-3 sm:p-3.5 leading-relaxed shadow-2xs ${
@@ -239,10 +233,15 @@ export const FloatingChatbot: React.FC<FloatingChatbotProps> = ({
                       : "bg-white border border-stone-200 text-stone-800 rounded-tl-none"
                   }`}
                 >
-                  <p>{msg.text}</p>
+                  {msg.sender === "user" ? <p className="whitespace-pre-wrap break-words">{msg.text}</p> : (
+                    <div className="min-w-0 break-words [&_p]:mb-3 [&_p:last-child]:mb-0 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:my-1 [&_strong]:font-semibold">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]} skipHtml>{msg.text}</ReactMarkdown>
+                    </div>
+                  )}
                 </div>
 
                 {/* Embedded Recipe Card */}
+                {!!msg.suggestions?.length && <div className="mt-2 flex w-full flex-col gap-2">{msg.suggestions.map(recipe=><button key={recipe.maCongThuc} disabled={isLoading} onClick={()=>handleSendMessage(`Nấu ${recipe.tenMonAn}`)} className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-left text-sm text-emerald-900 hover:bg-emerald-100"><strong>{recipe.tenMonAn}</strong><span className="mt-1 block text-xs">Đủ nguyên liệu · {recipe.tongTienUocTinh.toLocaleString("vi-VN")} đ / {recipe.khauPhan} người</span></button>)}</div>}
                 {msg.recipe && (
                   <div className="mt-2.5 w-full max-w-[95%] bg-[#FDF8EE] border border-amber-200 rounded-xl p-3 shadow-xs">
                     <div className="flex items-center justify-between border-b border-amber-200/60 pb-2 mb-2">
@@ -268,8 +267,9 @@ export const FloatingChatbot: React.FC<FloatingChatbotProps> = ({
                           className="flex items-center justify-between text-xs bg-white/80 p-2 rounded border border-amber-200/40"
                         >
                           <div className="flex items-center space-x-2">
-                            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                            <span className={`w-2 h-2 shrink-0 rounded-full ${item.conHang ? "bg-emerald-500" : "bg-red-500"}`} />
                             <span className="font-medium text-stone-800">{item.tenSP}</span>
+                            {item.thayTheCho && <span className="text-[10px] text-emerald-800">Lựa chọn còn hàng</span>}
                             <span className="text-stone-400 text-[11px]">
                               ({item.soLuongDinhLuong} {item.donViTinh})
                             </span>
@@ -278,8 +278,8 @@ export const FloatingChatbot: React.FC<FloatingChatbotProps> = ({
                             <div className="font-bold text-[#B91C1C]">
                               {item.thanhTien.toLocaleString("vi-VN")}đ
                             </div>
-                            <div className="text-[10px] text-emerald-700">
-                              Tồn: {item.tonKhoHienTai} {item.donViTinh}
+                            <div className={`text-[10px] ${item.conHang ? "text-emerald-700" : "text-red-700"}`}>
+                              {item.conHang ? `Tồn: ${item.tonKhoHienTai} ${item.donViTinh}` : item.lyDoKhongKhaDung || "Không thể mua"}
                             </div>
                           </div>
                         </div>
@@ -298,10 +298,10 @@ export const FloatingChatbot: React.FC<FloatingChatbotProps> = ({
                       <button
                         disabled={isLoading || !msg.canAddToCart || !msg.recipe.duNguyenLieuTrongKho || msg.cartAdded}
                         onClick={() => handleAddRecipeToCart(msg.recipe!)}
-                        className="px-3.5 py-1.5 bg-[#08783C] hover:bg-[#056331] text-white text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-xs transition-colors"
+                        className="px-3.5 py-1.5 bg-[#08783C] hover:bg-[#056331] disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-xs transition-colors"
                       >
                         <ShoppingCart className="w-3.5 h-3.5" />
-                        <span>Bỏ vào giỏ ngay</span>
+                        <span>{msg.cartAdded ? "Đã thêm vào giỏ" : !msg.recipe.duNguyenLieuTrongKho ? "Chưa đủ nguyên liệu" : "Bỏ vào giỏ ngay"}</span>
                       </button>
                     </div>
                   </div>

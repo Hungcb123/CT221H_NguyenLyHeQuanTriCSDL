@@ -31,6 +31,7 @@ BEGIN
         MaSP INT IDENTITY(1,1) PRIMARY KEY,
         TenSP NVARCHAR(200) NOT NULL,
         MoTa NVARCHAR(MAX) NULL,
+        HinhAnh NVARCHAR(1000) NULL,
         Gia DECIMAL(18,2) NOT NULL CHECK (Gia > 0),
         DonViTinh NVARCHAR(20) NOT NULL,
         SoLuongTon INT NOT NULL DEFAULT 0 CHECK (SoLuongTon >= 0),

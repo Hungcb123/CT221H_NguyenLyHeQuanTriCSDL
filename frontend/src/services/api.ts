@@ -13,13 +13,18 @@ import {
   CheckoutResponse,
 } from "@/types";
 
+import { customerHeaders } from "./customer-session";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
 // Keep the browser model stable while mapping the backend's Vietnamese DTO fields.
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   let res: Response;
   try {
-    res = await fetch(`${API_BASE_URL}${path}`, { cache: "no-store", ...init });
+    const headers = new Headers(init.headers);
+    if (init.method && !["GET", "HEAD"].includes(init.method)) {
+      for (const [key,value] of Object.entries(await customerHeaders())) headers.set(key,value);
+    }
+    res = await fetch(`${API_BASE_URL}${path}`, { cache: "no-store", ...init, headers });
   } catch {
     throw new Error("Không kết nối được máy chủ. Vui lòng kiểm tra kết nối và thử lại.");
   }
@@ -31,6 +36,12 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 }
 
 export const apiService = {
+  async addRecipeToCart(recipeId: number, servings: number, customerId: number): Promise<void> {
+    await request(`/api/v1/ai/chatbot/recipes/${recipeId}/cart`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ customerId, servings }),
+    });
+  },
   async createProduct(req: ProductCreateRequest): Promise<ProductResponse> {
     return request("/api/v1/products", {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(req),
@@ -92,7 +103,7 @@ export const apiService = {
     return json.data;
   },
 
-  async getCart(customerId: number = 1): Promise<CartResponse> {
+  async getCart(customerId: number): Promise<CartResponse> {
     const data = await request<Omit<CartResponse, "danhSachMon"> & { items: (CartResponse["danhSachMon"][number] & { soLuongTon?: number })[] }>(`/api/v1/cart/${customerId}`);
     if (!Array.isArray(data?.items)) throw new Error("Dữ liệu giỏ hàng không hợp lệ. Vui lòng thử lại.");
     return { ...data, danhSachMon: data.items.map((item) => ({ ...item, soLuongTonHienTai: item.soLuongTon })) };
@@ -113,13 +124,13 @@ export const apiService = {
     });
   },
 
-  async getWallet(customerId: number = 1): Promise<WalletResponse> {
+  async getWallet(customerId: number): Promise<WalletResponse> {
     const data = await request<WalletResponse>(`/api/v1/wallets/${customerId}`);
     if (!data || !Number.isFinite(data.soDuVi)) throw new Error("Không đọc được số dư ví. Vui lòng thử lại.");
     return data;
   },
 
-  async checkout(address: string, note: string, customerId: number = 1): Promise<CheckoutResponse> {
+  async checkout(address: string, note: string, customerId: number): Promise<CheckoutResponse> {
     const data = await request<CheckoutResponse>("/api/v1/orders/checkout", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ maKH: customerId, diaChiGiaoHang: address.trim(), ghiChu: note.trim() }),

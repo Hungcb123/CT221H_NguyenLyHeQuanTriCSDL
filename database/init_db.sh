@@ -18,6 +18,8 @@ echo "🚀 Bắt đầu thực thi các file SQL khởi tạo CSDL..."
 echo "1/5: Đang tạo bảng và Schema (01_init_schema.sql)..."
 /opt/mssql-tools18/bin/sqlcmd -S "${SQL_SERVER_HOST:-sqlserver}" -U sa -P "StrongPassword123!" -C -i /database/01_init_schema.sql
 
+/opt/mssql-tools18/bin/sqlcmd -S "${SQL_SERVER_HOST:-sqlserver}" -U sa -P "StrongPassword123!" -C -b -i /database/07_product_images.sql
+
 echo "2/5: Đang tạo Stored Procedures CRUD (02_stored_procedures.sql)..."
 /opt/mssql-tools18/bin/sqlcmd -S "${SQL_SERVER_HOST:-sqlserver}" -U sa -P "StrongPassword123!" -C -i /database/02_stored_procedures.sql
 
@@ -32,5 +34,10 @@ echo "5/5: Đang nạp kịch bản Benchmark & Chỉ mục Covering Index (05_i
 
 echo "Đang bổ sung danh mục 48 sản phẩm (06_extended_catalog.sql)..."
 /opt/mssql-tools18/bin/sqlcmd -S "${SQL_SERVER_HOST:-sqlserver}" -U sa -P "StrongPassword123!" -C -b -i /database/06_extended_catalog.sql
+
+echo "Đang gắn ảnh minh họa sản phẩm (08_catalog_images.sql)..."
+/opt/mssql-tools18/bin/sqlcmd -S "${SQL_SERVER_HOST:-sqlserver}" -U sa -P "StrongPassword123!" -C -b -f 65001 -i /database/08_catalog_images.sql
+
+/opt/mssql-tools18/bin/sqlcmd -S "${SQL_SERVER_HOST:-sqlserver}" -U sa -P "StrongPassword123!" -C -b -f 65001 -i /database/10_available_recipes.sql
 
 echo "🎉 HOÀN TẤT KHỞI TẠO CƠ SỞ DỮ LIỆU FreshGroceryDB THÀNH CÔNG!"

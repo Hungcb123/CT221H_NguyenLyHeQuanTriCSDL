@@ -2,7 +2,8 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Search, ShoppingCart, User, Sparkles, Shield } from "lucide-react";
+import { Search, ShoppingCart, Sparkles } from "lucide-react";
+import { AccountMenu } from "@/components/customer/AccountMenu";
 
 interface HeaderProps {
   cartCount: number;
@@ -96,14 +97,6 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Action Buttons: Cart & Account */}
           <div className="flex items-center space-x-3 shrink-0">
-            <Link
-              href="/admin"
-              className="hidden xl:flex items-center gap-1.5 text-xs font-bold text-emerald-100 hover:text-white"
-              title="Quản trị cửa hàng"
-            >
-              <Shield className="h-4 w-4" />
-              <span>Quản trị</span>
-            </Link>
             {/* Cart Button */}
             <button
               onClick={onOpenCart}
@@ -119,7 +112,7 @@ export const Header: React.FC<HeaderProps> = ({
               )}
             </button>
 
-            <span className="hidden sm:flex items-center gap-2 text-sm text-emerald-100"><User className="h-4 w-4" />Khách hàng #1</span>
+            <AccountMenu />
           </div>
         </div>
       </div>

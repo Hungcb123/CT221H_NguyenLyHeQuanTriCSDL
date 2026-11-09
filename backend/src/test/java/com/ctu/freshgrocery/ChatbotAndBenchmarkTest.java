@@ -55,7 +55,7 @@ public class ChatbotAndBenchmarkTest {
                 .tenSP("Cá lóc tươi làm sạch")
                 .donViTinh("con")
                 .gia(new BigDecimal("75000.00"))
-                .soLuongTon(20)
+                .soLuongTon(20).hanSuDung(LocalDateTime.now().plusDays(2))
                 .trangThaiXoa(false)
                 .build();
 
@@ -64,7 +64,7 @@ public class ChatbotAndBenchmarkTest {
                 .tenSP("Cà chua tươi Đà Lạt")
                 .donViTinh("kg")
                 .gia(new BigDecimal("32000.00"))
-                .soLuongTon(50)
+                .soLuongTon(50).hanSuDung(LocalDateTime.now().plusDays(2))
                 .trangThaiXoa(false)
                 .build();
 
@@ -102,10 +102,10 @@ public class ChatbotAndBenchmarkTest {
         when(recipeRepository.findAll()).thenReturn(List.of(r1));
         when(productRepository.findAll()).thenReturn(List.of(p1, p4));
 
-        recipeService = new RecipeServiceImpl(recipeRepository, null, null);
+        recipeService = new RecipeServiceImpl(recipeRepository, null, null, productRepository, null, null);
         mcpServerService = new McpServerServiceImpl(recipeService, productRepository, semanticSearchService);
         com.ctu.freshgrocery.service.PromotionService promoService = Mockito.mock(com.ctu.freshgrocery.service.PromotionService.class);
-        chatbotService = new ChatbotServiceImpl(mcpServerService, recipeRepository, promoService);
+        chatbotService = new ChatbotServiceImpl(mcpServerService, recipeService, promoService);
     }
 
     @Test

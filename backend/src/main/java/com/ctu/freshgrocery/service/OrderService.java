@@ -11,5 +11,6 @@ public interface OrderService {
     CheckoutResponse checkout(CheckoutRequest request);
     OrderDetailResponse getOrderById(Integer orderId);
     List<OrderDetailResponse> getOrdersByCustomer(Integer customerId);
+    List<OrderDetailResponse> getOrdersByCustomer(Integer customerId, int page, int size);
     ConcurrencyTestResponse runConcurrencyTest();
 }

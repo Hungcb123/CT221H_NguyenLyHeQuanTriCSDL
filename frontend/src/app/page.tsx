@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useCustomer } from "@/components/customer/CustomerProvider";
 import { Header } from "@/components/layout/Header";
 import { CategorySidebar } from "@/components/layout/CategorySidebar";
 import { HeroBanner } from "@/components/home/HeroBanner";
@@ -16,6 +17,7 @@ import { Sparkles, ArrowRight } from "lucide-react";
 
 export default function HomePage() {
   const router = useRouter();
+  const { customer } = useCustomer();
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<ProductResponse[]>([]);
   const [relatedProducts, setRelatedProducts] = useState<ProductResponse[]>([]);
@@ -25,7 +27,8 @@ export default function HomePage() {
   const [activeNavFilter, setActiveNavFilter] = useState<string>("HANG_MOI");
   const [cartError, setCartError] = useState<string | null>(null);
   const [categoryError, setCategoryError] = useState<string | null>(null);
-  const [cart, setCart] = useState<CartResponse | null>(null);
+  const [storedCart, setCart] = useState<CartResponse | null>(null);
+  const cart = customer && storedCart?.maKH === customer.maKH ? storedCart : null;
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isSemanticResult, setIsSemanticResult] = useState(false);
   const [semanticScoreNotice, setSemanticScoreNotice] = useState<string | null>(null);
@@ -37,8 +40,13 @@ export default function HomePage() {
     apiService.getCategories().then(setCategories).catch(() => setCategoryError("Không tải được danh mục."));
 
     // Load cart
-    apiService.getCart(1).then(setCart).catch(() => setCartError("Không tải được giỏ hàng. Vui lòng thử lại."));
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (customer) void apiService.getCart(customer.maKH).then(value => { if(!cancelled){setCart(value);setCartError(null);} }).catch(() => { if(!cancelled)setCartError("Không tải được giỏ hàng."); });
+    return () => { cancelled = true; };
+  }, [customer]);
 
   const [search, setSearch] = useState<{ keyword: string } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -48,8 +56,9 @@ export default function HomePage() {
   const hasMore = !search && currentPage < totalPages;
 
   const loadCart = async () => {
+    if (!customer) { setCart(null); return; }
     try {
-      const cartData = await apiService.getCart(1);
+      const cartData = await apiService.getCart(customer.maKH);
       setCart(cartData);
       setCartError(null);
     } catch {
@@ -136,7 +145,8 @@ export default function HomePage() {
   };
 
   const handleAddToCart = async (product: ProductResponse, quantity = 1) => {
-    await apiService.addToCart({ customerId: 1, productId: product.maSP, quantity });
+    if (!customer) { router.push("/login?next=/"); return; }
+    await apiService.addToCart({ customerId: customer.maKH, productId: product.maSP, quantity });
     await loadCart();
   };
 
@@ -145,7 +155,7 @@ export default function HomePage() {
       {/* 1. Header matching mockup */}
       <Header
         cartCount={cart?.tongSoLuong ?? 0}
-        onOpenCart={() => { setIsCartOpen(true); void loadCart(); }}
+        onOpenCart={() => { if(!customer){router.push("/login?next=/");return;} setIsCartOpen(true); void loadCart(); }}
         onSearch={handleSearch}
         activeFilter={activeNavFilter}
         setActiveFilter={(filter) => {
@@ -272,6 +282,7 @@ export default function HomePage() {
 
       {/* 4. Floating AI Chatbot Culinary Assistant Widget */}
       <FloatingChatbot
+        key={customer?.maKH ?? "guest"}
         onCartUpdated={loadCart}
         onNavigateCheckout={() => router.push("/checkout")}
       />
@@ -286,12 +297,12 @@ export default function HomePage() {
 
       {/* 5. Cart Slide-over Drawer */}
       <CartDrawer
-        isOpen={isCartOpen}
+        isOpen={isCartOpen && !!customer}
         onClose={() => setIsCartOpen(false)}
         cart={cart}
         error={cartError}
         onRetry={loadCart}
-        onRemove={async (productId) => { await apiService.removeFromCart(1, productId); await loadCart(); }}
+        onRemove={async (productId) => { if(customer)await apiService.removeFromCart(customer.maKH, productId); await loadCart(); }}
         onCheckout={() => router.push("/checkout")}
       />
     </div>

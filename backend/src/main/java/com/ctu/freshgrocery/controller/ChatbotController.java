@@ -27,9 +27,21 @@ import java.util.List;
 @RequiredArgsConstructor
 @Tag(name = "6. AI Chatbot Ẩm Thực & Gợi Ý Món Ăn (Smart Recipe Assistant)", description = "Các API trợ lý Chatbot AI tư vấn món ăn gia đình, kiểm tra nguyên liệu và bỏ giỏ hàng tự động")
 public class ChatbotController {
+    private final com.ctu.freshgrocery.customer.CustomerAccess customer;
 
     private final ChatbotService chatbotService;
     private final RecipeService recipeService;
+
+    public record AddRecipeRequest(
+            @jakarta.validation.constraints.NotNull @jakarta.validation.constraints.Min(1) Integer customerId,
+            @jakarta.validation.constraints.NotNull @jakarta.validation.constraints.Min(1) Integer servings) {}
+
+    @PostMapping("/recipes/{recipeId}/cart")
+    public ApiResponse<?> addRecipe(@PathVariable Integer recipeId, @Valid @RequestBody AddRecipeRequest request) {
+        customer.owner(request.customerId());
+        return ApiResponse.ok("Đã thêm nguyên liệu vào giỏ hàng",
+                recipeService.addRecipeToCart(request.customerId(), recipeId, request.servings()));
+    }
 
     @PostMapping("/chat")
     @Operation(
@@ -39,6 +51,8 @@ public class ChatbotController {
                     "2. Yêu cầu mua hàng (VD: 'Bỏ vào giỏ hàng và dẫn tôi đi thanh toán') -> Kích hoạt Stored Procedure sp_ThemNguyenLieuMonAnVaoGioHang và chuyển hướng sang trang thanh toán."
     )
     public ResponseEntity<ApiResponse<ChatMessageResponse>> chat(@Valid @RequestBody ChatMessageRequest request) {
+        request.setCustomerId(customer.optionalId());
+        if (customer.optionalId() != null) customer.verifyCsrf();
         ChatMessageResponse response = chatbotService.processChatMessage(request);
         return ResponseEntity.ok(ApiResponse.<ChatMessageResponse>builder()
                 .success(true)

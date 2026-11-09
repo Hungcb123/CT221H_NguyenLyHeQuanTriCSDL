@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
 public class ChatbotServiceImpl implements ChatbotService {
 
     private final McpServerService mcpServerService;
-    private final RecipeRepository recipeRepository;
+    private final com.ctu.freshgrocery.service.RecipeService recipeService;
     private final PromotionService promotionService;
 
     private static final NumberFormat CURRENCY_FORMAT = NumberFormat.getInstance(new Locale("vi", "VN"));
@@ -38,14 +38,16 @@ public class ChatbotServiceImpl implements ChatbotService {
     @Override
     public ChatMessageResponse processChatMessage(ChatMessageRequest request) {
         String msg = request.getMessage().trim().toLowerCase();
-        Integer customerId = request.getCustomerId() != null ? request.getCustomerId() : 1;
+        Integer customerId = request.getCustomerId();
 
         log.info("Xử lý tin nhắn từ khách hàng [{}]: \"{}\"", customerId, request.getMessage());
 
         // Kịch bản 1: Yêu cầu bỏ nguyên liệu vào giỏ hàng & thanh toán
         if (msg.contains("bỏ vào giỏ") || msg.contains("thêm vào giỏ") || msg.contains("mua hết") || msg.contains("thanh toán")) {
             // Xác định món ăn đang nói tới (mặc định Canh chua cá lóc nếu không nói rõ)
-            int recipeId = detectRecipeId(msg);
+            if (customerId == null) return ChatMessageResponse.builder().reply("Vui lòng đăng nhập trước khi thêm vào giỏ.").cartAdded(false).build();
+            if (request.getRecipeId() == null) return ChatMessageResponse.builder().reply("Bạn muốn thêm nguyên liệu món nào? Hãy chọn một món từ gợi ý trước.").cartAdded(false).build();
+            int recipeId = request.getRecipeId();
             int servings = detectServings(msg);
 
             // 1. Gọi MCP Tool: add_recipe_to_customer_cart
@@ -61,6 +63,12 @@ public class ChatbotServiceImpl implements ChatbotService {
                             .build()
             );
 
+            if (!Boolean.TRUE.equals(addRes.getIsSuccess())) {
+                return ChatMessageResponse.builder().reply(addRes.getErrorMessage() != null
+                        ? addRes.getErrorMessage() : "Không thể thêm nguyên liệu vào giỏ. Vui lòng kiểm tra lại nguyên liệu.")
+                        .canAddToCart(false).cartAdded(false).itemsAddedCount(0).build();
+            }
+
             // 2. Gọi MCP Tool: create_checkout_redirect
             McpToolCallResponse redirectRes = mcpServerService.executeTool(
                     McpToolCallRequest.builder()
@@ -69,8 +77,8 @@ public class ChatbotServiceImpl implements ChatbotService {
                             .build()
             );
 
-            int itemsAdded = 3;
-            BigDecimal totalPrice = new BigDecimal("182000.00");
+            int itemsAdded = 0;
+            BigDecimal totalPrice = BigDecimal.ZERO;
             if (addRes.getIsSuccess() && addRes.getContent() instanceof Map<?, ?> map) {
                 if (map.containsKey("SoLuongMonDaThem")) {
                     itemsAdded = ((Number) map.get("SoLuongMonDaThem")).intValue();
@@ -99,7 +107,7 @@ public class ChatbotServiceImpl implements ChatbotService {
 
         // Kịch bản 2: Hỏi công thức món ăn và tư vấn nguyên liệu
         if (msg.contains("nấu") || msg.contains("công thức") || msg.contains("canh chua") || msg.contains("kho tàu") || msg.contains("món gì")) {
-            String recipeName = detectRecipeName(msg);
+            String recipeName = request.getMessage();
             int servings = detectServings(msg);
 
             // Gọi MCP Tool: search_recipe_and_groceries
@@ -111,8 +119,21 @@ public class ChatbotServiceImpl implements ChatbotService {
             );
 
             if (toolRes.getIsSuccess() && toolRes.getContent() instanceof RecipeDetailDto recipe) {
+                if (!Boolean.TRUE.equals(recipe.getDuNguyenLieuTrongKho())) {
+                    var alternatives = recipeService.getAllRecipes().stream()
+                            .filter(r -> Boolean.TRUE.equals(r.getDuNguyenLieuTrongKho()))
+                            .filter(r -> !r.getMaCongThuc().equals(recipe.getMaCongThuc())).limit(4).toList();
+                    String missing = recipe.getNguyenLieuList().stream().filter(i -> !Boolean.TRUE.equals(i.getConHang()))
+                            .map(RecipeDetailDto.IngredientItemDto::getTenSP).collect(java.util.stream.Collectors.joining(", "));
+                    return ChatMessageResponse.builder().reply("Món **" + recipe.getTenMonAn()
+                            + "** hiện thiếu nguyên liệu còn bán được: " + missing
+                            + (alternatives.isEmpty() ? ". Kho chưa đủ nguyên liệu cho các công thức hiện có."
+                            : ". Bạn có thể chọn các món dưới đây, đã kiểm tra đủ nguyên liệu trong kho."))
+                            .suggestedRecipes(alternatives).canAddToCart(false).cartAdded(false).build();
+                }
+
                 StringBuilder sb = new StringBuilder();
-                sb.append(String.format("👩‍🍳 Chào bạn! Bách hóa có đầy đủ nguyên liệu tươi sống cho món **%s** (Khẩu phần %d người ăn):\n\n",
+                sb.append(String.format("👩‍🍳 Nguyên liệu cho món **%s** (Khẩu phần %d người ăn):\n\n",
                         recipe.getTenMonAn(), recipe.getKhauPhan()));
 
                 sb.append("📋 **Danh sách nguyên liệu trong kho:**\n");
@@ -122,19 +143,21 @@ public class ChatbotServiceImpl implements ChatbotService {
                             item.getSoLuongDinhLuong(),
                             item.getDonViTinh(),
                             CURRENCY_FORMAT.format(item.getDonGia()),
-                            item.getConHang() ? "✅ Còn hàng (tồn " + item.getTonKhoHienTai() + ")" : "❌ Hết hàng"
+                            item.getConHang() ? "✅ Còn hàng (tồn " + item.getTonKhoHienTai() + ")" : "❌ " + item.getLyDoKhongKhaDung()
                     ));
                 }
 
                 sb.append(String.format("\n💵 **Tổng chi phí nguyên liệu ước tính:** %s VND.\n",
                         CURRENCY_FORMAT.format(recipe.getTongTienUocTinh())));
-                sb.append("\n💡 **Bạn có muốn tôi bỏ toàn bộ các nguyên liệu này vào giỏ hàng và dẫn bạn đi thanh toán luôn không?**");
+                sb.append(Boolean.TRUE.equals(recipe.getDuNguyenLieuTrongKho())
+                        ? "\n💡 **Bạn có muốn thêm các nguyên liệu này vào giỏ hàng không?**"
+                        : "\nHiện có nguyên liệu không đủ điều kiện bán, nên chưa thể thêm cả món vào giỏ.");
 
                 return ChatMessageResponse.builder()
                         .reply(sb.toString())
                         .mcpToolInvoked("search_recipe_and_groceries")
                         .recipeSuggested(recipe)
-                        .canAddToCart(true)
+                        .canAddToCart(Boolean.TRUE.equals(recipe.getDuNguyenLieuTrongKho()))
                         .cartAdded(false)
                         .build();
             }
@@ -217,26 +240,17 @@ public class ChatbotServiceImpl implements ChatbotService {
         }
 
         // Fallback tự nhiên
-        String fallback = "Dạ bách hóa có thể giúp bạn gợi ý thực đơn hôm nay (Canh chua cá lóc, Thịt kho tàu trứng gà, Canh đậu hũ bắp cải...) " +
-                "và tự động chuẩn bị giỏ hàng đủ nguyên liệu tươi sống. Bạn muốn nấu món gì hôm nay ạ?";
+        var availableRecipes = recipeService.getAllRecipes().stream()
+                .filter(r -> Boolean.TRUE.equals(r.getDuNguyenLieuTrongKho())).limit(4).toList();
+        String fallback = availableRecipes.isEmpty() ? "Kho chưa đủ nguyên liệu cho các công thức hiện có. Bạn có thể tìm sản phẩm để mua riêng."
+                : "Đây là các món có đủ nguyên liệu còn hạn trong kho hiện tại. Bạn muốn chọn món nào?";
         return ChatMessageResponse.builder()
                 .reply(fallback)
+                .suggestedRecipes(availableRecipes)
                 .mcpToolInvoked(null)
                 .canAddToCart(false)
                 .cartAdded(false)
                 .build();
-    }
-
-    private int detectRecipeId(String msg) {
-        if (msg.contains("thịt kho") || msg.contains("kho tàu")) return 2;
-        if (msg.contains("đậu hũ") || msg.contains("thanh đạm")) return 3;
-        return 1; // Mặc định canh chua cá lóc
-    }
-
-    private String detectRecipeName(String msg) {
-        if (msg.contains("thịt kho") || msg.contains("kho tàu")) return "Thịt kho tàu";
-        if (msg.contains("đậu hũ") || msg.contains("bắp cải")) return "Canh đậu hũ non";
-        return "Canh chua cá lóc";
     }
 
     private int detectServings(String msg) {

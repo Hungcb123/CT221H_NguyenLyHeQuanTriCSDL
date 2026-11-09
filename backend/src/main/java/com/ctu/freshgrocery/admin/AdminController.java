@@ -52,6 +52,7 @@ public class AdminController {
         var list = catalog.stream().filter(p -> query.isBlank() || scores.containsKey(p.getMaSP()) || query.equals(p.getMaSP().toString()))
                 .sorted(Comparator.comparing(Product::getMaSP).reversed()).map(p -> {
                     Map<String,Object> row = new LinkedHashMap<>();
+                    row.put("hinhAnh",p.getHinhAnh());
                     row.put("maSP",p.getMaSP()); row.put("tenSP",p.getTenSP()); row.put("moTa",p.getMoTa()); row.put("gia",p.getGia());
                     row.put("donViTinh",p.getDonViTinh()); row.put("soLuongTon",p.getSoLuongTon()); row.put("hanSuDung",p.getHanSuDung());
                     row.put("nhietDoBaoQuan",p.getNhietDoBaoQuan()); row.put("maDanhMuc",p.getMaDanhMuc()); row.put("trangThaiXoa",p.getTrangThaiXoa());

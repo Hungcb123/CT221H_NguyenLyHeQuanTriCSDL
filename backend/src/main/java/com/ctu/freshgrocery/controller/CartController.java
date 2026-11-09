@@ -24,12 +24,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @Tag(name = "2. Giỏ hàng (Cart)", description = "Các API thao tác giỏ hàng thực phẩm thông qua Stored Procedure")
 public class CartController {
+    private final com.ctu.freshgrocery.customer.CustomerAccess customer;
 
     private final CartService cartService;
 
     @PostMapping("/items")
     @Operation(summary = "Thêm sản phẩm vào giỏ hàng", description = "Thực thi sp_ThemVaoGioHang để kiểm tra tồn kho, hạn sử dụng và cộng dồn số lượng")
     public ResponseEntity<ApiResponse<Void>> addToCart(@Valid @RequestBody AddToCartRequest request) {
+        customer.owner(request.getMaKH());
         cartService.addToCart(request);
         return ResponseEntity.ok(ApiResponse.<Void>builder()
                 .success(true)
@@ -42,6 +44,7 @@ public class CartController {
     @DeleteMapping("/items")
     @Operation(summary = "Xóa sản phẩm khỏi giỏ hàng", description = "Thực thi sp_XoaKhoiGioHang để gỡ sản phẩm ra khỏi giỏ")
     public ResponseEntity<ApiResponse<Void>> removeFromCart(@Valid @RequestBody RemoveFromCartRequest request) {
+        customer.owner(request.getMaKH());
         cartService.removeFromCart(request);
         return ResponseEntity.ok(ApiResponse.<Void>builder()
                 .success(true)
@@ -56,6 +59,7 @@ public class CartController {
     public ResponseEntity<ApiResponse<CartResponse>> getCart(
             @Parameter(description = "Mã khách hàng", example = "1")
             @PathVariable Integer customerId) {
+        customer.owner(customerId);
         CartResponse cartResponse = cartService.getCart(customerId);
         return ResponseEntity.ok(ApiResponse.<CartResponse>builder()
                 .success(true)
