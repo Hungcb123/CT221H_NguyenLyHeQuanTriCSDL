@@ -1,0 +1,1138 @@
+{
+  "note": "Post-policy regression evaluation. The policy was added after inspecting model comparison and receiving the user preference; this is not an independent new holdout validation.",
+  "policy": "Hybrid/RRF: named product types must agree; lexical evidence or a clear semantic winner can enter primary results; rejected candidates remain suggestions.",
+  "label_source": "Assistant-proposed; user/domain review pending.",
+  "summary": {
+    "development": {
+      "before": {
+        "positive_queries": 15,
+        "negative_queries": 5,
+        "hit_at_3": 1.0,
+        "mrr_at_5": 0.9222,
+        "no_match_accuracy": 0.2,
+        "selection_objective": 0.5611
+      },
+      "after": {
+        "positive_queries": 15,
+        "negative_queries": 5,
+        "hit_at_3": 0.7333,
+        "mrr_at_5": 0.7333,
+        "no_match_accuracy": 1.0,
+        "selection_objective": 0.8667
+      }
+    },
+    "holdout": {
+      "before": {
+        "positive_queries": 24,
+        "negative_queries": 6,
+        "hit_at_3": 1.0,
+        "mrr_at_5": 0.9514,
+        "no_match_accuracy": 0.1667,
+        "selection_objective": 0.559
+      },
+      "after": {
+        "positive_queries": 24,
+        "negative_queries": 6,
+        "hit_at_3": 0.8333,
+        "mrr_at_5": 0.8333,
+        "no_match_accuracy": 1.0,
+        "selection_objective": 0.9167
+      }
+    }
+  },
+  "queries": [
+    {
+      "query": "cá lóc",
+      "relevantNames": [
+        "cá lóc"
+      ],
+      "kind": "name",
+      "split": "development",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [
+        1
+      ],
+      "main": [
+        "Cá lóc tươi làm sạch"
+      ],
+      "related": [
+        "Cà chua tươi Đà Lạt",
+        "Cá hồi phi lê Nauy tươi",
+        "Xoài cát Hòa Lộc",
+        "Bắp cải trắng Đà Lạt",
+        "Tôm sú tươi sống"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "ca loc",
+      "relevantNames": [
+        "cá lóc"
+      ],
+      "kind": "name",
+      "split": "development",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [
+        1
+      ],
+      "main": [
+        "Cá lóc tươi làm sạch"
+      ],
+      "related": [
+        "Cà chua tươi Đà Lạt",
+        "Cá hồi phi lê Nauy tươi",
+        "Xoài cát Hòa Lộc",
+        "Bắp cải trắng Đà Lạt",
+        "Tôm sú tươi sống"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "cà chua",
+      "relevantNames": [
+        "cà chua"
+      ],
+      "kind": "name",
+      "split": "development",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [
+        4
+      ],
+      "main": [
+        "Cà chua tươi Đà Lạt"
+      ],
+      "related": [
+        "Cá lóc tươi làm sạch",
+        "Cá hồi phi lê Nauy tươi",
+        "Tôm sú tươi sống",
+        "Chuối sứ chín tự nhiên",
+        "Bắp cải trắng Đà Lạt",
+        "Đậu hũ non trứng"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "thịt bò",
+      "relevantNames": [
+        "thịt bò"
+      ],
+      "kind": "name",
+      "split": "development",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [
+        10
+      ],
+      "main": [
+        "Thịt bò bắp Úc tươi"
+      ],
+      "related": [
+        "Thịt ba rọi heo VietGAP",
+        "Bắp cải trắng Đà Lạt",
+        "Tôm sú tươi sống",
+        "Đậu hũ non trứng",
+        "Trứng gà ta Ba Huân (vỉ 10)",
+        "Cá hồi phi lê Nauy tươi"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "trứng gà",
+      "relevantNames": [
+        "trứng gà"
+      ],
+      "kind": "name",
+      "split": "development",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [
+        5
+      ],
+      "main": [
+        "Trứng gà ta Ba Huân (vỉ 10)"
+      ],
+      "related": [
+        "Đậu hũ non trứng",
+        "Xoài cát Hòa Lộc",
+        "Bắp cải trắng Đà Lạt",
+        "Rau muống nước sạch",
+        "Chuối sứ chín tự nhiên",
+        "Tôm sú tươi sống"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "rau muống",
+      "relevantNames": [
+        "rau muống"
+      ],
+      "kind": "name",
+      "split": "development",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [
+        3
+      ],
+      "main": [
+        "Rau muống nước sạch"
+      ],
+      "related": [
+        "Đậu hũ non trứng",
+        "Tôm sú tươi sống",
+        "Bắp cải trắng Đà Lạt",
+        "Cà chua tươi Đà Lạt",
+        "Thịt ba rọi heo VietGAP",
+        "Thịt bò bắp Úc tươi"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "nguyên liệu nấu canh chua",
+      "relevantNames": [
+        "cá lóc",
+        "cà chua"
+      ],
+      "kind": "intent",
+      "split": "development",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [
+        4,
+        1
+      ],
+      "main": [
+        "Cá lóc tươi làm sạch"
+      ],
+      "related": [
+        "Cà chua tươi Đà Lạt",
+        "Đậu hũ non trứng",
+        "Rau muống nước sạch",
+        "Bắp cải trắng Đà Lạt",
+        "Chuối sứ chín tự nhiên",
+        "Thịt ba rọi heo VietGAP"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "thịt để kho tàu",
+      "relevantNames": [
+        "ba rọi",
+        "trứng gà"
+      ],
+      "kind": "intent",
+      "split": "development",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [
+        5,
+        2
+      ],
+      "main": [
+        "Thịt ba rọi heo VietGAP"
+      ],
+      "related": [
+        "Thịt bò bắp Úc tươi",
+        "Cá hồi phi lê Nauy tươi",
+        "Tôm sú tươi sống",
+        "Bắp cải trắng Đà Lạt",
+        "Đậu hũ non trứng",
+        "Chuối sứ chín tự nhiên"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "rau ăn kèm món luộc",
+      "relevantNames": [
+        "rau muống",
+        "bắp cải"
+      ],
+      "kind": "intent",
+      "split": "development",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [
+        7,
+        3
+      ],
+      "main": [],
+      "related": [
+        "Rau muống nước sạch",
+        "Thịt ba rọi heo VietGAP",
+        "Cá lóc tươi làm sạch",
+        "Bắp cải trắng Đà Lạt",
+        "Cá hồi phi lê Nauy tươi",
+        "Đậu hũ non trứng"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "hải sản để hấp",
+      "relevantNames": [
+        "tôm sú"
+      ],
+      "kind": "intent",
+      "split": "development",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [
+        6
+      ],
+      "main": [],
+      "related": [
+        "Cá lóc tươi làm sạch",
+        "Thịt bò bắp Úc tươi",
+        "Tôm sú tươi sống",
+        "Cá hồi phi lê Nauy tươi",
+        "Trứng gà ta Ba Huân (vỉ 10)",
+        "Cà chua tươi Đà Lạt"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "sữa tươi không đường",
+      "relevantNames": [],
+      "kind": "no_match",
+      "split": "development",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [],
+      "main": [],
+      "related": [
+        "Tôm sú tươi sống",
+        "Rau muống nước sạch",
+        "Cá hồi phi lê Nauy tươi",
+        "Cá lóc tươi làm sạch",
+        "Cà chua tươi Đà Lạt",
+        "Thịt ba rọi heo VietGAP"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "bột giặt",
+      "relevantNames": [],
+      "kind": "no_match",
+      "split": "development",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [],
+      "main": [],
+      "related": [],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "cà phê hòa tan",
+      "relevantNames": [],
+      "kind": "no_match",
+      "split": "development",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [],
+      "main": [],
+      "related": [
+        "Cà chua tươi Đà Lạt",
+        "Cá hồi phi lê Nauy tươi",
+        "Thịt bò bắp Úc tươi",
+        "Cá lóc tươi làm sạch",
+        "Xoài cát Hòa Lộc",
+        "Rau muống nước sạch"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "sầu riêng",
+      "relevantNames": [],
+      "kind": "no_match",
+      "split": "development",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [],
+      "main": [],
+      "related": [
+        "Rau muống nước sạch",
+        "Chuối sứ chín tự nhiên",
+        "Tôm sú tươi sống",
+        "Cá lóc tươi làm sạch",
+        "Xoài cát Hòa Lộc",
+        "Cá hồi phi lê Nauy tươi"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "nước rửa chén",
+      "relevantNames": [],
+      "kind": "no_match",
+      "split": "development",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [],
+      "main": [],
+      "related": [
+        "Rau muống nước sạch",
+        "Chuối sứ chín tự nhiên",
+        "Cá lóc tươi làm sạch",
+        "Xoài cát Hòa Lộc",
+        "Cà chua tươi Đà Lạt",
+        "Cá hồi phi lê Nauy tươi"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "ca looc",
+      "relevantNames": [
+        "cá lóc"
+      ],
+      "kind": "typo",
+      "split": "development",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [
+        1
+      ],
+      "main": [],
+      "related": [
+        "Cá lóc tươi làm sạch",
+        "Cà chua tươi Đà Lạt",
+        "Bắp cải trắng Đà Lạt",
+        "Cá hồi phi lê Nauy tươi",
+        "Rau muống nước sạch",
+        "Tôm sú tươi sống"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "thit bo bap",
+      "relevantNames": [
+        "thịt bò"
+      ],
+      "kind": "intent",
+      "split": "development",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [
+        10
+      ],
+      "main": [
+        "Thịt bò bắp Úc tươi"
+      ],
+      "related": [
+        "Bắp cải trắng Đà Lạt",
+        "Thịt ba rọi heo VietGAP",
+        "Tôm sú tươi sống",
+        "Cá hồi phi lê Nauy tươi",
+        "Đậu hũ non trứng",
+        "Trứng gà ta Ba Huân (vỉ 10)"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "cà chua làm sốt",
+      "relevantNames": [
+        "cà chua"
+      ],
+      "kind": "intent",
+      "split": "development",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [
+        4
+      ],
+      "main": [],
+      "related": [
+        "Cá lóc tươi làm sạch",
+        "Cà chua tươi Đà Lạt",
+        "Cá hồi phi lê Nauy tươi",
+        "Tôm sú tươi sống",
+        "Chuối sứ chín tự nhiên",
+        "Bắp cải trắng Đà Lạt"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "cá để áp chảo",
+      "relevantNames": [
+        "cá hồi"
+      ],
+      "kind": "intent",
+      "split": "development",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [
+        9
+      ],
+      "main": [
+        "Cá hồi phi lê Nauy tươi"
+      ],
+      "related": [
+        "Cà chua tươi Đà Lạt",
+        "Cá lóc tươi làm sạch",
+        "Tôm sú tươi sống",
+        "Thịt bò bắp Úc tươi",
+        "Thịt ba rọi heo VietGAP",
+        "Đậu hũ non trứng"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "thịt để hầm",
+      "relevantNames": [
+        "thịt bò"
+      ],
+      "kind": "intent",
+      "split": "development",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [
+        10
+      ],
+      "main": [
+        "Thịt bò bắp Úc tươi"
+      ],
+      "related": [
+        "Thịt ba rọi heo VietGAP",
+        "Tôm sú tươi sống",
+        "Chuối sứ chín tự nhiên",
+        "Bắp cải trắng Đà Lạt",
+        "Cá hồi phi lê Nauy tươi"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "TÔM SÚ",
+      "relevantNames": [
+        "tôm sú"
+      ],
+      "kind": "name",
+      "split": "holdout",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [
+        6
+      ],
+      "main": [
+        "Tôm sú tươi sống"
+      ],
+      "related": [
+        "Chuối sứ chín tự nhiên"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "bắp cải trắng",
+      "relevantNames": [
+        "bắp cải"
+      ],
+      "kind": "name",
+      "split": "holdout",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [
+        7
+      ],
+      "main": [
+        "Bắp cải trắng Đà Lạt"
+      ],
+      "related": [
+        "Thịt bò bắp Úc tươi",
+        "Chuối sứ chín tự nhiên",
+        "Cá lóc tươi làm sạch",
+        "Cá hồi phi lê Nauy tươi",
+        "Đậu hũ non trứng",
+        "Trứng gà ta Ba Huân (vỉ 10)"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "đậu hũ non",
+      "relevantNames": [
+        "đậu hũ"
+      ],
+      "kind": "name",
+      "split": "holdout",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [
+        12
+      ],
+      "main": [
+        "Đậu hũ non trứng"
+      ],
+      "related": [
+        "Rau muống nước sạch",
+        "Thịt bò bắp Úc tươi",
+        "Xoài cát Hòa Lộc",
+        "Chuối sứ chín tự nhiên",
+        "Cá hồi phi lê Nauy tươi",
+        "Thịt ba rọi heo VietGAP"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "cá hồi phi lê",
+      "relevantNames": [
+        "cá hồi"
+      ],
+      "kind": "name",
+      "split": "holdout",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [
+        9
+      ],
+      "main": [
+        "Cá hồi phi lê Nauy tươi"
+      ],
+      "related": [
+        "Thịt ba rọi heo VietGAP",
+        "Cá lóc tươi làm sạch",
+        "Cà chua tươi Đà Lạt",
+        "Tôm sú tươi sống",
+        "Thịt bò bắp Úc tươi",
+        "Trứng gà ta Ba Huân (vỉ 10)"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "xoài cát",
+      "relevantNames": [
+        "xoài"
+      ],
+      "kind": "name",
+      "split": "holdout",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [
+        11
+      ],
+      "main": [
+        "Xoài cát Hòa Lộc"
+      ],
+      "related": [
+        "Cá lóc tươi làm sạch"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "chuối sứ",
+      "relevantNames": [
+        "chuối"
+      ],
+      "kind": "name",
+      "split": "holdout",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [
+        8
+      ],
+      "main": [
+        "Chuối sứ chín tự nhiên"
+      ],
+      "related": [
+        "Tôm sú tươi sống",
+        "Cà chua tươi Đà Lạt",
+        "Cá lóc tươi làm sạch",
+        "Cá hồi phi lê Nauy tươi",
+        "Thịt bò bắp Úc tươi",
+        "Thịt ba rọi heo VietGAP"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "ba rọi heo",
+      "relevantNames": [
+        "ba rọi"
+      ],
+      "kind": "name",
+      "split": "holdout",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [
+        2
+      ],
+      "main": [
+        "Thịt ba rọi heo VietGAP"
+      ],
+      "related": [
+        "Trứng gà ta Ba Huân (vỉ 10)",
+        "Bắp cải trắng Đà Lạt",
+        "Đậu hũ non trứng",
+        "Thịt bò bắp Úc tươi",
+        "Cà chua tươi Đà Lạt",
+        "Cá hồi phi lê Nauy tươi"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "trung ga ta",
+      "relevantNames": [
+        "trứng gà"
+      ],
+      "kind": "name",
+      "split": "holdout",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [
+        5
+      ],
+      "main": [
+        "Trứng gà ta Ba Huân (vỉ 10)"
+      ],
+      "related": [
+        "Đậu hũ non trứng",
+        "Xoài cát Hòa Lộc",
+        "Bắp cải trắng Đà Lạt",
+        "Tôm sú tươi sống",
+        "Chuối sứ chín tự nhiên",
+        "Rau muống nước sạch"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "bap cai",
+      "relevantNames": [
+        "bắp cải"
+      ],
+      "kind": "name",
+      "split": "holdout",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [
+        7
+      ],
+      "main": [
+        "Bắp cải trắng Đà Lạt"
+      ],
+      "related": [
+        "Thịt bò bắp Úc tươi",
+        "Cá lóc tươi làm sạch",
+        "Cá hồi phi lê Nauy tươi",
+        "Cà chua tươi Đà Lạt",
+        "Tôm sú tươi sống",
+        "Thịt ba rọi heo VietGAP"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "  CÀ   CHUA  ",
+      "relevantNames": [
+        "cà chua"
+      ],
+      "kind": "name",
+      "split": "holdout",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [
+        4
+      ],
+      "main": [
+        "Cà chua tươi Đà Lạt"
+      ],
+      "related": [
+        "Cá lóc tươi làm sạch",
+        "Cá hồi phi lê Nauy tươi",
+        "Tôm sú tươi sống",
+        "Chuối sứ chín tự nhiên",
+        "Bắp cải trắng Đà Lạt",
+        "Đậu hũ non trứng"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "nguyên liệu làm sashimi",
+      "relevantNames": [
+        "cá hồi"
+      ],
+      "kind": "intent",
+      "split": "holdout",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [
+        9
+      ],
+      "main": [
+        "Cá hồi phi lê Nauy tươi"
+      ],
+      "related": [
+        "Cá lóc tươi làm sạch",
+        "Cà chua tươi Đà Lạt",
+        "Thịt ba rọi heo VietGAP",
+        "Chuối sứ chín tự nhiên",
+        "Trứng gà ta Ba Huân (vỉ 10)"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "thịt heo để luộc",
+      "relevantNames": [
+        "ba rọi"
+      ],
+      "kind": "intent",
+      "split": "holdout",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [
+        2
+      ],
+      "main": [
+        "Thịt ba rọi heo VietGAP"
+      ],
+      "related": [
+        "Bắp cải trắng Đà Lạt",
+        "Thịt bò bắp Úc tươi",
+        "Cá hồi phi lê Nauy tươi",
+        "Rau muống nước sạch",
+        "Tôm sú tươi sống",
+        "Đậu hũ non trứng"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "rau để nấu canh thịt bằm",
+      "relevantNames": [
+        "bắp cải"
+      ],
+      "kind": "intent",
+      "split": "holdout",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [
+        7
+      ],
+      "main": [
+        "Bắp cải trắng Đà Lạt"
+      ],
+      "related": [
+        "Đậu hũ non trứng",
+        "Rau muống nước sạch",
+        "Thịt ba rọi heo VietGAP",
+        "Thịt bò bắp Úc tươi",
+        "Cá hồi phi lê Nauy tươi",
+        "Tôm sú tươi sống"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "trái cây ngọt để tráng miệng",
+      "relevantNames": [
+        "chuối",
+        "xoài"
+      ],
+      "kind": "intent",
+      "split": "holdout",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [
+        11,
+        8
+      ],
+      "main": [
+        "Chuối sứ chín tự nhiên"
+      ],
+      "related": [
+        "Bắp cải trắng Đà Lạt",
+        "Xoài cát Hòa Lộc",
+        "Tôm sú tươi sống",
+        "Trứng gà ta Ba Huân (vỉ 10)",
+        "Thịt bò bắp Úc tươi",
+        "Đậu hũ non trứng"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "đậu mềm để nấu canh rong biển",
+      "relevantNames": [
+        "đậu hũ"
+      ],
+      "kind": "intent",
+      "split": "holdout",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [
+        12
+      ],
+      "main": [
+        "Đậu hũ non trứng"
+      ],
+      "related": [
+        "Bắp cải trắng Đà Lạt",
+        "Cá lóc tươi làm sạch",
+        "Thịt ba rọi heo VietGAP",
+        "Rau muống nước sạch",
+        "Thịt bò bắp Úc tươi",
+        "Cà chua tươi Đà Lạt"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "cá đồng cắt khúc nấu canh",
+      "relevantNames": [
+        "cá lóc"
+      ],
+      "kind": "intent",
+      "split": "holdout",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [
+        1
+      ],
+      "main": [
+        "Cá lóc tươi làm sạch"
+      ],
+      "related": [
+        "Bắp cải trắng Đà Lạt",
+        "Xoài cát Hòa Lộc",
+        "Đậu hũ non trứng",
+        "Cà chua tươi Đà Lạt",
+        "Tôm sú tươi sống",
+        "Cá hồi phi lê Nauy tươi"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "bắp bò nhúng lẩu",
+      "relevantNames": [
+        "thịt bò"
+      ],
+      "kind": "intent",
+      "split": "holdout",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [
+        10
+      ],
+      "main": [
+        "Thịt bò bắp Úc tươi"
+      ],
+      "related": [
+        "Bắp cải trắng Đà Lạt",
+        "Xoài cát Hòa Lộc",
+        "Chuối sứ chín tự nhiên",
+        "Tôm sú tươi sống",
+        "Trứng gà ta Ba Huân (vỉ 10)",
+        "Cá hồi phi lê Nauy tươi"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "quả chín đỏ để nấu sốt",
+      "relevantNames": [
+        "cà chua"
+      ],
+      "kind": "intent",
+      "split": "holdout",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [
+        4
+      ],
+      "main": [],
+      "related": [
+        "Cà chua tươi Đà Lạt",
+        "Chuối sứ chín tự nhiên",
+        "Đậu hũ non trứng",
+        "Bắp cải trắng Đà Lạt",
+        "Trứng gà ta Ba Huân (vỉ 10)",
+        "Cá hồi phi lê Nauy tươi"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "ca hoii",
+      "relevantNames": [
+        "cá hồi"
+      ],
+      "kind": "typo",
+      "split": "holdout",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [
+        9
+      ],
+      "main": [],
+      "related": [
+        "Cá hồi phi lê Nauy tươi",
+        "Cá lóc tươi làm sạch",
+        "Cà chua tươi Đà Lạt",
+        "Tôm sú tươi sống",
+        "Thịt bò bắp Úc tươi",
+        "Thịt ba rọi heo VietGAP"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "thit ba roi",
+      "relevantNames": [
+        "ba rọi"
+      ],
+      "kind": "typo",
+      "split": "holdout",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [
+        2
+      ],
+      "main": [
+        "Thịt ba rọi heo VietGAP"
+      ],
+      "related": [
+        "Bắp cải trắng Đà Lạt",
+        "Thịt bò bắp Úc tươi",
+        "Trứng gà ta Ba Huân (vỉ 10)",
+        "Tôm sú tươi sống",
+        "Đậu hũ non trứng",
+        "Cá hồi phi lê Nauy tươi"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "tom suu",
+      "relevantNames": [
+        "tôm sú"
+      ],
+      "kind": "typo",
+      "split": "holdout",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [
+        6
+      ],
+      "main": [],
+      "related": [
+        "Tôm sú tươi sống"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "rau muon",
+      "relevantNames": [
+        "rau muống"
+      ],
+      "kind": "typo",
+      "split": "holdout",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [
+        3
+      ],
+      "main": [],
+      "related": [
+        "Rau muống nước sạch",
+        "Đậu hũ non trứng",
+        "Bắp cải trắng Đà Lạt",
+        "Cà chua tươi Đà Lạt",
+        "Thịt bò bắp Úc tươi",
+        "Trứng gà ta Ba Huân (vỉ 10)"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "xoai cat hoa loc",
+      "relevantNames": [
+        "xoài"
+      ],
+      "kind": "typo",
+      "split": "holdout",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [
+        11
+      ],
+      "main": [
+        "Xoài cát Hòa Lộc"
+      ],
+      "related": [
+        "Cá lóc tươi làm sạch",
+        "Rau muống nước sạch",
+        "Thịt bò bắp Úc tươi",
+        "Bắp cải trắng Đà Lạt",
+        "Tôm sú tươi sống",
+        "Thịt ba rọi heo VietGAP"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "dau hu non trung",
+      "relevantNames": [
+        "đậu hũ"
+      ],
+      "kind": "typo",
+      "split": "holdout",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [
+        12
+      ],
+      "main": [
+        "Đậu hũ non trứng"
+      ],
+      "related": [
+        "Rau muống nước sạch",
+        "Xoài cát Hòa Lộc",
+        "Trứng gà ta Ba Huân (vỉ 10)",
+        "Chuối sứ chín tự nhiên",
+        "Thịt bò bắp Úc tươi",
+        "Bắp cải trắng Đà Lạt"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "thịt gà nguyên con",
+      "relevantNames": [],
+      "kind": "no_match",
+      "split": "holdout",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [],
+      "main": [],
+      "related": [
+        "Thịt ba rọi heo VietGAP",
+        "Trứng gà ta Ba Huân (vỉ 10)",
+        "Bắp cải trắng Đà Lạt",
+        "Tôm sú tươi sống",
+        "Thịt bò bắp Úc tươi",
+        "Cá hồi phi lê Nauy tươi"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "sữa chua dâu",
+      "relevantNames": [],
+      "kind": "no_match",
+      "split": "holdout",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [],
+      "main": [],
+      "related": [
+        "Cà chua tươi Đà Lạt",
+        "Đậu hũ non trứng",
+        "Cá lóc tươi làm sạch",
+        "Rau muống nước sạch",
+        "Tôm sú tươi sống",
+        "Cá hồi phi lê Nauy tươi"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "mực ống tươi",
+      "relevantNames": [],
+      "kind": "no_match",
+      "split": "holdout",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [],
+      "main": [],
+      "related": [
+        "Cà chua tươi Đà Lạt",
+        "Cá hồi phi lê Nauy tươi",
+        "Thịt ba rọi heo VietGAP",
+        "Thịt bò bắp Úc tươi",
+        "Tôm sú tươi sống",
+        "Trứng gà ta Ba Huân (vỉ 10)"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "nước ngọt có ga",
+      "relevantNames": [],
+      "kind": "no_match",
+      "split": "holdout",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [],
+      "main": [],
+      "related": [
+        "Rau muống nước sạch",
+        "Trứng gà ta Ba Huân (vỉ 10)",
+        "Chuối sứ chín tự nhiên",
+        "Xoài cát Hòa Lộc",
+        "Bắp cải trắng Đà Lạt",
+        "Thịt bò bắp Úc tươi"
+      ],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "bánh mì sandwich",
+      "relevantNames": [],
+      "kind": "no_match",
+      "split": "holdout",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [],
+      "main": [],
+      "related": [],
+      "mode": "HYBRID"
+    },
+    {
+      "query": "phô mai lát",
+      "relevantNames": [],
+      "kind": "no_match",
+      "split": "holdout",
+      "labelSource": "assistant-proposed-needs-review",
+      "relevantIds": [],
+      "main": [],
+      "related": [
+        "Cà chua tươi Đà Lạt",
+        "Bắp cải trắng Đà Lạt",
+        "Thịt ba rọi heo VietGAP",
+        "Cá hồi phi lê Nauy tươi",
+        "Thịt bò bắp Úc tươi",
+        "Xoài cát Hòa Lộc"
+      ],
+      "mode": "HYBRID"
+    }
+  ]
+}

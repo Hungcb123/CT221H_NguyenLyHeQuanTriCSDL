@@ -1,0 +1,56 @@
+{
+  "features": [
+    "ProductId",
+    "UnitPrice",
+    "DayOfWeek",
+    "IsWeekend",
+    "Month",
+    "DayOfMonth",
+    "Lag_1",
+    "Lag_7",
+    "Rolling_Mean_7",
+    "Rolling_Std_7"
+  ],
+  "mean": [
+    6.4953434225844005,
+    123183.35273573923,
+    3.0046565774155995,
+    0.28637951105937137,
+    5.470314318975553,
+    15.611175785797439,
+    58.63736903376019,
+    58.888824214202565,
+    58.75607018127375,
+    11.65490185355723
+  ],
+  "scale": [
+    3.452948559252034,
+    140647.2280197661,
+    1.9999945790643432,
+    0.4520688959713613,
+    2.738930098622161,
+    8.615586270813004,
+    28.473320242012715,
+    28.6491234288098,
+    25.908004515085413,
+    5.7537053157560845
+  ],
+  "evaluation": {
+    "catalogSize": 12,
+    "trainSamples": 3436,
+    "testSamples": 860,
+    "splitMethod": "TEMPORAL_80_20",
+    "mae": 3.2161,
+    "rmse": 4.3157,
+    "r2": 0.9741,
+    "wapePercent": 5.34,
+    "volumeAccuracyPercent": 94.66,
+    "restockAccuracyPercent": 94.77,
+    "restockPrecisionPercent": 94.84,
+    "restockRecallPercent": 94.61,
+    "restockF1Percent": 94.72,
+    "spoilageRiskAccuracyPercent": 92.44,
+    "spoilageRiskMacroF1Percent": 92.38,
+    "spoilageRiskWeightedF1Percent": 92.46
+  }
+}

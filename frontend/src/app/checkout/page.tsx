@@ -1,0 +1,115 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { ArrowLeft, CheckCircle2, MapPin, ShoppingBag, Wallet } from "lucide-react";
+import { apiService } from "@/services/api";
+import type { CartResponse, CheckoutResponse } from "@/types";
+
+const money = (value: number) => `${value.toLocaleString("vi-VN")} đ`;
+
+export default function CheckoutPage() {
+  const [cart, setCart] = useState<CartResponse | null>(null);
+  const [balance, setBalance] = useState<number | null>(null);
+  const [address, setAddress] = useState("");
+  const [note, setNote] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [retry, setRetry] = useState(0);
+  const [result, setResult] = useState<CheckoutResponse | null>(null);
+  const submittingRef = useRef(false);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([apiService.getCart(1), apiService.getWallet(1)])
+      .then(([nextCart, wallet]) => { if (!cancelled) { setCart(nextCart); setBalance(wallet.soDuVi); } })
+      .catch((cause) => { if (!cancelled) setError(cause instanceof Error ? cause.message : "Không tải được thông tin thanh toán."); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [retry]);
+
+  useEffect(() => { if (result) headingRef.current?.focus(); }, [result]);
+
+  const insufficient = balance !== null && cart !== null && balance < cart.tongTien;
+  const unavailable = cart?.danhSachMon.some((item) => item.conDuHang === false);
+  const canPay = !loading && !!cart?.danhSachMon.length && balance !== null && !insufficient && !unavailable;
+
+  async function checkout(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (submittingRef.current || !canPay || !address.trim()) return;
+    submittingRef.current = true;
+    setSubmitting(true);
+    setError(null);
+    try {
+      setResult(await apiService.checkout(address, note));
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Chưa xác nhận được thanh toán. Vui lòng kiểm tra đơn hàng trước khi thử lại.");
+      // Refresh stock and wallet after a rejected transaction, keeping the delivery fields.
+      const refreshed = await Promise.allSettled([apiService.getCart(1), apiService.getWallet(1)]);
+      if (refreshed[0].status === "fulfilled") setCart(refreshed[0].value);
+      if (refreshed[1].status === "fulfilled") setBalance(refreshed[1].value.soDuVi);
+    } finally {
+      submittingRef.current = false;
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <main className="min-h-screen bg-stone-50 px-4 py-8 text-stone-900 sm:px-6">
+      <div className="mx-auto max-w-4xl">
+        <Link href="/" className="mb-6 inline-flex min-h-11 items-center gap-2 font-semibold text-emerald-800 hover:underline"><ArrowLeft className="h-4 w-4" />Tiếp tục mua sắm</Link>
+        {result ? (
+          <section className="rounded-xl bg-white p-6 text-center shadow-sm sm:p-10">
+            <CheckCircle2 className="mx-auto mb-4 h-14 w-14 text-emerald-700" aria-hidden="true" />
+            <h1 ref={headingRef} tabIndex={-1} className="text-2xl font-bold">Thanh toán thành công</h1>
+            <p className="mt-2 text-stone-600">Đơn hàng #{result.maDH} đã được xác nhận.</p>
+            <dl className="mx-auto my-6 max-w-md space-y-3 text-left">
+              <div className="flex justify-between gap-4"><dt>Tổng thanh toán</dt><dd className="font-bold">{money(result.tongTien)}</dd></div>
+              <div className="flex justify-between gap-4"><dt>Số dư ví còn lại</dt><dd className="font-bold text-emerald-800">{money(result.soDuConLai)}</dd></div>
+            </dl>
+            <Link href="/" className="inline-flex min-h-11 items-center rounded-lg bg-emerald-800 px-6 font-semibold text-white hover:bg-emerald-900">Tiếp tục đi chợ</Link>
+          </section>
+        ) : (
+          <>
+            <h1 className="mb-6 text-2xl font-bold">Thanh toán đơn hàng</h1>
+            {error && <div role="alert" className="mb-5 rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
+              <p>{error}</p>
+              {!submitting && <button type="button" className="mt-2 min-h-11 font-semibold underline" onClick={() => { setLoading(true); setError(null); setRetry((value) => value + 1); }}>Tải lại giỏ hàng và số dư</button>}
+            </div>}
+            {loading ? <p role="status">Đang tải giỏ hàng và số dư ví…</p> : (
+              <form onSubmit={checkout} className="grid gap-6 md:grid-cols-3">
+                <div className="space-y-6 md:col-span-2">
+                  <section className="space-y-4 rounded-xl border border-stone-200 bg-white p-5 sm:p-6">
+                    <h2 className="flex items-center gap-2 text-lg font-bold"><MapPin className="h-5 w-5 text-emerald-800" />Thông tin giao hàng</h2>
+                    <div><label htmlFor="delivery-address" className="mb-2 block font-medium">Địa chỉ nhận hàng <span className="text-red-700">*</span></label>
+                      <input id="delivery-address" autoComplete="street-address" required maxLength={500} value={address} disabled={submitting} onChange={(event) => setAddress(event.target.value)} placeholder="Số nhà, đường, phường/xã, tỉnh/thành phố" className="min-h-11 w-full rounded-lg border border-stone-300 px-3 text-base" /></div>
+                    <div><label htmlFor="delivery-note" className="mb-2 block font-medium">Ghi chú giao hàng</label>
+                      <textarea id="delivery-note" maxLength={1000} rows={3} value={note} disabled={submitting} onChange={(event) => setNote(event.target.value)} className="w-full rounded-lg border border-stone-300 p-3 text-base" placeholder="Hướng dẫn giao hàng (nếu có)" /></div>
+                  </section>
+                  <section className="rounded-xl border border-stone-200 bg-white p-5 sm:p-6">
+                    <h2 className="mb-3 flex items-center gap-2 text-lg font-bold"><Wallet className="h-5 w-5 text-emerald-800" />Ví DailyMart</h2>
+                    <p>Số dư khả dụng: <strong className="text-emerald-800">{balance === null ? "Chưa tải được" : money(balance)}</strong></p>
+                    {insufficient && <p role="status" className="mt-3 text-red-800">Số dư ví chưa đủ. Vui lòng nạp thêm tiền trước khi thanh toán.</p>}
+                  </section>
+                </div>
+                <section className="self-start rounded-xl border border-stone-200 bg-white p-5">
+                  <h2 className="mb-4 flex items-center gap-2 text-lg font-bold"><ShoppingBag className="h-5 w-5 text-emerald-800" />Đơn hàng của bạn</h2>
+                  {!cart?.danhSachMon.length ? <p className="text-stone-600">Giỏ hàng đang trống. Hãy chọn sản phẩm trước khi thanh toán.</p> : (
+                    <ul className="max-h-80 space-y-4 overflow-y-auto">{cart.danhSachMon.map((item) => <li key={item.maSP} className="text-sm">
+                      <p className="break-words font-semibold">{item.tenSP}</p><div className="mt-1 flex justify-between gap-3 text-stone-600"><span>{item.soLuong} × {item.donViTinh}</span><span className="shrink-0">{money(item.thanhTien)}</span></div>
+                      {item.conDuHang === false && <p className="mt-1 text-red-800">Không đủ hàng. Vui lòng điều chỉnh giỏ hàng.</p>}
+                    </li>)}</ul>
+                  )}
+                  <div className="my-5 flex flex-wrap justify-between gap-2 border-t border-stone-200 pt-4 font-bold"><span>Tổng thanh toán</span><span className="text-red-800">{money(cart?.tongTien ?? 0)}</span></div>
+                  <button type="submit" disabled={!canPay || submitting || !address.trim()} className="min-h-12 w-full rounded-lg bg-emerald-800 px-3 py-3 font-bold text-white hover:bg-emerald-900 disabled:cursor-not-allowed disabled:opacity-50">{submitting ? "Đang thanh toán…" : "Xác nhận thanh toán ví"}</button>
+                </section>
+              </form>
+            )}
+          </>
+        )}
+      </div>
+    </main>
+  );
+}

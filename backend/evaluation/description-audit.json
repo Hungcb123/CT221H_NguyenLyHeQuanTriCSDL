@@ -1,0 +1,86 @@
+{
+  "catalog_size": 12,
+  "empty_descriptions": [],
+  "policy": "No SQL descriptions were edited. Candidate model uses raw SQL name, description and category only.",
+  "review_notes": [
+    {
+      "id": 6,
+      "name": "Tôm sú tươi sống",
+      "note": "Mô tả hiện có xuất xứ và đặc điểm; chưa nói cách chế biến. Yêu cầu hấp chỉ được gợi ý nếu thiếu chứng cứ từ khóa."
+    }
+  ],
+  "documents": [
+    {
+      "id": 12,
+      "name": "Đậu hũ non trứng",
+      "description": "Đậu hũ non mềm mịn béo ngậy, thích hợp nấu canh rong biển hoặc chiên giòn",
+      "category": "Rau củ quả tươi sạch"
+    },
+    {
+      "id": 11,
+      "name": "Xoài cát Hòa Lộc",
+      "description": "Xoài cát Tiền Giang vỏ vàng mịn, vị ngọt đậm đà hương thơm đặc trưng",
+      "category": "Trái cây tươi nhiệt đới"
+    },
+    {
+      "id": 10,
+      "name": "Thịt bò bắp Úc tươi",
+      "description": "Bắp bò giòn sần sật có vân hoa đẹp mắt, thích hợp nhúng lẩu hoặc hầm tiêu",
+      "category": "Thịt tươi sống mỗi ngày"
+    },
+    {
+      "id": 9,
+      "name": "Cá hồi phi lê Nauy tươi",
+      "description": "Thịt cá hồi màu cam tươi đẹp mắt, giàu Omega-3, ăn sống Sashimi hoặc áp chảo",
+      "category": "Thủy hải sản tươi sống"
+    },
+    {
+      "id": 8,
+      "name": "Chuối sứ chín tự nhiên",
+      "description": "Chuối sứ Bến Tre dẻo thơm, ngọt dịu tráng miệng",
+      "category": "Trái cây tươi nhiệt đới"
+    },
+    {
+      "id": 7,
+      "name": "Bắp cải trắng Đà Lạt",
+      "description": "Bắp cải cuộn chặt búp, giòn ngọt, thích hợp xào hoặc nấu canh thịt bằm",
+      "category": "Rau củ quả tươi sạch"
+    },
+    {
+      "id": 6,
+      "name": "Tôm sú tươi sống",
+      "description": "Tôm sú sinh thái Cà Mau thịt chắc ngọt tự nhiên",
+      "category": "Thủy hải sản tươi sống"
+    },
+    {
+      "id": 5,
+      "name": "Trứng gà ta Ba Huân (vỉ 10)",
+      "description": "Trứng gà tươi sạch tiệt trùng UV, lòng đỏ béo ngậy",
+      "category": "Thịt tươi sống mỗi ngày"
+    },
+    {
+      "id": 4,
+      "name": "Cà chua tươi Đà Lạt",
+      "description": "Cà chua chín mọng đỏ tự nhiên, giàu vitamin C và khoáng chất",
+      "category": "Rau củ quả tươi sạch"
+    },
+    {
+      "id": 3,
+      "name": "Rau muống nước sạch",
+      "description": "Rau muống non ngọn xanh giòn, trồng thủy canh không hóa chất",
+      "category": "Rau củ quả tươi sạch"
+    },
+    {
+      "id": 2,
+      "name": "Thịt ba rọi heo VietGAP",
+      "description": "Thịt ba chỉ heo tươi mềm, tỷ lệ nạc mỡ cân đối, thích hợp kho tàu hoặc luộc",
+      "category": "Thịt tươi sống mỗi ngày"
+    },
+    {
+      "id": 1,
+      "name": "Cá lóc tươi làm sạch",
+      "description": "Cá lóc đồng làm sạch mang và ruột, cắt khúc sẵn sàng chế biến món canh chua",
+      "category": "Thủy hải sản tươi sống"
+    }
+  ]
+}

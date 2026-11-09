@@ -1,0 +1,502 @@
+{
+  "note": "Starter human judgments, not a representative production benchmark.",
+  "catalog_size": 12,
+  "query_count": 10,
+  "summary": {
+    "all": {
+      "LIKE": {
+        "hit_at_3": 0.5,
+        "mrr_at_5": 0.5,
+        "precision_at_3": 0.1667
+      },
+      "BM25": {
+        "hit_at_3": 0.9,
+        "mrr_at_5": 0.8333,
+        "precision_at_3": 0.3
+      },
+      "VECTOR": {
+        "hit_at_3": 1.0,
+        "mrr_at_5": 0.8833,
+        "precision_at_3": 0.4
+      },
+      "HYBRID": {
+        "hit_at_3": 1.0,
+        "mrr_at_5": 0.9333,
+        "precision_at_3": 0.3667
+      }
+    },
+    "name": {
+      "LIKE": {
+        "hit_at_3": 0.8333,
+        "mrr_at_5": 0.8333,
+        "precision_at_3": 0.2778
+      },
+      "BM25": {
+        "hit_at_3": 1.0,
+        "mrr_at_5": 1.0,
+        "precision_at_3": 0.3333
+      },
+      "VECTOR": {
+        "hit_at_3": 1.0,
+        "mrr_at_5": 0.8889,
+        "precision_at_3": 0.3333
+      },
+      "HYBRID": {
+        "hit_at_3": 1.0,
+        "mrr_at_5": 1.0,
+        "precision_at_3": 0.3333
+      }
+    },
+    "intent": {
+      "LIKE": {
+        "hit_at_3": 0.0,
+        "mrr_at_5": 0.0,
+        "precision_at_3": 0.0
+      },
+      "BM25": {
+        "hit_at_3": 0.75,
+        "mrr_at_5": 0.5833,
+        "precision_at_3": 0.25
+      },
+      "VECTOR": {
+        "hit_at_3": 1.0,
+        "mrr_at_5": 0.875,
+        "precision_at_3": 0.5
+      },
+      "HYBRID": {
+        "hit_at_3": 1.0,
+        "mrr_at_5": 0.8333,
+        "precision_at_3": 0.4167
+      }
+    }
+  },
+  "queries": [
+    {
+      "query": "cá lóc",
+      "kind": "name",
+      "scores": {
+        "LIKE": {
+          "hit_at_3": 1,
+          "mrr_at_5": 1.0,
+          "precision_at_3": 0.3333333333333333,
+          "top_3": [
+            "Cá lóc tươi làm sạch"
+          ]
+        },
+        "BM25": {
+          "hit_at_3": 1,
+          "mrr_at_5": 1.0,
+          "precision_at_3": 0.3333333333333333,
+          "top_3": [
+            "Cá lóc tươi làm sạch",
+            "Xoài cát Hòa Lộc",
+            "Cà chua tươi Đà Lạt"
+          ]
+        },
+        "VECTOR": {
+          "hit_at_3": 1,
+          "mrr_at_5": 1.0,
+          "precision_at_3": 0.3333333333333333,
+          "top_3": [
+            "Cá lóc tươi làm sạch",
+            "Cà chua tươi Đà Lạt",
+            "Bắp cải trắng Đà Lạt"
+          ]
+        },
+        "HYBRID": {
+          "hit_at_3": 1,
+          "mrr_at_5": 1.0,
+          "precision_at_3": 0.3333333333333333,
+          "top_3": [
+            "Cá lóc tươi làm sạch",
+            "Cà chua tươi Đà Lạt",
+            "Cá hồi phi lê Nauy tươi"
+          ]
+        }
+      }
+    },
+    {
+      "query": "ca loc",
+      "kind": "name",
+      "scores": {
+        "LIKE": {
+          "hit_at_3": 0,
+          "mrr_at_5": 0,
+          "precision_at_3": 0.0,
+          "top_3": []
+        },
+        "BM25": {
+          "hit_at_3": 1,
+          "mrr_at_5": 1.0,
+          "precision_at_3": 0.3333333333333333,
+          "top_3": [
+            "Cá lóc tươi làm sạch",
+            "Xoài cát Hòa Lộc",
+            "Cà chua tươi Đà Lạt"
+          ]
+        },
+        "VECTOR": {
+          "hit_at_3": 1,
+          "mrr_at_5": 1.0,
+          "precision_at_3": 0.3333333333333333,
+          "top_3": [
+            "Cá lóc tươi làm sạch",
+            "Cà chua tươi Đà Lạt",
+            "Bắp cải trắng Đà Lạt"
+          ]
+        },
+        "HYBRID": {
+          "hit_at_3": 1,
+          "mrr_at_5": 1.0,
+          "precision_at_3": 0.3333333333333333,
+          "top_3": [
+            "Cá lóc tươi làm sạch",
+            "Cà chua tươi Đà Lạt",
+            "Cá hồi phi lê Nauy tươi"
+          ]
+        }
+      }
+    },
+    {
+      "query": "cà chua",
+      "kind": "name",
+      "scores": {
+        "LIKE": {
+          "hit_at_3": 1,
+          "mrr_at_5": 1.0,
+          "precision_at_3": 0.3333333333333333,
+          "top_3": [
+            "Cà chua tươi Đà Lạt"
+          ]
+        },
+        "BM25": {
+          "hit_at_3": 1,
+          "mrr_at_5": 1.0,
+          "precision_at_3": 0.3333333333333333,
+          "top_3": [
+            "Cà chua tươi Đà Lạt",
+            "Cá lóc tươi làm sạch",
+            "Cá hồi phi lê Nauy tươi"
+          ]
+        },
+        "VECTOR": {
+          "hit_at_3": 1,
+          "mrr_at_5": 1.0,
+          "precision_at_3": 0.3333333333333333,
+          "top_3": [
+            "Cà chua tươi Đà Lạt",
+            "Cá lóc tươi làm sạch",
+            "Cá hồi phi lê Nauy tươi"
+          ]
+        },
+        "HYBRID": {
+          "hit_at_3": 1,
+          "mrr_at_5": 1.0,
+          "precision_at_3": 0.3333333333333333,
+          "top_3": [
+            "Cà chua tươi Đà Lạt",
+            "Cá lóc tươi làm sạch",
+            "Cá hồi phi lê Nauy tươi"
+          ]
+        }
+      }
+    },
+    {
+      "query": "thịt bò",
+      "kind": "name",
+      "scores": {
+        "LIKE": {
+          "hit_at_3": 1,
+          "mrr_at_5": 1.0,
+          "precision_at_3": 0.3333333333333333,
+          "top_3": [
+            "Thịt bò bắp Úc tươi"
+          ]
+        },
+        "BM25": {
+          "hit_at_3": 1,
+          "mrr_at_5": 1.0,
+          "precision_at_3": 0.3333333333333333,
+          "top_3": [
+            "Thịt bò bắp Úc tươi",
+            "Thịt ba rọi heo VietGAP",
+            "Tôm sú tươi sống"
+          ]
+        },
+        "VECTOR": {
+          "hit_at_3": 1,
+          "mrr_at_5": 0.3333333333333333,
+          "precision_at_3": 0.3333333333333333,
+          "top_3": [
+            "Bắp cải trắng Đà Lạt",
+            "Thịt ba rọi heo VietGAP",
+            "Thịt bò bắp Úc tươi"
+          ]
+        },
+        "HYBRID": {
+          "hit_at_3": 1,
+          "mrr_at_5": 1.0,
+          "precision_at_3": 0.3333333333333333,
+          "top_3": [
+            "Thịt bò bắp Úc tươi",
+            "Thịt ba rọi heo VietGAP",
+            "Bắp cải trắng Đà Lạt"
+          ]
+        }
+      }
+    },
+    {
+      "query": "trứng gà",
+      "kind": "name",
+      "scores": {
+        "LIKE": {
+          "hit_at_3": 1,
+          "mrr_at_5": 1.0,
+          "precision_at_3": 0.3333333333333333,
+          "top_3": [
+            "Trứng gà ta Ba Huân (vỉ 10)"
+          ]
+        },
+        "BM25": {
+          "hit_at_3": 1,
+          "mrr_at_5": 1.0,
+          "precision_at_3": 0.3333333333333333,
+          "top_3": [
+            "Trứng gà ta Ba Huân (vỉ 10)",
+            "Xoài cát Hòa Lộc",
+            "Đậu hũ non trứng"
+          ]
+        },
+        "VECTOR": {
+          "hit_at_3": 1,
+          "mrr_at_5": 1.0,
+          "precision_at_3": 0.3333333333333333,
+          "top_3": [
+            "Trứng gà ta Ba Huân (vỉ 10)",
+            "Đậu hũ non trứng",
+            "Bắp cải trắng Đà Lạt"
+          ]
+        },
+        "HYBRID": {
+          "hit_at_3": 1,
+          "mrr_at_5": 1.0,
+          "precision_at_3": 0.3333333333333333,
+          "top_3": [
+            "Trứng gà ta Ba Huân (vỉ 10)",
+            "Đậu hũ non trứng",
+            "Xoài cát Hòa Lộc"
+          ]
+        }
+      }
+    },
+    {
+      "query": "rau muống",
+      "kind": "name",
+      "scores": {
+        "LIKE": {
+          "hit_at_3": 1,
+          "mrr_at_5": 1.0,
+          "precision_at_3": 0.3333333333333333,
+          "top_3": [
+            "Rau muống nước sạch"
+          ]
+        },
+        "BM25": {
+          "hit_at_3": 1,
+          "mrr_at_5": 1.0,
+          "precision_at_3": 0.3333333333333333,
+          "top_3": [
+            "Rau muống nước sạch"
+          ]
+        },
+        "VECTOR": {
+          "hit_at_3": 1,
+          "mrr_at_5": 1.0,
+          "precision_at_3": 0.3333333333333333,
+          "top_3": [
+            "Rau muống nước sạch",
+            "Đậu hũ non trứng",
+            "Tôm sú tươi sống"
+          ]
+        },
+        "HYBRID": {
+          "hit_at_3": 1,
+          "mrr_at_5": 1.0,
+          "precision_at_3": 0.3333333333333333,
+          "top_3": [
+            "Rau muống nước sạch",
+            "Đậu hũ non trứng",
+            "Tôm sú tươi sống"
+          ]
+        }
+      }
+    },
+    {
+      "query": "nguyên liệu nấu canh chua",
+      "kind": "intent",
+      "scores": {
+        "LIKE": {
+          "hit_at_3": 0,
+          "mrr_at_5": 0,
+          "precision_at_3": 0.0,
+          "top_3": []
+        },
+        "BM25": {
+          "hit_at_3": 1,
+          "mrr_at_5": 0.3333333333333333,
+          "precision_at_3": 0.3333333333333333,
+          "top_3": [
+            "Bắp cải trắng Đà Lạt",
+            "Đậu hũ non trứng",
+            "Cá lóc tươi làm sạch"
+          ]
+        },
+        "VECTOR": {
+          "hit_at_3": 1,
+          "mrr_at_5": 0.5,
+          "precision_at_3": 0.6666666666666666,
+          "top_3": [
+            "Chuối sứ chín tự nhiên",
+            "Cà chua tươi Đà Lạt",
+            "Cá lóc tươi làm sạch"
+          ]
+        },
+        "HYBRID": {
+          "hit_at_3": 1,
+          "mrr_at_5": 1.0,
+          "precision_at_3": 0.6666666666666666,
+          "top_3": [
+            "Cà chua tươi Đà Lạt",
+            "Đậu hũ non trứng",
+            "Cá lóc tươi làm sạch"
+          ]
+        }
+      }
+    },
+    {
+      "query": "thịt để kho tàu",
+      "kind": "intent",
+      "scores": {
+        "LIKE": {
+          "hit_at_3": 0,
+          "mrr_at_5": 0,
+          "precision_at_3": 0.0,
+          "top_3": []
+        },
+        "BM25": {
+          "hit_at_3": 1,
+          "mrr_at_5": 1.0,
+          "precision_at_3": 0.3333333333333333,
+          "top_3": [
+            "Thịt ba rọi heo VietGAP",
+            "Tôm sú tươi sống",
+            "Bắp cải trắng Đà Lạt"
+          ]
+        },
+        "VECTOR": {
+          "hit_at_3": 1,
+          "mrr_at_5": 1.0,
+          "precision_at_3": 0.3333333333333333,
+          "top_3": [
+            "Thịt ba rọi heo VietGAP",
+            "Thịt bò bắp Úc tươi",
+            "Đậu hũ non trứng"
+          ]
+        },
+        "HYBRID": {
+          "hit_at_3": 1,
+          "mrr_at_5": 1.0,
+          "precision_at_3": 0.3333333333333333,
+          "top_3": [
+            "Thịt ba rọi heo VietGAP",
+            "Thịt bò bắp Úc tươi",
+            "Cá hồi phi lê Nauy tươi"
+          ]
+        }
+      }
+    },
+    {
+      "query": "rau ăn kèm món luộc",
+      "kind": "intent",
+      "scores": {
+        "LIKE": {
+          "hit_at_3": 0,
+          "mrr_at_5": 0,
+          "precision_at_3": 0.0,
+          "top_3": []
+        },
+        "BM25": {
+          "hit_at_3": 1,
+          "mrr_at_5": 1.0,
+          "precision_at_3": 0.3333333333333333,
+          "top_3": [
+            "Rau muống nước sạch",
+            "Cá lóc tươi làm sạch",
+            "Thịt ba rọi heo VietGAP"
+          ]
+        },
+        "VECTOR": {
+          "hit_at_3": 1,
+          "mrr_at_5": 1.0,
+          "precision_at_3": 0.6666666666666666,
+          "top_3": [
+            "Rau muống nước sạch",
+            "Thịt ba rọi heo VietGAP",
+            "Bắp cải trắng Đà Lạt"
+          ]
+        },
+        "HYBRID": {
+          "hit_at_3": 1,
+          "mrr_at_5": 1.0,
+          "precision_at_3": 0.3333333333333333,
+          "top_3": [
+            "Rau muống nước sạch",
+            "Thịt ba rọi heo VietGAP",
+            "Cá lóc tươi làm sạch"
+          ]
+        }
+      }
+    },
+    {
+      "query": "hải sản để hấp",
+      "kind": "intent",
+      "scores": {
+        "LIKE": {
+          "hit_at_3": 0,
+          "mrr_at_5": 0,
+          "precision_at_3": 0.0,
+          "top_3": []
+        },
+        "BM25": {
+          "hit_at_3": 0,
+          "mrr_at_5": 0,
+          "precision_at_3": 0.0,
+          "top_3": [
+            "Cá lóc tươi làm sạch",
+            "Thịt bò bắp Úc tươi"
+          ]
+        },
+        "VECTOR": {
+          "hit_at_3": 1,
+          "mrr_at_5": 1.0,
+          "precision_at_3": 0.3333333333333333,
+          "top_3": [
+            "Tôm sú tươi sống",
+            "Cá lóc tươi làm sạch",
+            "Cá hồi phi lê Nauy tươi"
+          ]
+        },
+        "HYBRID": {
+          "hit_at_3": 1,
+          "mrr_at_5": 0.3333333333333333,
+          "precision_at_3": 0.3333333333333333,
+          "top_3": [
+            "Cá lóc tươi làm sạch",
+            "Thịt bò bắp Úc tươi",
+            "Tôm sú tươi sống"
+          ]
+        }
+      }
+    }
+  ]
+}

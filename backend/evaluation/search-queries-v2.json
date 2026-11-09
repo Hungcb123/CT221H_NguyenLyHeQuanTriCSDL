@@ -1,0 +1,434 @@
+[
+  {
+    "query": "cá lóc",
+    "relevantNames": [
+      "cá lóc"
+    ],
+    "kind": "name",
+    "split": "development",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "ca loc",
+    "relevantNames": [
+      "cá lóc"
+    ],
+    "kind": "name",
+    "split": "development",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "cà chua",
+    "relevantNames": [
+      "cà chua"
+    ],
+    "kind": "name",
+    "split": "development",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "thịt bò",
+    "relevantNames": [
+      "thịt bò"
+    ],
+    "kind": "name",
+    "split": "development",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "trứng gà",
+    "relevantNames": [
+      "trứng gà"
+    ],
+    "kind": "name",
+    "split": "development",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "rau muống",
+    "relevantNames": [
+      "rau muống"
+    ],
+    "kind": "name",
+    "split": "development",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "nguyên liệu nấu canh chua",
+    "relevantNames": [
+      "cá lóc",
+      "cà chua"
+    ],
+    "kind": "intent",
+    "split": "development",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "thịt để kho tàu",
+    "relevantNames": [
+      "ba rọi",
+      "trứng gà"
+    ],
+    "kind": "intent",
+    "split": "development",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "rau ăn kèm món luộc",
+    "relevantNames": [
+      "rau muống",
+      "bắp cải"
+    ],
+    "kind": "intent",
+    "split": "development",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "hải sản để hấp",
+    "relevantNames": [
+      "tôm sú"
+    ],
+    "kind": "intent",
+    "split": "development",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "sữa tươi không đường",
+    "relevantNames": [],
+    "kind": "no_match",
+    "split": "development",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "bột giặt",
+    "relevantNames": [],
+    "kind": "no_match",
+    "split": "development",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "cà phê hòa tan",
+    "relevantNames": [],
+    "kind": "no_match",
+    "split": "development",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "sầu riêng",
+    "relevantNames": [],
+    "kind": "no_match",
+    "split": "development",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "nước rửa chén",
+    "relevantNames": [],
+    "kind": "no_match",
+    "split": "development",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "ca looc",
+    "relevantNames": [
+      "cá lóc"
+    ],
+    "kind": "typo",
+    "split": "development",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "thit bo bap",
+    "relevantNames": [
+      "thịt bò"
+    ],
+    "kind": "intent",
+    "split": "development",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "cà chua làm sốt",
+    "relevantNames": [
+      "cà chua"
+    ],
+    "kind": "intent",
+    "split": "development",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "cá để áp chảo",
+    "relevantNames": [
+      "cá hồi"
+    ],
+    "kind": "intent",
+    "split": "development",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "thịt để hầm",
+    "relevantNames": [
+      "thịt bò"
+    ],
+    "kind": "intent",
+    "split": "development",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "TÔM SÚ",
+    "relevantNames": [
+      "tôm sú"
+    ],
+    "kind": "name",
+    "split": "holdout",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "bắp cải trắng",
+    "relevantNames": [
+      "bắp cải"
+    ],
+    "kind": "name",
+    "split": "holdout",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "đậu hũ non",
+    "relevantNames": [
+      "đậu hũ"
+    ],
+    "kind": "name",
+    "split": "holdout",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "cá hồi phi lê",
+    "relevantNames": [
+      "cá hồi"
+    ],
+    "kind": "name",
+    "split": "holdout",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "xoài cát",
+    "relevantNames": [
+      "xoài"
+    ],
+    "kind": "name",
+    "split": "holdout",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "chuối sứ",
+    "relevantNames": [
+      "chuối"
+    ],
+    "kind": "name",
+    "split": "holdout",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "ba rọi heo",
+    "relevantNames": [
+      "ba rọi"
+    ],
+    "kind": "name",
+    "split": "holdout",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "trung ga ta",
+    "relevantNames": [
+      "trứng gà"
+    ],
+    "kind": "name",
+    "split": "holdout",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "bap cai",
+    "relevantNames": [
+      "bắp cải"
+    ],
+    "kind": "name",
+    "split": "holdout",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "  CÀ   CHUA  ",
+    "relevantNames": [
+      "cà chua"
+    ],
+    "kind": "name",
+    "split": "holdout",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "nguyên liệu làm sashimi",
+    "relevantNames": [
+      "cá hồi"
+    ],
+    "kind": "intent",
+    "split": "holdout",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "thịt heo để luộc",
+    "relevantNames": [
+      "ba rọi"
+    ],
+    "kind": "intent",
+    "split": "holdout",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "rau để nấu canh thịt bằm",
+    "relevantNames": [
+      "bắp cải"
+    ],
+    "kind": "intent",
+    "split": "holdout",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "trái cây ngọt để tráng miệng",
+    "relevantNames": [
+      "chuối",
+      "xoài"
+    ],
+    "kind": "intent",
+    "split": "holdout",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "đậu mềm để nấu canh rong biển",
+    "relevantNames": [
+      "đậu hũ"
+    ],
+    "kind": "intent",
+    "split": "holdout",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "cá đồng cắt khúc nấu canh",
+    "relevantNames": [
+      "cá lóc"
+    ],
+    "kind": "intent",
+    "split": "holdout",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "bắp bò nhúng lẩu",
+    "relevantNames": [
+      "thịt bò"
+    ],
+    "kind": "intent",
+    "split": "holdout",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "quả chín đỏ để nấu sốt",
+    "relevantNames": [
+      "cà chua"
+    ],
+    "kind": "intent",
+    "split": "holdout",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "ca hoii",
+    "relevantNames": [
+      "cá hồi"
+    ],
+    "kind": "typo",
+    "split": "holdout",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "thit ba roi",
+    "relevantNames": [
+      "ba rọi"
+    ],
+    "kind": "typo",
+    "split": "holdout",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "tom suu",
+    "relevantNames": [
+      "tôm sú"
+    ],
+    "kind": "typo",
+    "split": "holdout",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "rau muon",
+    "relevantNames": [
+      "rau muống"
+    ],
+    "kind": "typo",
+    "split": "holdout",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "xoai cat hoa loc",
+    "relevantNames": [
+      "xoài"
+    ],
+    "kind": "typo",
+    "split": "holdout",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "dau hu non trung",
+    "relevantNames": [
+      "đậu hũ"
+    ],
+    "kind": "typo",
+    "split": "holdout",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "thịt gà nguyên con",
+    "relevantNames": [],
+    "kind": "no_match",
+    "split": "holdout",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "sữa chua dâu",
+    "relevantNames": [],
+    "kind": "no_match",
+    "split": "holdout",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "mực ống tươi",
+    "relevantNames": [],
+    "kind": "no_match",
+    "split": "holdout",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "nước ngọt có ga",
+    "relevantNames": [],
+    "kind": "no_match",
+    "split": "holdout",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "bánh mì sandwich",
+    "relevantNames": [],
+    "kind": "no_match",
+    "split": "holdout",
+    "labelSource": "assistant-proposed-needs-review"
+  },
+  {
+    "query": "phô mai lát",
+    "relevantNames": [],
+    "kind": "no_match",
+    "split": "holdout",
+    "labelSource": "assistant-proposed-needs-review"
+  }
+]

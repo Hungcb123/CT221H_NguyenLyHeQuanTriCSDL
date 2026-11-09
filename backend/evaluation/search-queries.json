@@ -1,0 +1,12 @@
+[
+  {"query":"cá lóc","relevantNames":["cá lóc"],"kind":"name"},
+  {"query":"ca loc","relevantNames":["cá lóc"],"kind":"name"},
+  {"query":"cà chua","relevantNames":["cà chua"],"kind":"name"},
+  {"query":"thịt bò","relevantNames":["thịt bò"],"kind":"name"},
+  {"query":"trứng gà","relevantNames":["trứng gà"],"kind":"name"},
+  {"query":"rau muống","relevantNames":["rau muống"],"kind":"name"},
+  {"query":"nguyên liệu nấu canh chua","relevantNames":["cá lóc","cà chua"],"kind":"intent"},
+  {"query":"thịt để kho tàu","relevantNames":["ba rọi","trứng gà"],"kind":"intent"},
+  {"query":"rau ăn kèm món luộc","relevantNames":["rau muống","bắp cải"],"kind":"intent"},
+  {"query":"hải sản để hấp","relevantNames":["tôm sú"],"kind":"intent"}
+]

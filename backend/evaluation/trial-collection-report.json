@@ -1,0 +1,22 @@
+{
+  "collection": "fresh_grocery_multilingual_trial_e8f8c211_raw_v1",
+  "points": 12,
+  "query": "nguyên liệu nấu canh chua",
+  "max_score_error": 3.2435203412006786e-08,
+  "top_3": [
+    {
+      "name": "Đậu hũ non trứng",
+      "score": 0.7451733
+    },
+    {
+      "name": "Bắp cải trắng Đà Lạt",
+      "score": 0.7245039
+    },
+    {
+      "name": "Rau muống nước sạch",
+      "score": 0.55888414
+    }
+  ],
+  "live_collection": "fresh_grocery_products",
+  "live_collection_modified": false
+}

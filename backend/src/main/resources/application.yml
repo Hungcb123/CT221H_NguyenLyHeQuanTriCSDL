@@ -1,0 +1,66 @@
+server:
+  port: ${SERVER_PORT:8085}
+  servlet:
+    context-path: /
+    session:
+      timeout: 30m
+      cookie:
+        http-only: true
+        same-site: lax
+        secure: ${ADMIN_COOKIE_SECURE:false}
+
+spring:
+  application:
+    name: fresh-grocery-backend
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:sqlserver://localhost:1433;databaseName=FreshGroceryDB;encrypt=true;trustServerCertificate=true}
+    username: ${SPRING_DATASOURCE_USERNAME:sa}
+    password: ${SPRING_DATASOURCE_PASSWORD:StrongPassword123!}
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    hikari:
+      pool-name: FreshGroceryHikariCP
+      maximum-pool-size: 15
+      minimum-idle: 5
+      idle-timeout: 300000
+      max-lifetime: 600000
+      connection-timeout: 30000
+
+  jpa:
+    database-platform: org.hibernate.dialect.SQLServerDialect
+    hibernate:
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+      ddl-auto: none # Toàn bộ CSDL và Stored Procedure được quản lý bởi SQL scripts chuẩn môn CT221H
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+# Cấu hình Swagger UI / OpenAPI 3
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+    try-it-out-enabled: true
+
+# Cấu hình CSDL Vector Qdrant cho Phân hệ Tìm kiếm Ngữ nghĩa (Semantic Search)
+qdrant:
+  host: ${QDRANT_HOST:localhost}
+  port: ${QDRANT_PORT:6333}
+  collection-name: ${QDRANT_COLLECTION:fresh_grocery_products}
+  dimension: 384
+
+logging:
+  level:
+    root: INFO
+    com.ctu.freshgrocery: DEBUG
+    org.springframework.jdbc.core.simple.SimpleJdbcCall: DEBUG
+
+# Retrieval minScore is separate from semantic-only admission into primary results.
+search:
+  semantic-primary-min-score: ${SEARCH_SEMANTIC_PRIMARY_MIN_SCORE:0.60}
+  semantic-primary-min-margin: ${SEARCH_SEMANTIC_PRIMARY_MIN_MARGIN:0.05}

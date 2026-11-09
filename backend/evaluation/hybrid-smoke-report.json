@@ -1,0 +1,96 @@
+{
+  "api_checks": [
+    {
+      "query": "mực ống tươi",
+      "mode": "HYBRID",
+      "main": [],
+      "related": [
+        "Cà chua tươi Đà Lạt",
+        "Cá hồi phi lê Nauy tươi",
+        "Thịt ba rọi heo VietGAP",
+        "Thịt bò bắp Úc tươi",
+        "Tôm sú tươi sống",
+        "Trứng gà ta Ba Huân (vỉ 10)"
+      ],
+      "scores": []
+    },
+    {
+      "query": "thịt gà nguyên con",
+      "mode": "HYBRID",
+      "main": [],
+      "related": [
+        "Thịt ba rọi heo VietGAP",
+        "Trứng gà ta Ba Huân (vỉ 10)",
+        "Chuối sứ chín tự nhiên",
+        "Cà chua tươi Đà Lạt",
+        "Tôm sú tươi sống",
+        "Bắp cải trắng Đà Lạt"
+      ],
+      "scores": []
+    },
+    {
+      "query": "thịt để kho tàu",
+      "mode": "HYBRID",
+      "main": [
+        "Thịt ba rọi heo VietGAP"
+      ],
+      "related": [
+        "Thịt bò bắp Úc tươi",
+        "Cá hồi phi lê Nauy tươi",
+        "Tôm sú tươi sống",
+        "Bắp cải trắng Đà Lạt",
+        "Đậu hũ non trứng",
+        "Chuối sứ chín tự nhiên"
+      ],
+      "scores": [
+        {
+          "maSP": 2,
+          "similarityScore": 0.476,
+          "keywordScore": 5.1215215,
+          "rankingScore": 0.016393442
+        }
+      ]
+    },
+    {
+      "query": "gợi ý món cá hồi phi lê Nauy tươi",
+      "mode": "HYBRID",
+      "main": [
+        "Cá hồi phi lê Nauy tươi"
+      ],
+      "related": [
+        "Cá lóc tươi làm sạch",
+        "Thịt ba rọi heo VietGAP",
+        "Thịt bò bắp Úc tươi",
+        "Trứng gà ta Ba Huân (vỉ 10)",
+        "Tôm sú tươi sống",
+        "Cà chua tươi Đà Lạt"
+      ],
+      "scores": [
+        {
+          "maSP": 9,
+          "similarityScore": 0.644,
+          "keywordScore": 10.442166,
+          "rankingScore": 0.016393442
+        }
+      ]
+    }
+  ],
+  "keyword_endpoint": "BM25",
+  "expiry_sort_verified": true,
+  "browser": [
+    {
+      "device": "desktop",
+      "hybridRequests": 2,
+      "noMatchSeparated": true,
+      "horizontalOverflow": false,
+      "inputValue": "mực ống tươi"
+    },
+    {
+      "device": "mobile",
+      "hybridRequests": 2,
+      "noMatchSeparated": true,
+      "horizontalOverflow": false,
+      "inputValue": "mực ống tươi"
+    }
+  ]
+}
