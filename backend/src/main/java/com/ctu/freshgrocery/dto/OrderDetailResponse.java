@@ -43,6 +43,7 @@ public class OrderDetailResponse {
 
     @Schema(description = "Trạng thái đơn hàng", example = "PAID")
     private String trangThai;
+    private String phuongThucThanhToan;
 
     private String nguonDon;
 

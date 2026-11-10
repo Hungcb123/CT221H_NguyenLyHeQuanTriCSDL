@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @JdbcTest
 @AutoConfigureTestDatabase(replace=AutoConfigureTestDatabase.Replace.NONE)
-@Import(AdminOrderService.class)
+@Import({AdminOrderService.class,com.ctu.freshgrocery.payment.MoMoSchema.class})
 @EnabledIfEnvironmentVariable(named="RUN_DB_INTEGRATION_TESTS",matches="true")
 class AdminRefundDatabaseTest {
     @Autowired JdbcTemplate jdbc;

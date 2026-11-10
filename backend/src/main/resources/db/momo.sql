@@ -1,0 +1,39 @@
+SET ANSI_NULLS ON;
+SET QUOTED_IDENTIFIER ON;
+BEGIN TRY
+BEGIN TRANSACTION;
+IF COL_LENGTH('dbo.DonHang','PhuongThucThanhToan') IS NULL
+    ALTER TABLE dbo.DonHang ADD PhuongThucThanhToan VARCHAR(20) NOT NULL
+        CONSTRAINT DF_DonHang_PhuongThucThanhToan DEFAULT 'WALLET';
+
+IF OBJECT_ID('dbo.ThanhToanMoMo') IS NULL
+BEGIN
+    CREATE TABLE dbo.ThanhToanMoMo (
+        PaymentId VARCHAR(50) NOT NULL PRIMARY KEY,
+        MaDH INT NOT NULL UNIQUE REFERENCES dbo.DonHang(MaDH),
+        MaKH INT NOT NULL REFERENCES dbo.KhachHang(MaKH),
+        IdempotencyKey VARCHAR(64) NOT NULL,
+        RequestId VARCHAR(50) NOT NULL UNIQUE,
+        PartnerCode VARCHAR(100) NOT NULL,
+        Amount BIGINT NOT NULL CHECK(Amount BETWEEN 1000 AND 50000000),
+        OrderInfo NVARCHAR(255) NOT NULL,
+        Status VARCHAR(20) NOT NULL DEFAULT 'CREATING'
+            CHECK(Status IN ('CREATING','PENDING','PAID','FAILED','REVIEW')),
+        PayUrl NVARCHAR(2048) NULL,
+        TransId VARCHAR(100) NULL,
+        ResultCode INT NULL,
+        Message NVARCHAR(500) NULL,
+        CreatedAt DATETIME2 NOT NULL DEFAULT GETDATE(),
+        UpdatedAt DATETIME2 NOT NULL DEFAULT GETDATE(),
+        LastCheckedAt DATETIME2 NULL,
+        CONSTRAINT UQ_MoMo_Customer_Key UNIQUE(MaKH,IdempotencyKey)
+    );
+    CREATE UNIQUE INDEX UX_MoMo_TransId ON dbo.ThanhToanMoMo(TransId) WHERE TransId IS NOT NULL;
+    CREATE INDEX IX_MoMo_Pending ON dbo.ThanhToanMoMo(Status,LastCheckedAt);
+END;
+COMMIT TRANSACTION;
+END TRY
+BEGIN CATCH
+    IF @@TRANCOUNT>0 ROLLBACK TRANSACTION;
+    THROW;
+END CATCH;

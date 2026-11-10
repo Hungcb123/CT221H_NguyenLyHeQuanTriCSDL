@@ -319,6 +319,7 @@ public class OrderServiceImpl implements OrderService {
                 .ngayTao(order.getNgayTao())
                 .tongTien(order.getTongTien())
                 .trangThai(order.getTrangThai())
+                .phuongThucThanhToan(order.getPhuongThucThanhToan())
                 .nguonDon(order.getNguonDon())
                 .items(itemDtos)
                 .build();

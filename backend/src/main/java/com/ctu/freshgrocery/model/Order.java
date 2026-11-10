@@ -54,6 +54,9 @@ public class Order {
     @Column(name = "TrangThai", nullable = false, length = 20)
     private String trangThai;
 
+    @Column(name = "PhuongThucThanhToan", insertable=false, updatable=false)
+    private String phuongThucThanhToan;
+
     @Column(name = "NguonDon", nullable = false, insertable = false, updatable = false)
     private String nguonDon;
 

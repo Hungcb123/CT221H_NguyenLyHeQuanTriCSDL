@@ -5,7 +5,7 @@ import {useEffect,useState} from "react";
 import {useRouter} from "next/navigation";
 import {useCustomer} from "./CustomerProvider";
 import {AccountMenu} from "./AccountMenu";
-type Order={maDH:number;ngayTao:string;tongTien:number;trangThai:string;diaChiGiaoHang:string;ghiChu?:string;items:{maSP:number;tenSP:string;soLuong:number;donGia:number;thanhTien:number}[]};
+type Order={maDH:number;ngayTao:string;tongTien:number;trangThai:string;phuongThucThanhToan?:string;diaChiGiaoHang:string;ghiChu?:string;items:{maSP:number;tenSP:string;soLuong:number;donGia:number;thanhTien:number}[]};
 const money=(value:number)=>new Intl.NumberFormat("vi-VN",{style:"currency",currency:"VND"}).format(value);
 const status:Record<string,string>={PAID:"Đã thanh toán",PENDING:"Chờ xác nhận",CONFIRMED:"Đã xác nhận",PROCESSING:"Đang chuẩn bị",SHIPPING:"Đang giao hàng",DELIVERED:"Đã giao hàng",CANCELLED:"Đã hủy",REFUNDED:"Đã hoàn tiền"};
 export function CustomerOrders({orderId}:{orderId?:string}){
@@ -25,6 +25,7 @@ export function CustomerOrders({orderId}:{orderId?:string}){
  {!busy&&orders.map(order=><article key={order.maDH} className="space-y-4 rounded-xl border border-stone-200 bg-white p-5 sm:p-7">
  <div className="flex flex-wrap items-center justify-between gap-3"><h2 className="font-bold">Đơn #{order.maDH}</h2><span className="rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-800">{status[order.trangThai]||order.trangThai}</span></div>
  <p className="text-sm text-stone-600">Đặt lúc {new Date(order.ngayTao).toLocaleString("vi-VN")}</p>
+ {order.phuongThucThanhToan==="MOMO_SANDBOX"&&<div className="rounded-lg bg-pink-50 p-3 text-sm text-pink-900"><strong>MoMo Sandbox — đơn thử nghiệm</strong><p>Không có tiền thật được thanh toán.</p><Link href={`/payments/momo/order/${order.maDH}`} className="mt-2 inline-block font-semibold underline">{order.trangThai==="PENDING"?"Tiếp tục / kiểm tra thanh toán":"Xem kết quả MoMo"}</Link></div>}
  <ul className="divide-y">{order.items?.map(item=><li key={item.maSP} className="flex items-start justify-between gap-4 py-3"><div><p className="font-medium">{item.tenSP}</p><p className="text-sm text-stone-500">{item.soLuong} × {money(item.donGia)}</p></div><strong className="shrink-0 text-sm">{money(item.thanhTien)}</strong></li>)}</ul>
  <div className="flex justify-between border-t pt-4 font-bold"><span>Tổng thanh toán</span><span className="text-red-800">{money(order.tongTien)}</span></div>
  {orderId?<><p className="text-sm"><strong>Giao đến:</strong> {order.diaChiGiaoHang}</p>{order.ghiChu&&<p className="text-sm"><strong>Ghi chú:</strong> {order.ghiChu}</p>}</>:<Link href={`/orders/${order.maDH}`} className="customer-action customer-action-primary">Xem chi tiết đơn hàng <ArrowRight aria-hidden="true" /></Link>}

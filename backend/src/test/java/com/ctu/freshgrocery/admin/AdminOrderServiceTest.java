@@ -27,4 +27,9 @@ class AdminOrderServiceTest {
         verify(jdbc).update("UPDATE DonHang SET TrangThai = ? WHERE MaDH = ?","CANCELLED",1);
     }
     @Test void pendingCancellationNeverRefunds(){order("PENDING");assertEquals(false,service.changeStatus(1,"CANCELLED","admin").get("refunded"));verify(jdbc,never()).update(startsWith("UPDATE KhachHang"),any(),any());}
+    @Test void momoCannotBeRefundedIntoInternalWallet(){
+        order("PAID");when(jdbc.queryForMap(anyString(),eq(1))).thenReturn(Map.of("TrangThai","PAID","TongTien",new BigDecimal("100"),"PhuongThucThanhToan","MOMO_SANDBOX"));
+        assertThrows(AppException.class,()->service.changeStatus(1,"CANCELLED","admin"));
+        verify(jdbc,never()).update(anyString(),any(Object[].class));
+    }
 }

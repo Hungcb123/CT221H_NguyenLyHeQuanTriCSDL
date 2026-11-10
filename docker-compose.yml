@@ -51,6 +51,13 @@ services:
       - SERVER_PORT=8085
       - QDRANT_HOST=qdrant
       - QDRANT_PORT=6333
+      - MOMO_ENABLED=${MOMO_ENABLED:-false}
+      - MOMO_PARTNER_CODE=${MOMO_PARTNER_CODE:-}
+      - MOMO_ACCESS_KEY=${MOMO_ACCESS_KEY:-}
+      - MOMO_SECRET_KEY=${MOMO_SECRET_KEY:-}
+      - MOMO_REDIRECT_URL=${MOMO_REDIRECT_URL:-http://localhost:3000/payments/momo/return}
+      - MOMO_IPN_URL=${MOMO_IPN_URL:-}
+      - MOMO_RECEIVER_PHONE=${MOMO_RECEIVER_PHONE:-0366643213}
 
   qdrant:
     image: qdrant/qdrant:latest
