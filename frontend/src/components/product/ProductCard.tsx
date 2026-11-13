@@ -3,6 +3,7 @@
 import React from "react";
 import { ImageOff } from "lucide-react";
 import { ProductResponse } from "@/types";
+import { productAvailability } from "@/services/product-availability";
 
 interface ProductCardProps {
   product: ProductResponse;
@@ -10,6 +11,8 @@ interface ProductCardProps {
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) => {
+
+  const availability = productAvailability(product);
 
   // Determine badge label and color
   const badgeText = product.tag || (product.dangKhuyenMai && product.phanTramGiam ? `-${product.phanTramGiam}%` : null);
@@ -53,6 +56,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) =
             {product.tenSP}
           </h3>
 
+          {!availability.available && <p className="mt-2 text-sm font-semibold text-red-800">{availability.label}</p>}
+
           {/* Price Area */}
           <div className="mt-2.5 flex items-baseline gap-2 flex-wrap">
             <span className="text-base font-extrabold text-[#B91C1C]">
@@ -73,7 +78,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) =
           onClick={() => onSelect(product)}
           className="min-h-11 w-full rounded-lg border border-[#079447] px-3 py-2 text-sm font-bold text-[#08783c] transition-colors hover:bg-[#079447] hover:text-white"
         >
-          Mua
+          {availability.available ? "Mua" : "Xem tình trạng"}
         </button>
       </div>
     </div>

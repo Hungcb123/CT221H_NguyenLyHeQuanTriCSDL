@@ -10,7 +10,9 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class AdminSchemaMigration implements ApplicationRunner {
     private final JdbcTemplate jdbc;
-    @Override public void run(ApplicationArguments args) {
+    @Override public void run(ApplicationArguments args) throws Exception {
+        jdbc.execute(new org.springframework.core.io.ClassPathResource("product-types.sql")
+                .getContentAsString(java.nio.charset.StandardCharsets.UTF_8));
         jdbc.execute("""
                 IF EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('DuBaoNhapHang')
                            AND name = 'DoTinCay' AND is_nullable = 0)

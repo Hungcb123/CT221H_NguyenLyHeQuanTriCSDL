@@ -70,7 +70,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService {
         // The small catalog is loaded once from SQL, independently of the AI service.
         // SQL failure propagates: a failed database query must never look like no matches.
         List<Product> products = productRepository.findAll().stream()
-                .filter(p -> !Boolean.TRUE.equals(p.getTrangThaiXoa())).toList();
+                .filter(p -> !Boolean.TRUE.equals(p.getTrangThaiXoa()) && p.getMaSPCha() == null).toList();
         Map<Integer, String> categoryNames = getCategoryNameMap();
         Map<Integer, Float> vectorScores = new HashMap<>();
         boolean semanticAvailable = true;

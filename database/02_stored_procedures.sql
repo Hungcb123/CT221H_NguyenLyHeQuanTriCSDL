@@ -208,7 +208,7 @@ BEGIN
           AND (ctkm.SoLuongKhuyenMai IS NULL OR ctkm.SoLuongDaBan < ctkm.SoLuongKhuyenMai)
         ORDER BY ctkm.GiaKhuyenMai ASC
     ) km_active
-    WHERE sp.TrangThaiXoa = 0
+    WHERE sp.TrangThaiXoa = 0 AND sp.MaSPCha IS NULL
       AND (@MaDanhMuc IS NULL OR sp.MaDanhMuc = @MaDanhMuc)
       AND (@TuKhoa IS NULL OR sp.TenSP LIKE N'%' + @TuKhoa + N'%' OR sp.MoTa LIKE N'%' + @TuKhoa + N'%')
       AND (@GiaTu IS NULL OR ISNULL(km_active.GiaKhuyenMai, sp.Gia) >= @GiaTu)
@@ -254,7 +254,7 @@ BEGIN
           AND (ctkm.SoLuongKhuyenMai IS NULL OR ctkm.SoLuongDaBan < ctkm.SoLuongKhuyenMai)
         ORDER BY ctkm.GiaKhuyenMai ASC
     ) km_active
-    WHERE sp.TrangThaiXoa = 0
+    WHERE sp.TrangThaiXoa = 0 AND sp.MaSPCha IS NULL
       AND (@MaDanhMuc IS NULL OR sp.MaDanhMuc = @MaDanhMuc)
       AND (@TuKhoa IS NULL OR sp.TenSP LIKE N'%' + @TuKhoa + N'%' OR sp.MoTa LIKE N'%' + @TuKhoa + N'%')
       AND (@GiaTu IS NULL OR ISNULL(km_active.GiaKhuyenMai, sp.Gia) >= @GiaTu)
@@ -452,11 +452,23 @@ BEGIN
         IF NOT EXISTS (SELECT 1 FROM KhachHang WITH (UPDLOCK, HOLDLOCK) WHERE MaKH = @MaKH)
             THROW 50001, N'Không tìm thấy khách hàng.', 1;
 
-        DECLARE @MaGioHang INT, @SoLuongCu INT, @TonKho INT;
-        SELECT @TonKho = SoLuongTon FROM SanPham WITH (UPDLOCK)
-        WHERE MaSP = @MaSP AND TrangThaiXoa = 0 AND HanSuDung > GETDATE();
+        DECLARE @MaGioHang INT, @SoLuongCu INT, @TonKho INT,
+                @DaXoa BIT, @HanDung DATETIME2, @MaSPCha INT;
+        SELECT @TonKho = SoLuongTon, @DaXoa = TrangThaiXoa,
+               @HanDung = HanSuDung, @MaSPCha = MaSPCha
+        FROM SanPham WITH (UPDLOCK) WHERE MaSP = @MaSP;
         IF @TonKho IS NULL
-            THROW 50001, N'Sản phẩm không tồn tại, đã hết hạn hoặc tạm ngừng kinh doanh.', 1;
+            THROW 50001, N'Sản phẩm không tồn tại.', 1;
+        IF @DaXoa = 1 OR EXISTS (SELECT 1 FROM SanPham WHERE MaSP = @MaSPCha AND TrangThaiXoa = 1)
+            THROW 50001, N'Sản phẩm đã ngừng kinh doanh. Vui lòng chọn sản phẩm khác.', 1;
+        IF @HanDung IS NULL
+            THROW 50001, N'Sản phẩm chưa có hạn sử dụng hợp lệ nên chưa thể mua.', 1;
+        IF @HanDung <= GETDATE()
+            THROW 50001, N'Sản phẩm đã hết hạn sử dụng. Vui lòng chọn sản phẩm khác.', 1;
+        IF EXISTS (SELECT 1 FROM SanPham WHERE MaSPCha = @MaSP AND TrangThaiXoa = 0)
+            THROW 50001, N'Vui lòng chọn loại sản phẩm trước khi thêm vào giỏ.', 1;
+        IF @TonKho <= 0
+            THROW 50001, N'Sản phẩm tạm hết hàng. Vui lòng chọn sản phẩm khác.', 1;
 
         SELECT @MaGioHang = MaGioHang FROM GioHang WHERE MaKH = @MaKH;
         SELECT @SoLuongCu = SoLuong FROM ChiTietGioHang WITH (UPDLOCK, HOLDLOCK)
@@ -552,7 +564,9 @@ BEGIN
              ELSE 0 END AS TienTietKiem,
         sp.SoLuongTon,
         sp.HanSuDung,
-        CASE WHEN sp.SoLuongTon < ctgh.SoLuong OR sp.HanSuDung <= GETDATE() THEN 0 ELSE 1 END AS ConDuHang,
+        CASE WHEN sp.SoLuongTon < ctgh.SoLuong OR sp.HanSuDung IS NULL OR sp.HanSuDung <= GETDATE() OR sp.TrangThaiXoa = 1
+                  OR EXISTS (SELECT 1 FROM SanPham parent WHERE parent.MaSP = sp.MaSPCha AND parent.TrangThaiXoa = 1)
+             THEN 0 ELSE 1 END AS ConDuHang,
         sp.HinhAnh
     FROM ChiTietGioHang ctgh
     INNER JOIN SanPham sp ON ctgh.MaSP = sp.MaSP

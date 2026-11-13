@@ -14,6 +14,10 @@ export interface Category {
 }
 
 export interface ProductResponse {
+  trangThaiBan?: "AVAILABLE" | "EXPIRED" | "OUT_OF_STOCK" | "STOPPED" | "UNKNOWN_EXPIRY" | "NO_AVAILABLE_TYPES";
+  maSPCha?: number | null;
+  tenSanPhamCha?: string;
+  tenLoai?: string;
   maSP: number;
   tenSP: string;
   moTa?: string;
@@ -35,7 +39,21 @@ export interface ProductResponse {
   tag?: string;
 }
 
+export interface ProductTypeDraft {
+  maSP?: number;
+  tenLoai: string;
+  gia: number;
+  donViTinh: string;
+  soLuongTon: number;
+  hanSuDung: string;
+  nhietDoBaoQuan?: string;
+  hinhAnh?: string;
+  moTa?: string;
+  trangThaiXoa?: boolean;
+}
+
 export interface ProductCreateRequest {
+  cacLoai?: ProductTypeDraft[];
   hinhAnh?: string;
   tenSP: string;
   moTa?: string;

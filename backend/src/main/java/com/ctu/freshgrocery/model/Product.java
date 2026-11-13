@@ -24,6 +24,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Table(name = "SanPham")
 public class Product {
+    @Column(name = "MaSPCha")
+    private Integer maSPCha;
+
 
     @Column(name = "HinhAnh", length = 1000)
     private String hinhAnh;

@@ -15,6 +15,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Schema(description = "Thông tin sản phẩm từ kết quả tìm kiếm ngữ nghĩa (Semantic Vector Search)")
 public class SemanticProductResponse {
+    // Computed against SQL Server time, including sellable child types.
+    private String trangThaiBan;
     private String hinhAnh;
 
     @Schema(description = "Mã sản phẩm", example = "1")

@@ -17,6 +17,10 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Schema(description = "Thông tin cập nhật sản phẩm tươi sống")
 public class ProductUpdateRequest {
+    @jakarta.validation.Valid
+    @jakarta.validation.constraints.Size(max = 100)
+    private java.util.List<ProductTypeRequest> cacLoai;
+
     @jakarta.validation.constraints.Size(max = 1000)
     @jakarta.validation.constraints.Pattern(regexp = "^(?:https?://[^\\s]+|/(?!/)[^\\s]*)?$", message = "Ảnh phải là URL http(s) hoặc đường dẫn nội bộ")
     private String hinhAnh;

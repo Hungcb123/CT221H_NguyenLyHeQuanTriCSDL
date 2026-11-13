@@ -2,6 +2,14 @@
 
 Mở `http://localhost:3000/admin`. Frontend chuyển tiếp API sang backend tại cổng 8085; SQL Server và Qdrant phải đang chạy.
 
+## Sản phẩm và các loại
+
+Trong form **Thêm sản phẩm** hoặc **Sửa sản phẩm**, mục **Các loại của sản phẩm** cho phép thêm nhiều loại trực tiếp. Mỗi loại có tên, ảnh, giá, đơn vị tính, tồn kho, hạn dùng và mô tả riêng. Bấm **Lưu sản phẩm** để lưu sản phẩm và toàn bộ các loại cùng một giao dịch; nếu một loại không hợp lệ, tất cả thay đổi được hoàn tác.
+
+Loại không hiện thành sản phẩm độc lập trong danh sách. Khách bấm mua sản phẩm sẽ chọn các loại đang kinh doanh. Sản phẩm chưa có loại vẫn bán như trước. Trong form sửa, dùng **Ẩn loại / Khôi phục loại** để thay đổi trạng thái; mã hàng và lịch sử đơn của loại được giữ nguyên.
+
+Backend tự chạy migration `product-types.sql` khi khởi động; bản SQL độc lập là `database/15_product_types.sql`. Quan hệ sở hữu dùng `SanPham.MaSPCha`. Các liên kết nhóm của bản cũ được gỡ khi nâng cấp, giữ nguyên các mặt hàng và lịch sử.
+
 ## Tài khoản
 
 Backend dùng phiên đăng nhập Spring Security, role `ADMIN`, BCrypt và CSRF. Lần khởi động đầu, nếu chưa đặt `ADMIN_PASSWORD`, backend tạo tài khoản local:

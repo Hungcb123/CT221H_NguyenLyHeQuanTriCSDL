@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class SemanticSearchController {
 
     private final SemanticSearchService semanticSearchService;
+    private final com.ctu.freshgrocery.service.ProductTypeService productTypes;
 
     @GetMapping("/semantic")
     @Operation(
@@ -41,6 +42,10 @@ public class SemanticSearchController {
             @RequestParam(value = "minScore", defaultValue = "0.35") Float minScore
     ) {
         HybridSearchResponse results = semanticSearchService.searchWithStatus(query, limit, minScore);
+        var all = new java.util.ArrayList<>(results.getProducts());
+        if (results.getRelatedProducts() != null) all.addAll(results.getRelatedProducts());
+        var statuses = productTypes.saleStatuses(all.stream().map(com.ctu.freshgrocery.dto.SemanticProductResponse::getMaSP).toList());
+        all.forEach(p -> p.setTrangThaiBan(statuses.get(p.getMaSP())));
         return ResponseEntity.ok(ApiResponse.<HybridSearchResponse>builder()
                 .success(true)
                 .statusCode(1)

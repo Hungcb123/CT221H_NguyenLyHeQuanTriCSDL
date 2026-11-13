@@ -27,10 +27,12 @@ import java.util.Optional;
 public class ProductServiceImpl implements ProductService {
 
     private final ProductSpRepository productSpRepository;
+    private final com.ctu.freshgrocery.service.ProductTypeService productTypes;
     private final ProductRepository productRepository;
     private final SemanticSearchService semanticSearchService;
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public ApiResponse<ProductResponse> createProduct(ProductCreateRequest request) {
         log.info("Creating fresh grocery product via Stored Procedure: {}", request.getTenSP());
 
@@ -45,6 +47,7 @@ public class ProductServiceImpl implements ProductService {
         }
 
         // Lấy chi tiết sản phẩm vừa tạo
+        syncTypes(productTypes.save(newMaSP, request.getCacLoai()));
         Optional<ProductResponse> productOpt = productSpRepository.callLayChiTietSanPham(newMaSP);
         productOpt.ifPresent(p -> productRepository.findById(p.getMaSP()).ifPresent(semanticSearchService::syncProduct));
 
@@ -54,6 +57,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public ApiResponse<ProductResponse> updateProduct(Integer id, ProductUpdateRequest request) {
         log.info("Updating fresh grocery product ID={} via Stored Procedure", id);
 
@@ -67,6 +71,7 @@ public class ProductServiceImpl implements ProductService {
         }
 
         // Lấy lại chi tiết sau khi cập nhật và cập nhật vector trong Qdrant
+        syncTypes(productTypes.save(id, request.getCacLoai()));
         Optional<ProductResponse> productOpt = productSpRepository.callLayChiTietSanPham(id);
         productOpt.ifPresent(p -> productRepository.findById(p.getMaSP()).ifPresent(semanticSearchService::syncProduct));
 
@@ -76,6 +81,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public ApiResponse<String> deleteProduct(Integer id) {
         log.info("Triggering delete for product ID={}", id);
 
@@ -83,6 +89,10 @@ public class ProductServiceImpl implements ProductService {
             return ApiResponse.error(-1, "Sản phẩm không tồn tại hoặc đã bị xóa mềm trước đó.");
         }
 
+        for (var child : productTypes.childIds(id, false)) {
+            productSpRepository.callXoaSanPham(child);
+            semanticSearchService.removeProduct(child);
+        }
         semanticSearchService.removeProduct(id);
         return ApiResponse.ok(1, "Đã ẩn sản phẩm và ghi nhật ký xóa mềm.", "Soft-deleted successfully");
     }
@@ -119,10 +129,17 @@ public class ProductServiceImpl implements ProductService {
         return ApiResponse.ok("Lấy danh sách sản phẩm thành công", pageData);
     }
 
+    private void syncTypes(List<Integer> ids) {
+        for (var id : ids) productRepository.findById(id).ifPresent(p -> {
+            if (Boolean.TRUE.equals(p.getTrangThaiXoa())) semanticSearchService.removeProduct(id);
+            else semanticSearchService.syncProduct(p);
+        });
+    }
+
     private ApiResponse<ProductPageResponse> searchByBm25(Integer categoryId, String keyword,
             BigDecimal minPrice, BigDecimal maxPrice, String sortBy, int page, int size) {
         List<Product> catalog = productRepository.findAll().stream()
-                .filter(p -> !Boolean.TRUE.equals(p.getTrangThaiXoa())).toList();
+                .filter(p -> !Boolean.TRUE.equals(p.getTrangThaiXoa()) && p.getMaSPCha() == null).toList();
         Map<Integer, Float> scores = ProductBm25.score(catalog, keyword);
         String query = ProductBm25.normalize(keyword);
         var intent = new ProductQueryIntent(keyword);

@@ -15,6 +15,12 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Schema(description = "Thông tin chi tiết sản phẩm thực phẩm tươi sống")
 public class ProductResponse {
+    private Integer maSPCha;
+    private String tenLoai;
+    private String tenSanPhamCha;
+
+    // Computed against SQL Server time, including sellable child types.
+    private String trangThaiBan;
     private String hinhAnh;
     private Integer maSP;
     private String tenSP;

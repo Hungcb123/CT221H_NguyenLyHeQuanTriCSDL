@@ -23,6 +23,7 @@ import java.util.*;
 public class AdminController {
     private final JdbcTemplate jdbc;
     private final ProductRepository products;
+    private final com.ctu.freshgrocery.service.ProductTypeService productTypes;
     private final CategoryRepository categories;
     private final PromotionRepository promotions;
     private final SemanticSearchService semantic;
@@ -55,12 +56,13 @@ public class AdminController {
     @GetMapping("/products")
     public ApiResponse<?> products(@RequestParam(defaultValue="") String query, @RequestParam(defaultValue="false") boolean deleted,
                                   @RequestParam(defaultValue="1") int page, @RequestParam(defaultValue="20") int size) {
-        var catalog = products.findAll().stream().filter(p -> Boolean.TRUE.equals(p.getTrangThaiXoa()) == deleted).toList();
+        var catalog = products.findAll().stream().filter(p -> Boolean.TRUE.equals(p.getTrangThaiXoa()) == deleted && p.getMaSPCha() == null).toList();
         var scores = ProductBm25.score(catalog, query);
         var list = catalog.stream().filter(p -> query.isBlank() || scores.containsKey(p.getMaSP()) || query.equals(p.getMaSP().toString()))
                 .sorted(Comparator.comparing(Product::getMaSP).reversed()).map(p -> {
                     Map<String,Object> row = new LinkedHashMap<>();
                     row.put("hinhAnh",p.getHinhAnh());
+                    row.putAll(productTypes.metadata(p.getMaSP()));
                     row.put("maSP",p.getMaSP()); row.put("tenSP",p.getTenSP()); row.put("moTa",p.getMoTa()); row.put("gia",p.getGia());
                     row.put("donViTinh",p.getDonViTinh()); row.put("soLuongTon",p.getSoLuongTon()); row.put("hanSuDung",p.getHanSuDung());
                     row.put("nhietDoBaoQuan",p.getNhietDoBaoQuan()); row.put("maDanhMuc",p.getMaDanhMuc()); row.put("trangThaiXoa",p.getTrangThaiXoa());

@@ -301,6 +301,7 @@ export default function HomePage() {
         products={[...products, ...relatedProducts]}
         onClose={() => setSelectedProduct(null)}
         onAddToCart={handleAddToCart}
+        onSelect={setSelectedProduct}
       />
 
       {/* 5. Cart Slide-over Drawer */}

@@ -22,7 +22,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="vi" className="h-full antialiased">
+    // Browser add-ons can add root classes (e.g. mdl-js) before React hydrates.
+    // Limit the exception to root attributes; descendants still report mismatches.
+    <html lang="vi" className="h-full antialiased" suppressHydrationWarning>
       <body className="min-h-full flex flex-col font-sans"><CustomerProvider>{children}</CustomerProvider></body>
     </html>
   );

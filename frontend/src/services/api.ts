@@ -46,6 +46,9 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 }
 
 export const apiService = {
+  async getProductTypes(id: number): Promise<ProductResponse[]> {
+    return request(`/api/v1/products/${id}/types`);
+  },
   async addRecipeToCart(recipeId: number, servings: number, customerId: number): Promise<void> {
     await request(`/api/v1/ai/chatbot/recipes/${recipeId}/cart`, {
       method: "POST", headers: { "Content-Type": "application/json" },

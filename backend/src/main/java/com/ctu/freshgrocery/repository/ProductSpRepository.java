@@ -31,6 +31,7 @@ import java.util.Optional;
 public class ProductSpRepository {
 
     private final JdbcTemplate jdbcTemplate;
+    private final com.ctu.freshgrocery.service.ProductTypeService productTypes;
 
     private SimpleJdbcCall spThemSanPhamCall;
     private SimpleJdbcCall spCapNhatSanPhamCall;
@@ -162,7 +163,11 @@ public class ProductSpRepository {
                 .addValue("SoDongTrenTrang", soDongTrenTrang);
 
         log.debug("Calling Stored Procedure sp_LayDanhSachSanPhamPhanTrang with params: {}", params.getValues());
-        return spPhanTrangSanPhamCall.execute(params);
+        Map<String, Object> result = spPhanTrangSanPhamCall.execute(params);
+        @SuppressWarnings("unchecked")
+        List<ProductResponse> items = (List<ProductResponse>) result.get("items");
+        if (items != null) productTypes.enrich(items);
+        return result;
     }
 
     /**
@@ -174,6 +179,7 @@ public class ProductSpRepository {
         Map<String, Object> result = spChiTietSanPhamCall.execute(params);
         List<ProductResponse> items = (List<ProductResponse>) result.getOrDefault("items", Collections.emptyList());
         if (items != null && !items.isEmpty()) {
+            productTypes.enrich(items);
             return Optional.of(items.get(0));
         }
         return Optional.empty();

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Plus, RotateCw } from "lucide-react";
-import { Category, ProductCreateRequest } from "@/types";
+import { Category, ProductCreateRequest, ProductResponse } from "@/types";
 import {
   adminError,
   adminRequest,
@@ -11,6 +11,7 @@ import {
   datetime,
   money,
 } from "@/services/admin-api";
+import { ProductTypeEditor } from "@/components/admin/ProductTypeEditor";
 import { useAdminResource } from "@/components/admin/useAdminResource";
 import {
   AdminTitle,
@@ -30,6 +31,7 @@ const fresh = (category: number): ProductCreateRequest => ({
   hanSuDung: "",
   nhietDoBaoQuan: "",
   maDanhMuc: category,
+  cacLoai: [],
 });
 type Confirmation = {
   title: string;
@@ -45,6 +47,10 @@ export default function ProductAdminPage() {
     `/api/v1/admin/products?${new URLSearchParams({ query, deleted: String(deleted), page: String(page), size: "20" })}`,
   );
   const categories = useAdminResource<Category[]>("/api/v1/categories");
+  const [typesLoading, setTypesLoading] = useState(false);
+  const [typesError, setTypesError] = useState("");
+  const [typesUploading, setTypesUploading] = useState(false);
+  const loadVersion = useRef(0);
   const [draft, setDraft] = useState<ProductCreateRequest | null>(null);
   const [editing, setEditing] = useState<number | null>(null);
   const [pending, setPending] = useState(false);
@@ -63,12 +69,13 @@ export default function ProductAdminPage() {
     <>
       <AdminTitle
         title="Sản phẩm"
-        description="Quản lý giá niêm yết, tồn kho, hạn dùng và trạng thái kinh doanh."
+        description="Quản lý sản phẩm và thêm các loại ngay trong form tạo hoặc chỉnh sửa."
       >
         <button
           className="ad-btn"
-          disabled={!categories.data?.length}
+          disabled={!categories.data?.length || pending || typesUploading}
           onClick={() => {
+            loadVersion.current++; setTypesLoading(false); setTypesError("");
             setDraft(fresh(categories.data![0].maDanhMuc));
             setEditing(null);
             setMessage("");
@@ -130,6 +137,12 @@ export default function ProductAdminPage() {
                       tenSP: draft.tenSP.trim(),
                       donViTinh: draft.donViTinh.trim(),
                       hanSuDung: `${draft.hanSuDung}:00`,
+                      cacLoai: (draft.cacLoai || []).map((type) => ({
+                        ...type,
+                        tenLoai: type.tenLoai.trim(),
+                        donViTinh: type.donViTinh.trim(),
+                        hanSuDung: type.hanSuDung.length === 16 ? type.hanSuDung + ":00" : type.hanSuDung,
+                      })),
                     }),
                   },
                 );
@@ -137,7 +150,7 @@ export default function ProductAdminPage() {
                 setEditing(null);
                 setMessage(
                   editing
-                    ? "Đã lưu thay đổi; trigger và đồng bộ vector được thực thi ở backend."
+                    ? "Đã lưu thay đổi."
                     : "Đã tạo sản phẩm.",
                 );
                 list.refresh();
@@ -282,15 +295,24 @@ export default function ProductAdminPage() {
                 </small>
               </label>
             </div>
+            <ProductTypeEditor
+              types={draft.cacLoai || []}
+              product={draft}
+              disabled={pending || typesLoading}
+              onChange={(values) => field("cacLoai", values)}
+              onUploading={setTypesUploading}
+            />
+            {typesLoading && <p role="status">Đang tải các loại của sản phẩm…</p>}
+            {typesError && <p role="alert" className="text-red-800">{typesError} Hãy mở lại sản phẩm để tải lại trước khi lưu.</p>}
             <div className="ad-actions">
-              <button className="ad-btn" disabled={pending}>
+              <button className="ad-btn" disabled={pending || typesLoading || !!typesError || typesUploading}>
                 {pending ? "Đang lưu…" : "Lưu sản phẩm"}
               </button>
               <button
                 type="button"
                 className="ad-btn secondary"
                 disabled={pending}
-                onClick={() => setDraft(null)}
+                onClick={() => { loadVersion.current++; setDraft(null); setTypesError(""); }}
               >
                 Hủy chỉnh sửa
               </button>
@@ -373,15 +395,29 @@ export default function ProductAdminPage() {
                   <div className="ad-row-actions">
                     {!deleted && (
                       <button
-                        onClick={() => {
+                        disabled={pending || typesUploading}
+                        onClick={async () => {
+                          const version = ++loadVersion.current;
+                          setTypesLoading(true); setTypesError("");
                           setEditing(p.maSP);
                           setDraft({
                             ...p,
+                            cacLoai: [],
                             moTa: p.moTa ?? "",
                             hanSuDung: p.hanSuDung.slice(0, 16),
                           });
                           setError("");
                           window.scrollTo({ top: 0, behavior: "smooth" });
+                          try {
+                            const types = await adminRequest<ProductResponse[]>(`/api/v1/admin/products/${p.maSP}/types`);
+                            if (version === loadVersion.current) setDraft((current) => current ? {
+                              ...current, cacLoai: types.map((t) => ({ ...t, tenLoai: t.tenLoai || "", gia: t.giaGoc, hanSuDung: t.hanSuDung.slice(0, 16) })),
+                            } : current);
+                          } catch (failure) {
+                            if (version === loadVersion.current) setTypesError(adminError(failure));
+                          } finally {
+                            if (version === loadVersion.current) setTypesLoading(false);
+                          }
                         }}
                       >
                         Sửa

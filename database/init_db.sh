@@ -24,6 +24,7 @@ echo "1/5: Đang tạo bảng và Schema (01_init_schema.sql)..."
 sqlcmd -i /database/01_init_schema.sql
 
 sqlcmd -i /database/07_product_images.sql
+sqlcmd -i /database/15_product_types.sql
 
 echo "2/5: Đang tạo Stored Procedures CRUD (02_stored_procedures.sql)..."
 sqlcmd -i /database/02_stored_procedures.sql
@@ -39,6 +40,7 @@ sqlcmd -i /database/05_indexing_benchmark.sql
 
 echo "Đang bổ sung danh mục 48 sản phẩm (06_extended_catalog.sql)..."
 sqlcmd -i /database/06_extended_catalog.sql
+
 
 echo "Đang gắn ảnh minh họa sản phẩm (08_catalog_images.sql)..."
 sqlcmd -i /database/08_catalog_images.sql

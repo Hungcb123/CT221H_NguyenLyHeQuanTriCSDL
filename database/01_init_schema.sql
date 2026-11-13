@@ -29,6 +29,8 @@ IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = N'SanPham')
 BEGIN
     CREATE TABLE SanPham (
         MaSP INT IDENTITY(1,1) PRIMARY KEY,
+        MaSPCha INT NULL CONSTRAINT FK_SanPham_Cha REFERENCES dbo.SanPham(MaSP),
+        TenLoai NVARCHAR(80) NULL,
         TenSP NVARCHAR(200) NOT NULL,
         MoTa NVARCHAR(MAX) NULL,
         HinhAnh NVARCHAR(1000) NULL,

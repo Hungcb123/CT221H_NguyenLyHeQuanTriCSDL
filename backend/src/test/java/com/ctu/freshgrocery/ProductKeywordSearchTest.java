@@ -15,7 +15,7 @@ class ProductKeywordSearchTest {
     ProductRepository repository = mock(ProductRepository.class);
     ProductSpRepository procedures = mock(ProductSpRepository.class);
     SemanticSearchService semantic = mock(SemanticSearchService.class);
-    ProductServiceImpl service = new ProductServiceImpl(procedures, repository, semantic);
+    ProductServiceImpl service = new ProductServiceImpl(procedures, mock(com.ctu.freshgrocery.service.ProductTypeService.class), repository, semantic);
 
     void catalog() {
         when(repository.findAll()).thenReturn(List.of(
