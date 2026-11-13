@@ -4,9 +4,12 @@
 USE FreshGroceryDB;
 GO
 SET XACT_ABORT ON;
+SET QUOTED_IDENTIFIER ON;
+SET ANSI_NULLS ON;
+DECLARE @Changed TABLE (MaSP INT, TenSP NVARCHAR(200), HanCu DATETIME2, HanMoi DATETIME2);
 BEGIN TRANSACTION;
 UPDATE p SET HanSuDung = DATEADD(DAY, demo.DaysFresh, GETDATE()), NgayCapNhat = GETDATE()
-OUTPUT inserted.MaSP, inserted.TenSP, deleted.HanSuDung AS HanCu, inserted.HanSuDung AS HanMoi
+OUTPUT inserted.MaSP, inserted.TenSP, deleted.HanSuDung, inserted.HanSuDung INTO @Changed
 FROM dbo.SanPham p
 JOIN (VALUES
     (N'Cải thìa VietGAP', N'Cải thìa xanh giòn, dùng xào tỏi hoặc nấu canh.', 4),
@@ -72,4 +75,5 @@ JOIN (VALUES
 ) demo(TenSP, MoTa, DaysFresh) ON p.TenSP = demo.TenSP AND p.MoTa = demo.MoTa
 WHERE p.MaSPCha IS NULL AND p.TrangThaiXoa = 0 AND p.HanSuDung <= GETDATE();
 COMMIT TRANSACTION;
+SELECT * FROM @Changed ORDER BY MaSP;
 GO
