@@ -168,13 +168,7 @@ for name,code in [('Cao Tường Hưng','B2303873'),('Trang Minh Chánh','B23038
  for r in p.runs:r.bold=True
 p=doc.add_paragraph();p.paragraph_format.space_after=Pt(15)
 p=para('Cần Thơ, tháng 11 năm 2026');p.alignment=WD_ALIGN_PARAGRAPH.CENTER;p.paragraph_format.first_line_indent=Cm(0)
-# Frame on cover only.
-borders=OxmlElement('w:pgBorders');borders.set(qn('w:offsetFrom'),'page')
-for side in ['top','left','bottom','right']:
- e=OxmlElement('w:'+side)
- for k,v in [('val','single'),('sz','8'),('space','24'),('color','516579')]:e.set(qn('w:'+k),v)
- borders.append(e)
-cover._sectPr.append(borders)
+# No decorative page borders.
 
 front=doc.add_section(WD_SECTION_START.NEW_PAGE);setup_section(front,1,'lowerRoman')
 for old in front._sectPr.findall(qn('w:pgBorders')):front._sectPr.remove(old)
