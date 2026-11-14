@@ -148,6 +148,54 @@ class ProductTypesDatabaseTest {
         assertEquals("STOPPED", typesStatus(children.getFirst().getMaSP()));
     }
 
+    @Test void hidingAndRestoringFamilyPreservesEachTypesOwnVisibility() {
+        var parent = service.createProduct(product("QA Restore family", List.of(type("Visible", 100000, 8), type("Hidden", 120000, 12)))).getData();
+        var original = controller.adminTypes(parent.getMaSP()).getData();
+        var visible = existing(original.getFirst());
+        var hidden = existing(original.get(1)); hidden.setTrangThaiXoa(true);
+        service.updateProduct(parent.getMaSP(), ProductUpdateRequest.builder().cacLoai(List.of(visible, hidden)).build());
+
+        assertTrue(service.deleteProduct(parent.getMaSP()).isSuccess());
+        assertFalse(jdbc.queryForObject("SELECT TrangThaiXoa FROM SanPham WHERE MaSP = ?", Boolean.class, visible.getMaSP()),
+                "Hiding a family must preserve each type\'s own visibility for restoration");
+        assertEquals("STOPPED", new ProductTypeService(jdbc).saleStatuses(List.of(visible.getMaSP())).get(visible.getMaSP()));
+        assertThrows(AppException.class, () -> controller.types(parent.getMaSP()));
+        // Restoring a family clears its parent flag without reviving individually hidden types.
+        jdbc.update("UPDATE SanPham SET TrangThaiXoa = 0 WHERE MaSP = ?", parent.getMaSP());
+        var restored = controller.types(parent.getMaSP()).getData();
+        assertEquals(List.of(visible.getMaSP()), restored.stream().map(ProductResponse::getMaSP).toList());
+        assertEquals(8, restored.getFirst().getSoLuongTon());
+        assertTrue(controller.adminTypes(parent.getMaSP()).getData().get(1).getTrangThaiXoa());
+    }
+
+    @Test void hidingAllTypesDoesNotMakeBaseProductSellable() {
+        var parent = service.createProduct(product("QA All hidden types", List.of(type("Hidden", 100000, 8)))).getData();
+        var hidden = existing(controller.adminTypes(parent.getMaSP()).getData().getFirst());
+        hidden.setTrangThaiXoa(true);
+        service.updateProduct(parent.getMaSP(), ProductUpdateRequest.builder().cacLoai(List.of(hidden)).build());
+        assertAll(
+                () -> assertTrue(controller.types(parent.getMaSP()).getData().isEmpty(), "A family with hidden types must not fall back to selling its base row"),
+                () -> assertEquals("NO_AVAILABLE_TYPES", typesStatus(parent.getMaSP())));
+    }
+
+    @Test void oldParentOfferDoesNotDiscountFamilyPreview() {
+        var parent = service.createProduct(product("QA Legacy family offer", List.of(type("300g", 30000, 8), type("500g", 50000, 12)))).getData();
+        int promotion = jdbc.queryForObject("INSERT INTO ChuongTrinhKhuyenMai(TenKM,LoaiKM,NgayBatDau,NgayKetThuc,TrangThai) OUTPUT INSERTED.MaKM VALUES(N'QA legacy parent offer','FLASH_SALE',DATEADD(HOUR,-1,GETDATE()),DATEADD(DAY,1,GETDATE()),1)", Integer.class);
+        jdbc.update("INSERT INTO ChiTietKhuyenMai(MaKM,MaSP,PhanTramGiam,GiaKhuyenMai) VALUES(?,?,30,70000)", promotion, parent.getMaSP());
+        var preview = service.getProductById(parent.getMaSP()).getData();
+        assertFalse(preview.getDangKhuyenMai());
+        assertEquals(0, preview.getGiaGoc().compareTo(preview.getGiaHienTai()));
+        assertNull(preview.getPhanTramGiam());
+        assertNull(preview.getMaKM());
+        assertNull(preview.getTenChuongTrinhKM());
+        var children = controller.types(parent.getMaSP()).getData();
+        assertEquals(0, BigDecimal.valueOf(30000).compareTo(children.getFirst().getGiaHienTai()));
+        assertEquals(0, BigDecimal.valueOf(50000).compareTo(children.get(1).getGiaHienTai()));
+        assertTrue(children.stream().noneMatch(ProductResponse::getDangKhuyenMai));
+        jdbc.update("UPDATE SanPham SET TrangThaiXoa=1 WHERE MaSPCha=?", parent.getMaSP());
+        assertFalse(service.getProductById(parent.getMaSP()).getData().getDangKhuyenMai());
+    }
+
     private String typesStatus(int id) {
         return service.getProductById(id).getData().getTrangThaiBan();
     }

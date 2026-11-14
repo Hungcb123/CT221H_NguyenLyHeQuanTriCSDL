@@ -19,17 +19,18 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/benchmark")
 @RequiredArgsConstructor
-@Tag(name = "8. Đo Kiểm Hiệu Năng Chỉ Mục (Indexing Benchmark 1M Records)", description = "Các API đối chứng hiệu năng truy vấn dữ liệu lớn: Table Scan vs B-Tree Covering Index Seek")
+@Tag(name = "8. Đo Kiểm Hiệu Năng Chỉ Mục (Indexing Benchmark 1M Records)", description = "Đối chứng thời gian truy vấn ép quét bảng và ép dùng chỉ mục bao phủ trên các đơn benchmark")
 public class BenchmarkController {
 
     private final BenchmarkService benchmarkService;
 
     @GetMapping("/compare")
     @Operation(
-            summary = "1-Click Benchmark: So sánh trực tiếp Table Scan vs Covering Index Seek",
-            description = "Thực thi song song 2 kịch bản truy vấn phân tích doanh số trên bảng DonHang lớn: " +
-                    "Kịch bản 1 (Clustered Index Scan - Không dùng chỉ mục bao phủ) vs Kịch bản 2 (Covering Index Seek - Đã tối ưu B-Tree + INCLUDE). " +
-                    "Trả về kết quả thời gian thực thi (ms), hệ số tăng tốc (Speedup Factor) và tỷ lệ thời gian I/O cắt giảm."
+            summary = "So sánh thời gian quét bảng và dùng chỉ mục bao phủ",
+            description = "Thực thi tuần tự hai truy vấn trên cùng các đơn có nguồn BENCHMARK: " +
+                    "kịch bản 1 ép quét bảng bằng INDEX(0); kịch bản 2 ép dùng chỉ mục bao phủ. " +
+                    "Bảo đảm chỉ mục bao phủ tồn tại trước khi chạy. Trả thời gian đo tại ứng dụng (ms), tỷ số và mức giảm thời gian. " +
+                    "Một lượt đo chịu ảnh hưởng của bộ đệm và tải hệ thống; chưa đo I/O hoặc xác nhận Seek/Scan bằng execution plan."
     )
     public ResponseEntity<ApiResponse<BenchmarkComparisonResponse>> compareBenchmark() {
         BenchmarkComparisonResponse response = benchmarkService.compareBenchmark();
@@ -44,7 +45,8 @@ public class BenchmarkController {
     @PostMapping("/generate-data")
     @Operation(
             summary = "Kích hoạt sinh dữ liệu lớn mẫu vào bảng DonHang bằng T-SQL CTE",
-            description = "Sử dụng đệ quy T-SQL Common Table Expression (CTE) kết hợp CROSS JOIN sinh cực nhanh 10.000 đến 500.000 bản ghi đơn hàng mẫu."
+            description = "Dùng T-SQL CTE và CROSS JOIN thêm 1.000 đến 1.000.000 đơn có nguồn BENCHMARK vào bảng DonHang. " +
+                    "Giá trị count được giới hạn trong khoảng này. Đơn không có chi tiết sản phẩm và được tách khỏi doanh thu bán hàng."
     )
     public ResponseEntity<ApiResponse<Map<String, Object>>> generateData(
             @Parameter(description = "Số lượng đơn hàng cần sinh (mặc định: 50.000 dòng)", example = "50000")

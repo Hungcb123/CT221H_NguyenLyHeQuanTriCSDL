@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Yêu cầu thanh toán đơn hàng bằng ví điện tử")
+@Schema(description = "Yêu cầu đặt hàng COD hoặc thanh toán bằng ví điện tử")
 public class CheckoutRequest {
 
     @NotNull(message = "Mã khách hàng không được để trống")
@@ -23,4 +23,9 @@ public class CheckoutRequest {
 
     @Schema(description = "Ghi chú giao hàng", example = "Giao buổi sáng trước 11h giúp mình nhé")
     private String ghiChu;
+
+    @jakarta.validation.constraints.Pattern(regexp = "WALLET|COD", message = "Chọn COD hoặc WALLET")
+    @NotNull
+    @Builder.Default
+    private String phuongThucThanhToan = "COD";
 }

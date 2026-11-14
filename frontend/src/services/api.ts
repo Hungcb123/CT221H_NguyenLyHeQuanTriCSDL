@@ -1,5 +1,6 @@
 import {
   ApiResponse,
+  PromotionCampaign,
   Category,
   ProductPageResponse,
   ProductResponse,
@@ -46,6 +47,9 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 }
 
 export const apiService = {
+  async getPromotionOffers(): Promise<PromotionCampaign[]> {
+    return request("/api/v1/promotions/storefront");
+  },
   async getProductTypes(id: number): Promise<ProductResponse[]> {
     return request(`/api/v1/products/${id}/types`);
   },
@@ -154,12 +158,12 @@ export const apiService = {
     return request<WalletTransaction[]>(`/api/v1/wallets/${customerId}/transactions`);
   },
 
-  async checkout(address: string, note: string, customerId: number): Promise<CheckoutResponse> {
+  async checkout(address: string, note: string, customerId: number, method: "COD" = "COD"): Promise<CheckoutResponse> {
     const data = await request<CheckoutResponse>("/api/v1/orders/checkout", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ maKH: customerId, diaChiGiaoHang: address.trim(), ghiChu: note.trim() }),
+      body: JSON.stringify({ maKH: customerId, diaChiGiaoHang: address.trim(), ghiChu: note.trim(), phuongThucThanhToan: method }),
     });
-    if (data?.statusCode !== 1 || !data.maDH || !Number.isFinite(data.tongTien) || !Number.isFinite(data.soDuConLai)) {
+    if (data?.statusCode !== 1 || !data.maDH || !Number.isFinite(data.tongTien)) {
       throw new Error(data?.message || "Chưa xác nhận được kết quả thanh toán. Hãy kiểm tra đơn hàng trước khi thử lại.");
     }
     return data;

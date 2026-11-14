@@ -35,6 +35,11 @@ export default function CategoriesPage() {
                 `/api/v1/admin/categories/${remove.maDanhMuc}`,
                 { method: "DELETE" },
               );
+              if (id === remove.maDanhMuc) {
+                setId(null);
+                setName("");
+                setDescription("");
+              }
               setRemove(null);
               list.refresh();
               setMessage("Đã xóa danh mục trống.");

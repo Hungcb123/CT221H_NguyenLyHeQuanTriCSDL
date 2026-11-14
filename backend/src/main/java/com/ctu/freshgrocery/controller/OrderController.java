@@ -32,8 +32,8 @@ public class OrderController {
 
     @PostMapping("/checkout")
     @Operation(
-            summary = "Thanh toán đơn hàng qua ví điện tử (REQ-TX-01)",
-            description = "Thực thi thủ tục sp_ThanhToanDonHang chuẩn ACID: khóa UPDLOCK/ROWLOCK kiểm tra tồn kho, trừ tiền ví, tạo đơn hàng, ghi sổ cái kiểm toán và xóa giỏ hàng nguyên tử."
+            summary = "Đặt hàng COD hoặc thanh toán qua ví điện tử (REQ-TX-01)",
+            description = "Thực thi thủ tục sp_ThanhToanDonHang chuẩn ACID: khóa UPDLOCK/ROWLOCK kiểm tra tồn kho, trừ tiền ví khi chọn WALLET (COD không trừ ví), tạo đơn hàng, ghi sổ cái kiểm toán và xóa giỏ hàng nguyên tử."
     )
     public ResponseEntity<ApiResponse<CheckoutResponse>> checkout(@Valid @RequestBody CheckoutRequest request) {
         customer.owner(request.getMaKH());

@@ -171,6 +171,62 @@ public class QdrantServiceImpl implements QdrantService {
     }
 
     @Override
+    public boolean retainOnlyPoints(String collectionName, java.util.Set<Long> activePointIds) {
+        try {
+            List<Long> staleIds = new ArrayList<>();
+            Object offset = null;
+            do {
+                Map<String, Object> scrollBody = new HashMap<>();
+                scrollBody.put("limit", 256);
+                scrollBody.put("with_payload", false);
+                scrollBody.put("with_vector", false);
+                if (offset != null) scrollBody.put("offset", offset);
+
+                String res = getClient().post()
+                        .uri("/collections/{name}/points/scroll", collectionName)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(scrollBody)
+                        .retrieve()
+                        .body(String.class);
+                if (res == null || res.isBlank()) break;
+
+                JsonNode root = objectMapper.readTree(res);
+                JsonNode result = root.get("result");
+                if (result == null) break;
+                JsonNode points = result.get("points");
+                if (points != null && points.isArray()) {
+                    for (JsonNode pt : points) {
+                        if (pt.has("id")) {
+                            long id = pt.get("id").asLong();
+                            if (activePointIds == null || !activePointIds.contains(id)) {
+                                staleIds.add(id);
+                            }
+                        }
+                    }
+                }
+                JsonNode nextOffset = result.get("next_page_offset");
+                offset = (nextOffset == null || nextOffset.isNull())
+                        ? null
+                        : (nextOffset.isNumber() ? nextOffset.longValue() : nextOffset.asText());
+            } while (offset != null);
+
+            if (!staleIds.isEmpty()) {
+                getClient().post()
+                        .uri("/collections/{name}/points/delete?wait=true", collectionName)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(Map.of("points", staleIds))
+                        .retrieve()
+                        .toBodilessEntity();
+                log.info("Đã dọn dẹp {} vector cũ/quy cách con khỏi Qdrant collection [{}]", staleIds.size(), collectionName);
+            }
+            return true;
+        } catch (Exception e) {
+            log.warn("Không thể dọn dẹp các điểm cũ trong Qdrant [{}]: {}", collectionName, e.getMessage());
+            return false;
+        }
+    }
+
+    @Override
     public List<QdrantScoredPoint> search(String collectionName, float[] vector, int limit, Float minScore) {
         try {
             List<Float> vectorList = new ArrayList<>(vector.length);

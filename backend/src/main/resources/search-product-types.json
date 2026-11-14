@@ -1,12 +1,422 @@
 [
-  ["thịt gà", "gà nguyên con"], ["trứng gà", "trứng"],
-  ["thịt bò", "bắp bò", "bò bắp"], ["thịt heo", "thịt lợn", "ba rọi", "ba chỉ"],
-  ["thịt dê"], ["thịt vịt"], ["cá lóc"], ["cá hồi", "salmon"], ["cá"],
-  ["tôm", "shrimp"], ["mực", "squid"], ["cua"],
-  ["rau muống"], ["bắp cải"], ["cà chua", "tomato"], ["cần tây"],
-  ["đậu hũ", "đậu phụ", "tofu"], ["chuối", "banana"], ["xoài", "mango"],
-  ["táo", "apple"], ["sầu riêng"], ["vải thiều"], ["dưa hấu"],
-  ["sữa chua", "yogurt"], ["sữa", "milk"], ["phô mai", "cheese"],
-  ["bánh mì", "sandwich"], ["cà phê", "coffee"], ["nước ngọt"],
-  ["bột giặt"], ["nước rửa chén"]
+  [
+    "thịt gà",
+    "gà nguyên con"
+  ],
+  [
+    "trứng gà",
+    "trứng"
+  ],
+  [
+    "thịt bò",
+    "bắp bò",
+    "bò bắp"
+  ],
+  [
+    "thịt heo",
+    "thịt lợn",
+    "ba rọi",
+    "ba chỉ"
+  ],
+  [
+    "thịt dê"
+  ],
+  [
+    "thịt vịt"
+  ],
+  [
+    "cá lóc"
+  ],
+  [
+    "cá hồi",
+    "salmon"
+  ],
+  [
+    "cá basa"
+  ],
+  [
+    "cá diêu hồng"
+  ],
+  [
+    "cá thu"
+  ],
+  [
+    "cá nục"
+  ],
+  [
+    "chả cá",
+    "thác lác"
+  ],
+  [
+    "cá"
+  ],
+  [
+    "tôm sú"
+  ],
+  [
+    "tôm thẻ"
+  ],
+  [
+    "tôm",
+    "shrimp"
+  ],
+  [
+    "mực",
+    "mực ống",
+    "squid"
+  ],
+  [
+    "bạch tuộc",
+    "octopus"
+  ],
+  [
+    "nghêu",
+    "ngao",
+    "clam"
+  ],
+  [
+    "sò huyết"
+  ],
+  [
+    "cua",
+    "cua biển",
+    "cua thịt",
+    "crab"
+  ],
+  [
+    "rau muống"
+  ],
+  [
+    "bắp cải"
+  ],
+  [
+    "cải thảo",
+    "bắp cải thảo",
+    "napa cabbage"
+  ],
+  [
+    "bông cải",
+    "súp lơ xanh",
+    "broccoli"
+  ],
+  [
+    "xà lách",
+    "rau xà lách",
+    "lettuce"
+  ],
+  [
+    "cà chua",
+    "tomato"
+  ],
+  [
+    "cà rốt",
+    "carrot"
+  ],
+  [
+    "khoai tây",
+    "potato"
+  ],
+  [
+    "khoai lang",
+    "sweet potato"
+  ],
+  [
+    "cần tây",
+    "rau cần tây",
+    "celery"
+  ],
+  [
+    "nấm kim châm",
+    "enoki"
+  ],
+  [
+    "nấm đùi gà",
+    "king oyster mushroom"
+  ],
+  [
+    "nấm rơm",
+    "straw mushroom"
+  ],
+  [
+    "giá đỗ",
+    "giá sống",
+    "bean sprouts"
+  ],
+  [
+    "bạc hà",
+    "dọc mùng"
+  ],
+  [
+    "ớt chuông",
+    "ớt ngọt",
+    "bell pepper"
+  ],
+  [
+    "ớt hiểm",
+    "ớt chỉ thiên",
+    "ớt cay"
+  ],
+  [
+    "đậu hũ",
+    "đậu phụ",
+    "tàu hũ",
+    "tofu"
+  ],
+  [
+    "chuối",
+    "banana"
+  ],
+  [
+    "xoài",
+    "mango"
+  ],
+  [
+    "táo",
+    "táo xanh",
+    "apple",
+    "green apple"
+  ],
+  [
+    "bơ sáp",
+    "quả bơ",
+    "trái bơ",
+    "avocado"
+  ],
+  [
+    "chanh tươi",
+    "chanh không hạt",
+    "trái chanh",
+    "chanh giấy",
+    "lime"
+  ],
+  [
+    "cam sành",
+    "cam"
+  ],
+  [
+    "bưởi",
+    "bưởi da xanh"
+  ],
+  [
+    "ổi",
+    "ổi nữ hoàng"
+  ],
+  [
+    "thanh long"
+  ],
+  [
+    "sầu riêng"
+  ],
+  [
+    "vải thiều"
+  ],
+  [
+    "dưa hấu"
+  ],
+  [
+    "sữa chua",
+    "yogurt"
+  ],
+  [
+    "sữa",
+    "milk"
+  ],
+  [
+    "phô mai",
+    "cheese"
+  ],
+  [
+    "bánh mì",
+    "sandwich"
+  ],
+  [
+    "cà phê",
+    "coffee"
+  ],
+  [
+    "nước ngọt"
+  ],
+  [
+    "bột giặt"
+  ],
+  [
+    "nước rửa chén"
+  ],
+  [
+    "tỏi",
+    "củ tỏi",
+    "tỏi khô",
+    "garlic"
+  ],
+  [
+    "hành tím",
+    "hành khô",
+    "củ hành tím",
+    "shallot"
+  ],
+  [
+    "gừng",
+    "củ gừng",
+    "ginger"
+  ],
+  [
+    "sả cây",
+    "cây sả",
+    "củ sả",
+    "sả tươi",
+    "lemongrass"
+  ],
+  [
+    "me vắt",
+    "me chua",
+    "cốt me",
+    "tamarind"
+  ],
+  [
+    "nước mắm",
+    "fish sauce"
+  ],
+  [
+    "nước tương",
+    "xì dầu",
+    "soy sauce"
+  ],
+  [
+    "hạt nêm",
+    "bột nêm"
+  ],
+  [
+    "tiêu đen",
+    "hạt tiêu",
+    "tiêu xay",
+    "black pepper"
+  ],
+  [
+    "ngò rí",
+    "rau mùi",
+    "mùi ta",
+    "cilantro",
+    "coriander"
+  ],
+  [
+    "ngò gai",
+    "mùi tàu",
+    "culantro",
+    "rau mùi tàu"
+  ],
+  [
+    "rau ngổ",
+    "ngò om",
+    "rau om"
+  ],
+  [
+    "hành lá",
+    "hành hoa",
+    "scallion"
+  ],
+  [
+    "húng quế",
+    "rau quế",
+    "Thai basil"
+  ],
+  [
+    "rau răm",
+    "Vietnamese coriander"
+  ],
+  [
+    "tía tô",
+    "lá tía tô",
+    "perilla"
+  ],
+  [
+    "thì là",
+    "rau thì là",
+    "dill"
+  ],
+  [
+    "tần ô",
+    "cải cúc",
+    "rau cải cúc"
+  ],
+  [
+    "khổ qua",
+    "mướp đắng"
+  ],
+  [
+    "bí đao",
+    "bí xanh"
+  ],
+  [
+    "dưa leo",
+    "dưa chuột"
+  ],
+  [
+    "đậu bắp",
+    "mướp tây",
+    "okra"
+  ],
+  [
+    "đậu cô ve",
+    "đậu que",
+    "đậu cove",
+    "đỗ cô ve"
+  ],
+  [
+    "củ đậu",
+    "củ sắn",
+    "jicama"
+  ],
+  [
+    "khoai mì",
+    "sắn",
+    "cassava"
+  ],
+  [
+    "bắp ngọt",
+    "ngô ngọt",
+    "ngô vàng"
+  ],
+  [
+    "dứa",
+    "khóm",
+    "trái thơm",
+    "quả thơm"
+  ],
+  [
+    "đậu phộng",
+    "lạc",
+    "hạt lạc"
+  ],
+  [
+    "ức gà",
+    "lườn gà",
+    "thịt lườn gà"
+  ],
+  [
+    "nạm bò",
+    "thịt bò nạm"
+  ],
+  [
+    "gầu bò",
+    "thịt bò gầu"
+  ],
+  [
+    "ức bò",
+    "thịt bò ức",
+    "beef brisket"
+  ],
+  [
+    "thăn bò",
+    "thịt bò thăn"
+  ],
+  [
+    "sườn bò",
+    "thịt bò sườn",
+    "dẻ sườn bò"
+  ],
+  [
+    "má đùi gà",
+    "thịt gà má đùi",
+    "đùi gà phi lê"
+  ]
 ]

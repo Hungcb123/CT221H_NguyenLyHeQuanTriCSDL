@@ -29,6 +29,7 @@ export interface AdminOrder {
   TongTien: number;
   TrangThai: string;
   DiaChiGiaoHang: string;
+  PhuongThucThanhToan?: string;
   NguonDon: "SALE" | "BENCHMARK" | "DEMO_FORECAST";
 }
 export interface AdminAlert {
@@ -115,6 +116,9 @@ export interface BenchmarkResult {
   academicEvaluation: string;
 }
 export interface Promotion {
+  dangHieuLuc: boolean;
+  soLuongSanPham: number;
+  trangThaiHienThi: "ACTIVE" | "PAUSED" | "UPCOMING" | "ENDED";
   maKM: number;
   tenKM: string;
   moTa: string;
@@ -148,32 +152,70 @@ export interface CustomerRow {
 let currentSession: AdminSession | null = null;
 
 export async function getAdminSession(): Promise<AdminSession> {
-  const response = await fetch("/api/v1/admin/auth/session", {
+  let response: Response;
+  try {
+    response = await fetch("/api/v1/admin/auth/session", {
+      cache: "no-store",
+      credentials: "same-origin",
+    });
+  } catch {
+    throw new Error("Không kết nối được máy chủ quản trị (cổng 8085). Vui lòng kiểm tra backend.");
+  }
+  const payload = await response.json().catch(() => null);
+  if (!response.ok || !payload?.success)
+    throw new Error(payload?.message || "Không kiểm tra được phiên đăng nhập.");
+  currentSession = payload.data;
+  return payload.data;
+}
+
+async function rawAdminFetch(path: string, init: RequestInit, session: AdminSession): Promise<Response> {
+  const headers = new Headers(init.headers);
+  headers.set(session.csrfHeader, session.csrfToken);
+  if (init.body && !(init.body instanceof URLSearchParams) && !(init.body instanceof FormData))
+    headers.set("Content-Type", "application/json");
+  return fetch(path, {
+    ...init,
+    headers,
     cache: "no-store",
     credentials: "same-origin",
   });
-  const payload = await response.json();
-  if (!response.ok || !payload.success)
-    throw new Error(payload.message || "Không kiểm tra được phiên đăng nhập.");
-  currentSession = payload.data;
-  return payload.data;
 }
 
 export async function adminRequest<T>(
   path: string,
   init: RequestInit = {},
 ): Promise<T> {
-  const session = currentSession ?? (await getAdminSession());
-  const headers = new Headers(init.headers);
-  headers.set(session.csrfHeader, session.csrfToken);
-  if (init.body && !(init.body instanceof URLSearchParams) && !(init.body instanceof FormData))
-    headers.set("Content-Type", "application/json");
-  const response = await fetch(path, {
-    ...init,
-    headers,
-    cache: "no-store",
-    credentials: "same-origin",
-  });
+  let session = currentSession ?? (await getAdminSession());
+  let response: Response;
+  try {
+    response = await rawAdminFetch(path, init, session);
+  } catch {
+    // Refresh session once in case stale CSRF / early socket close caused a network reset
+    session = await getAdminSession();
+    if (!session.authenticated && path !== "/api/v1/admin/auth/login") {
+      currentSession = null;
+      window.dispatchEvent(new Event("admin:unauthorized"));
+      throw new Error("Phiên quản trị đã hết hạn. Vui lòng đăng nhập lại (dữ liệu đang nhập vẫn được giữ).");
+    }
+    try {
+      response = await rawAdminFetch(path, init, session);
+    } catch {
+      throw new Error("Không kết nối được máy chủ để gửi dữ liệu. Vui lòng thử lại.");
+    }
+  }
+
+  // Transparently refresh stale CSRF token once on 403
+  if (response.status === 403 && path !== "/api/v1/admin/auth/login") {
+    const refreshed = await getAdminSession().catch(() => null);
+    if (refreshed?.authenticated) {
+      response = await rawAdminFetch(path, init, refreshed);
+    } else {
+      currentSession = null;
+      window.dispatchEvent(new Event("admin:unauthorized"));
+      throw new Error("Phiên quản trị đã hết hạn. Vui lòng đăng nhập lại (dữ liệu đang nhập vẫn được giữ).");
+    }
+  }
+
   const payload = await response.json().catch(() => null);
   if (response.status === 401) {
     currentSession = null;
@@ -184,6 +226,63 @@ export async function adminRequest<T>(
       payload?.message || `Yêu cầu không thành công (${response.status}).`,
     );
   return payload.data;
+}
+
+function readFileAsDataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error("Không đọc được tệp ảnh từ máy."));
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function normalizeImageForUpload(file: File): Promise<string> {
+  const supportedMime = ["image/jpeg", "image/png", "image/webp"].includes(file.type);
+  if (supportedMime && file.size <= 4.5 * 1024 * 1024) {
+    return readFileAsDataUrl(file);
+  }
+  // Auto-compress oversized images or convert unsupported image formats (BMP/AVIF/GIF) via Canvas
+  const bitmapUrl = URL.createObjectURL(file);
+  try {
+    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const el = new Image();
+      el.onload = () => resolve(el);
+      el.onerror = () => reject(new Error("Định dạng ảnh không hợp lệ. Vui lòng chọn JPG, PNG hoặc WebP."));
+      el.src = bitmapUrl;
+    });
+    const maxSide = 1600;
+    const scale = Math.min(1, maxSide / Math.max(img.naturalWidth || 1, img.naturalHeight || 1));
+    const width = Math.max(1, Math.round(img.naturalWidth * scale));
+    const height = Math.max(1, Math.round(img.naturalHeight * scale));
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return readFileAsDataUrl(file);
+    ctx.drawImage(img, 0, 0, width, height);
+    const outType = file.type === "image/png" ? "image/png" : "image/jpeg";
+    return canvas.toDataURL(outType, 0.88);
+  } finally {
+    URL.revokeObjectURL(bitmapUrl);
+  }
+}
+
+export async function uploadAdminProductImage(
+  file: File,
+  productId?: number,
+): Promise<{ url: string; savedToProduct?: boolean }> {
+  if (file.size > 15 * 1024 * 1024) {
+    throw new Error("Ảnh tối đa 15 MB.");
+  }
+  const data = await normalizeImageForUpload(file);
+  return adminRequest<{ url: string; savedToProduct?: boolean }>(
+    "/api/v1/admin/product-images",
+    {
+      method: "POST",
+      body: JSON.stringify({ data, productId: productId ?? null }),
+    },
+  );
 }
 
 export async function adminLogin(username: string, password: string) {

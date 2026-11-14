@@ -57,7 +57,7 @@ public class OrderServiceImpl implements OrderService {
                 request.getMaKH(),
                 cart.getMaGioHang(),
                 request.getDiaChiGiaoHang(),
-                request.getGhiChu()
+                request.getGhiChu(), "SALE", request.getPhuongThucThanhToan()
         );
 
         Integer statusCode = (Integer) result.get("StatusCode");
@@ -71,7 +71,7 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findById(maDH).orElse(null);
         BigDecimal tongTien = order != null ? order.getTongTien() : BigDecimal.ZERO;
 
-        BigDecimal balanceAfterPayment = jdbcTemplate.queryForObject(
+        BigDecimal balanceAfterPayment = "COD".equals(request.getPhuongThucThanhToan()) ? null : jdbcTemplate.queryForObject(
                 "SELECT SoDuSau FROM LichSuGiaoDichVi WHERE MaDH = ? AND MaKH = ? AND LoaiGiaoDich = 'THANH_TOAN'",
                 BigDecimal.class, maDH, request.getMaKH());
 
@@ -293,18 +293,64 @@ public class OrderServiceImpl implements OrderService {
 
     private OrderDetailResponse mapToOrderDetailResponse(Order order) {
         List<OrderDetailResponse.OrderItemDetailDto> itemDtos = new ArrayList<>();
-        if (order.getItems() != null) {
+        if (order.getItems() != null && !order.getItems().isEmpty()) {
+            List<Integer> productIds = order.getItems().stream()
+                    .map(it -> it.getId().getMaSP())
+                    .filter(java.util.Objects::nonNull)
+                    .distinct()
+                    .toList();
+            Map<Integer, Map<String, Object>> metaById = new java.util.HashMap<>();
+            if (!productIds.isEmpty()) {
+                String placeholders = String.join(",", java.util.Collections.nCopies(productIds.size(), "?"));
+                String metaSql = """
+                        SELECT s.MaSP, s.MaSPCha, s.TenSP, s.TenLoai, s.DonViTinh, s.NhietDoBaoQuan,
+                               COALESCE(NULLIF(s.HinhAnh, ''), p.HinhAnh) AS HinhAnh,
+                               p.TenSP AS TenSanPhamCha,
+                               d.TenDanhMuc
+                        FROM SanPham s
+                        LEFT JOIN SanPham p ON p.MaSP = s.MaSPCha
+                        LEFT JOIN DanhMuc d ON d.MaDanhMuc = s.MaDanhMuc
+                        WHERE s.MaSP IN (%s)
+                        """.formatted(placeholders);
+                for (Map<String, Object> row : jdbcTemplate.queryForList(metaSql, productIds.toArray())) {
+                    Number idNum = (Number) row.get("MaSP");
+                    if (idNum != null) metaById.put(idNum.intValue(), row);
+                }
+            }
+
             itemDtos = order.getItems().stream()
-                    .map(item -> OrderDetailResponse.OrderItemDetailDto.builder()
-                            .maSP(item.getId().getMaSP())
-                            .tenSP(item.getProduct() != null ? item.getProduct().getTenSP() : "Sản phẩm #" + item.getId().getMaSP())
-                            .soLuong(item.getSoLuong())
-                            .donGia(item.getDonGia())
-                            .giaGoc(item.getGiaGoc() != null ? item.getGiaGoc() : item.getDonGia())
-                            .tienGiam(item.getTienGiam() != null ? item.getTienGiam() : BigDecimal.ZERO)
-                            .maKM(item.getMaKM())
-                            .thanhTien(item.getDonGia().multiply(BigDecimal.valueOf(item.getSoLuong())))
-                            .build())
+                    .map(item -> {
+                        Integer maSP = item.getId().getMaSP();
+                        Map<String, Object> meta = metaById.getOrDefault(maSP, java.util.Collections.emptyMap());
+                        Product prod = item.getProduct();
+                        String tenSP = meta.get("TenSP") != null
+                                ? String.valueOf(meta.get("TenSP"))
+                                : (prod != null ? prod.getTenSP() : "Sản phẩm #" + maSP);
+                        String donViTinh = meta.get("DonViTinh") != null
+                                ? String.valueOf(meta.get("DonViTinh"))
+                                : (prod != null ? prod.getDonViTinh() : "");
+                        Number chaNum = (Number) meta.get("MaSPCha");
+                        Integer resolvedCha = chaNum != null
+                                ? Integer.valueOf(chaNum.intValue())
+                                : (prod != null ? prod.getMaSPCha() : null);
+                        return OrderDetailResponse.OrderItemDetailDto.builder()
+                                .maSP(maSP)
+                                .maSPCha(resolvedCha)
+                                .tenSP(tenSP)
+                                .tenSanPhamCha((String) meta.get("TenSanPhamCha"))
+                                .tenLoai((String) meta.get("TenLoai"))
+                                .donViTinh(donViTinh)
+                                .tenDanhMuc((String) meta.get("TenDanhMuc"))
+                                .nhietDoBaoQuan((String) meta.get("NhietDoBaoQuan"))
+                                .hinhAnh((String) meta.get("HinhAnh"))
+                                .soLuong(item.getSoLuong())
+                                .donGia(item.getDonGia())
+                                .giaGoc(item.getGiaGoc() != null ? item.getGiaGoc() : item.getDonGia())
+                                .tienGiam(item.getTienGiam() != null ? item.getTienGiam() : BigDecimal.ZERO)
+                                .maKM(item.getMaKM())
+                                .thanhTien(item.getDonGia().multiply(BigDecimal.valueOf(item.getSoLuong())))
+                                .build();
+                    })
                     .collect(Collectors.toList());
         }
 

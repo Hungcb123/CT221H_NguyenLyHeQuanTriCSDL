@@ -97,6 +97,10 @@ public class RecipeServiceImpl implements RecipeService {
         BigDecimal totalCost = BigDecimal.ZERO;
         boolean allAvailable = true;
         var catalog = productRepository.findAll();
+        var familyParentIds = catalog.stream()
+                .map(Product::getMaSPCha)
+                .filter(java.util.Objects::nonNull)
+                .collect(Collectors.toSet());
         var used = new java.util.HashMap<Integer,Integer>();
 
         for (RecipeIngredient ri : recipe.getIngredients()) {
@@ -108,22 +112,29 @@ public class RecipeServiceImpl implements RecipeService {
 
                 int roundedQty = (int) Math.ceil(scaledQty.doubleValue());
                 Product original = p;
-                // Resolve a sellable SKU for the ingredient instead of buying the template's fixed ID.
+                // Resolve a sellable leaf SKU (never a parent container with child variants).
                 p = catalog.stream().filter(candidate -> sameIngredient(original, candidate))
-                        .filter(candidate -> available(candidate, roundedQty + used.getOrDefault(candidate.getMaSP(), 0)))
-                        .sorted(java.util.Comparator.<Product,Boolean>comparing(candidate -> !candidate.getMaSP().equals(original.getMaSP()))
-                                .thenComparing(Product::getHanSuDung).thenComparing(Product::getMaSP))
+                        .filter(candidate -> available(candidate, roundedQty + used.getOrDefault(candidate.getMaSP(), 0), familyParentIds))
+                        .sorted(java.util.Comparator
+                                .<Product, Boolean>comparing(candidate -> !candidate.getMaSP().equals(original.getMaSP()))
+                                .thenComparing(candidate -> !java.util.Objects.equals(candidate.getMaSPCha(), original.getMaSP()))
+                                .thenComparing(Product::getGia, java.util.Comparator.nullsLast(BigDecimal::compareTo))
+                                .thenComparing(Product::getHanSuDung, java.util.Comparator.nullsLast(java.time.LocalDateTime::compareTo))
+                                .thenComparing(Product::getMaSP))
                         .findFirst().orElse(original);
                 used.merge(p.getMaSP(), roundedQty, Integer::sum);
                 BigDecimal lineCost = p.getGia().multiply(BigDecimal.valueOf(roundedQty));
                 totalCost = totalCost.add(lineCost);
 
                 String unavailable = Boolean.TRUE.equals(p.getTrangThaiXoa()) ? "Ngừng kinh doanh"
+                        : familyParentIds.contains(p.getMaSP()) ? "Hết quy cách đóng gói khả dụng"
                         : p.getHanSuDung() == null || !p.getHanSuDung().isAfter(java.time.LocalDateTime.now()) ? "Đã hết hạn"
                         : p.getSoLuongTon() == null || p.getSoLuongTon() < roundedQty ? "Không đủ số lượng" : null;
                 boolean inStock = unavailable == null;
                 if (!inStock) allAvailable = false;
 
+                boolean isSameOrOwnPack = p.getMaSP().equals(original.getMaSP())
+                        || java.util.Objects.equals(p.getMaSPCha(), original.getMaSP());
                 items.add(RecipeDetailDto.IngredientItemDto.builder()
                         .maSP(p.getMaSP())
                         .tenSP(p.getTenSP())
@@ -134,7 +145,7 @@ public class RecipeServiceImpl implements RecipeService {
                         .tonKhoHienTai(p.getSoLuongTon())
                         .conHang(inStock)
                         .lyDoKhongKhaDung(unavailable)
-                        .thayTheCho(p.getMaSP().equals(original.getMaSP()) ? null : original.getTenSP())
+                        .thayTheCho(isSameOrOwnPack ? null : original.getTenSP())
                         .build());
             } else {
                 allAvailable = false;
@@ -153,12 +164,17 @@ public class RecipeServiceImpl implements RecipeService {
                 .build();
     }
 
-    private boolean available(Product p, int quantity) {
-        return !Boolean.TRUE.equals(p.getTrangThaiXoa()) && p.getHanSuDung() != null
+    private boolean available(Product p, int quantity, java.util.Set<Integer> familyParentIds) {
+        return !familyParentIds.contains(p.getMaSP())
+                && !Boolean.TRUE.equals(p.getTrangThaiXoa()) && p.getHanSuDung() != null
                 && p.getHanSuDung().isAfter(java.time.LocalDateTime.now()) && p.getSoLuongTon() != null && p.getSoLuongTon() >= quantity;
     }
     private boolean sameIngredient(Product original, Product candidate) {
         if (original.getMaSP().equals(candidate.getMaSP())) return true;
+        if (java.util.Objects.equals(candidate.getMaSPCha(), original.getMaSP())) return true;
+        if (original.getMaSPCha() != null
+                && (java.util.Objects.equals(candidate.getMaSPCha(), original.getMaSPCha())
+                || java.util.Objects.equals(candidate.getMaSP(), original.getMaSPCha()))) return true;
         if (!java.util.Objects.equals(original.getMaDanhMuc(), candidate.getMaDanhMuc())
                 || !java.util.Objects.equals(original.getDonViTinh(), candidate.getDonViTinh())) return false;
         var name = ProductBm25.normalize(original.getTenSP()).split(" +");

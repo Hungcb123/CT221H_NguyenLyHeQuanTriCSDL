@@ -1,13 +1,14 @@
 package com.ctu.freshgrocery.config;
 
+import com.ctu.freshgrocery.repository.ProductRepository;
 import com.ctu.freshgrocery.service.QdrantService;
 import com.ctu.freshgrocery.service.SemanticSearchService;
+import com.ctu.freshgrocery.service.impl.VietnameseFoodSemantics;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -17,6 +18,7 @@ public class SemanticSearchInitializer {
 
     private final QdrantService qdrantService;
     private final SemanticSearchService semanticSearchService;
+    private final ProductRepository productRepository;
 
     @Value("${qdrant.collection-name:fresh_grocery_products}")
     private String collectionName;
@@ -37,10 +39,17 @@ public class SemanticSearchInitializer {
                     qdrantService.createCollectionIfNotExists(collectionName, dimension);
 
                     Long count = qdrantService.getPointsCount(collectionName);
-                    log.info("Số lượng vector điểm hiện có trong collection [{}]: {}", collectionName, count);
+                    long expectedCount = productRepository.findAll().stream()
+                            .filter(p -> !Boolean.TRUE.equals(p.getTrangThaiXoa()) && p.getMaSPCha() == null)
+                            .filter(p -> !VietnameseFoodSemantics.isInternalTestProduct(p))
+                            .count();
 
-                    if (count == null || count == 0L) {
-                        log.info("Collection trống, tự động nạp toàn bộ vector sản phẩm từ MS SQL Server sang Qdrant...");
+                    log.info("Số lượng vector điểm hiện có trong collection [{}]: {} (SQL sản phẩm gốc: {})",
+                            collectionName, count, expectedCount);
+
+                    if (count == null || count == 0L || count != expectedCount) {
+                        log.info("Chỉ mục Qdrant chưa đồng bộ đủ với SQL ({} vs {}), tự động tái đồng bộ toàn bộ vector sản phẩm...",
+                                count, expectedCount);
                         semanticSearchService.syncAllProducts();
                     }
                 } else {

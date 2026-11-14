@@ -56,6 +56,13 @@ public class GlobalExceptionHandler {
                 "Dữ liệu bị trùng hoặc đang được tham chiếu. Vui lòng kiểm tra lại."));
     }
 
+    @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMaxUploadSize(
+            org.springframework.web.multipart.MaxUploadSizeExceededException ex) {
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+                .body(ApiResponse.error(413, "Tệp ảnh quá lớn (tối đa 10 MB). Vui lòng chọn ảnh nhẹ hơn."));
+    }
+
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleMissingResource(NoResourceFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)

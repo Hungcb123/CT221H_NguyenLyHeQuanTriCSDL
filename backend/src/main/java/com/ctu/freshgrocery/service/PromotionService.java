@@ -21,4 +21,6 @@ public interface PromotionService {
     ApiResponse<PromotionDetailResponse> addProductToPromotion(Integer promotionId, PromotionAddProductRequest request);
 
     AutoClearanceResponse triggerAutoClearance(Integer soNgayCanDate, BigDecimal phanTramGiam);
+
+    java.util.Map<String, Object> previewAutoClearance(Integer soNgayCanDate, BigDecimal phanTramGiam);
 }

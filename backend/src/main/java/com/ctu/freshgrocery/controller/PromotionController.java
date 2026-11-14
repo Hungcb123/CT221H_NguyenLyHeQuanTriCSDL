@@ -34,6 +34,12 @@ import java.util.List;
 public class PromotionController {
 
     private final PromotionService promotionService;
+    private final com.ctu.freshgrocery.service.PromotionStorefrontService storefront;
+
+    @GetMapping("/storefront")
+    public ApiResponse<List<com.ctu.freshgrocery.service.PromotionStorefrontService.Campaign>> storefront() {
+        return ApiResponse.ok("Ưu đãi đang diễn ra", storefront.getOffers());
+    }
 
     @GetMapping
     @Operation(summary = "Lấy danh sách chương trình khuyến mãi", description = "Truy vấn danh sách tất cả chương trình khuyến mãi hoặc chỉ các chương trình đang còn hiệu lực")
@@ -77,6 +83,16 @@ public class PromotionController {
         } else {
             return ResponseEntity.badRequest().body(response);
         }
+    }
+
+    @GetMapping("/auto-clearance/preview")
+    @Operation(summary = "Quét xem trước danh sách thực phẩm cận hạn trước khi xả kho",
+            description = "Quét danh sách sản phẩm thỏa điều kiện cận hạn sử dụng để quản trị viên kiểm tra trước khi kích hoạt Stored Procedure xả kho.")
+    public ResponseEntity<ApiResponse<java.util.Map<String, Object>>> previewAutoClearance(
+            @RequestParam(name = "soNgayCanDate", required = false, defaultValue = "2") Integer soNgayCanDate,
+            @RequestParam(name = "phanTramGiam", required = false, defaultValue = "30.00") BigDecimal phanTramGiam) {
+        var preview = promotionService.previewAutoClearance(soNgayCanDate, phanTramGiam);
+        return ResponseEntity.ok(ApiResponse.ok(1, "Đã quét danh sách sản phẩm cận hạn.", preview));
     }
 
     @PostMapping("/auto-clearance")

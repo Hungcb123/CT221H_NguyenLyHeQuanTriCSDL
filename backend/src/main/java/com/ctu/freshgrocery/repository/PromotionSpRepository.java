@@ -103,4 +103,36 @@ public class PromotionSpRepository {
                 soNgayCanDate, phanTramGiamDeXuat);
         return spTuDongKichHoatXaKhoCanDateCall.execute(params);
     }
+
+    public java.util.List<Map<String, Object>> previewAutoClearanceCandidates(int soNgayCanDate, BigDecimal phanTramGiamDeXuat) {
+        String sql = """
+                SELECT
+                    sp.MaSP AS maSP,
+                    sp.TenSP AS tenSP,
+                    sp.DonViTinh AS donViTinh,
+                    sp.SoLuongTon AS soLuongTon,
+                    sp.HanSuDung AS hanSuDung,
+                    DATEDIFF(day, GETDATE(), sp.HanSuDung) AS soNgayConLai,
+                    sp.Gia AS giaGoc,
+                    ROUND(sp.Gia * (1.0 - (? / 100.0)), 2) AS giaKhuyenMai,
+                    ? AS phanTramGiam,
+                    CASE WHEN ct.MaSP IS NOT NULL THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS daCoTrongXaKho
+                FROM SanPham sp
+                LEFT JOIN ChuongTrinhKhuyenMai km
+                    ON km.LoaiKM = 'XA_KHO_CAN_DATE'
+                   AND km.TrangThai = 1
+                   AND km.NgayBatDau <= GETDATE()
+                   AND km.NgayKetThuc > GETDATE()
+                LEFT JOIN ChiTietKhuyenMai ct
+                    ON ct.MaKM = km.MaKM AND ct.MaSP = sp.MaSP
+                WHERE sp.TrangThaiXoa = 0
+                  AND sp.SoLuongTon > 0
+                  AND sp.HanSuDung > GETDATE()
+                  AND NOT EXISTS (SELECT 1 FROM SanPham parent WHERE parent.MaSP = sp.MaSPCha AND parent.TrangThaiXoa = 1)
+                  AND NOT EXISTS (SELECT 1 FROM SanPham child WHERE child.MaSPCha = sp.MaSP)
+                  AND DATEDIFF(day, GETDATE(), sp.HanSuDung) <= ?
+                ORDER BY sp.HanSuDung ASC, sp.MaSP ASC
+                """;
+        return jdbcTemplate.queryForList(sql, phanTramGiamDeXuat, phanTramGiamDeXuat, soNgayCanDate);
+    }
 }

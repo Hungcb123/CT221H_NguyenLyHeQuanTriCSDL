@@ -40,6 +40,8 @@ public class SePayStore {
             SELECT sp.MaSP,ct.SoLuong,sp.Gia AS GiaGoc,
                 ISNULL(km.GiaKhuyenMai,sp.Gia) AS DonGia,km.MaKM,
                 CASE WHEN sp.TrangThaiXoa=0 AND sp.HanSuDung>GETDATE()
+                     AND NOT EXISTS (SELECT 1 FROM SanPham parent WHERE parent.MaSP=sp.MaSPCha AND parent.TrangThaiXoa=1)
+                     AND NOT EXISTS (SELECT 1 FROM SanPham child WHERE child.MaSPCha=sp.MaSP)
                      AND sp.SoLuongTon>=ct.SoLuong AND ct.SoLuong>0 THEN 1 ELSE 0 END AS Available
             FROM ChiTietGioHang ct WITH (UPDLOCK,HOLDLOCK)
             JOIN SanPham sp WITH (UPDLOCK,ROWLOCK) ON sp.MaSP=ct.MaSP

@@ -40,6 +40,10 @@ public interface QdrantService {
 
     boolean deletePoint(String collectionName, Long pointId);
 
+    default boolean retainOnlyPoints(String collectionName, java.util.Set<Long> activePointIds) {
+        return true;
+    }
+
     List<QdrantScoredPoint> search(String collectionName, float[] vector, int limit, Float minScore);
 
     Long getPointsCount(String collectionName);

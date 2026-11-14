@@ -108,7 +108,7 @@ public class AdminController {
         int limit=Math.clamp(size,1,100);long start=(long)(Math.max(1,page)-1)*limit;
         String where=" WHERE (? = '' OR d.TrangThai = ?) AND ((d.NguonDon = 'SALE' AND EXISTS (SELECT 1 FROM ChiTietDonHang c WHERE c.MaDH=d.MaDH)) OR (? = 1 AND d.NguonDon = 'BENCHMARK'))";
         Long total=jdbc.queryForObject("SELECT COUNT_BIG(*) FROM DonHang d"+where,Long.class,status,status,includeBenchmark?1:0);
-        var items=jdbc.queryForList("SELECT d.MaDH, d.MaKH, k.HoTen, d.NgayTao, d.TongTien, d.TrangThai, d.DiaChiGiaoHang, d.NguonDon FROM DonHang d JOIN KhachHang k ON k.MaKH=d.MaKH"+where+" ORDER BY d.MaDH DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY",status,status,includeBenchmark?1:0,start,limit);
+        var items=jdbc.queryForList("SELECT d.MaDH, d.MaKH, k.HoTen, d.NgayTao, d.TongTien, d.TrangThai, d.DiaChiGiaoHang, d.NguonDon, d.PhuongThucThanhToan FROM DonHang d JOIN KhachHang k ON k.MaKH=d.MaKH"+where+" ORDER BY d.MaDH DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY",status,status,includeBenchmark?1:0,start,limit);
         return ApiResponse.ok("Danh sách đơn hàng",Map.of("items",items,"totalElements",total,"page",Math.max(1,page),"size",limit,"totalPages",(total+limit-1)/limit));
     }
     @GetMapping("/orders/{id}")

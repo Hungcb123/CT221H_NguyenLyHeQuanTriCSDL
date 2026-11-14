@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Promotion,
   adminError,
@@ -9,6 +9,10 @@ import {
 } from "@/services/admin-api";
 import { useAdminResource } from "@/components/admin/useAdminResource";
 import { AdminTitle, Confirm, Empty, Notice } from "@/components/admin/AdminUI";
+import { promotionInput, promotionUtc, promotionTime } from "@/services/promotion-time";
+import { apiService } from "@/services/api";
+import { ProductResponse } from "@/types";
+const promotionStates = { ACTIVE: "Đang diễn ra", PAUSED: "Tạm dừng", UPCOMING: "Chưa bắt đầu", ENDED: "Đã kết thúc" };
 const promotionTypes = {
   FLASH_SALE: "Giảm giá chớp nhoáng",
   XA_KHO_CAN_DATE: "Xả kho cận hạn",
@@ -33,8 +37,28 @@ export default function PromotionsPage() {
   const [product, setProduct] = useState("");
   const [price, setPrice] = useState("");
   const [quota, setQuota] = useState("");
-  const [days, setDays] = useState(2);
-  const [discount, setDiscount] = useState(30);
+  const [days, setDays] = useState("2");
+  const [discount, setDiscount] = useState("30");
+  const [scanning, setScanning] = useState(false);
+  const [scanPreview, setScanPreview] = useState<{
+    soNgayCanDate: number;
+    phanTramGiam: number;
+    tongSanPham: number;
+    soSanPhamMoi: number;
+    soSanPhamCapNhat: number;
+    items: Array<{
+      maSP: number;
+      tenSP: string;
+      donViTinh: string;
+      soLuongTon: number;
+      hanSuDung: string;
+      soNgayConLai: number;
+      giaGoc: number;
+      giaKhuyenMai: number;
+      phanTramGiam: number;
+      daCoTrongXaKho: boolean;
+    }>;
+  } | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
@@ -45,7 +69,32 @@ export default function PromotionsPage() {
     method: string;
     body?: string;
   } | null>(null);
+  const [productQuery, setProductQuery] = useState("");
+  const [productChoices, setProductChoices] = useState<ProductResponse[]>([]);
+  const [typeChoices, setTypeChoices] = useState<ProductResponse[]>([]);
+  const [family, setFamily] = useState("");
+  const [choicesError, setChoicesError] = useState("");
+  const detailId = detail?.maKM;
+  useEffect(() => {
+    if (!detailId) return;
+    let active = true;
+    const timeout = setTimeout(() => {
+      apiService.getProducts({ keyword: productQuery || undefined, size: 20 }).then(page => {
+        if (active) { setProductChoices(page.products); setChoicesError(""); }
+      }).catch(() => { if (active) setChoicesError("Không tải được danh sách sản phẩm."); });
+    }, 250);
+    return () => { active = false; clearTimeout(timeout); };
+  }, [detailId, productQuery]);
+  useEffect(() => {
+    let active = true;
+    if (!family) return;
+    apiService.getProductTypes(Number(family)).then(items => {
+      if (active) { setTypeChoices(items); setProduct(items.length === 1 ? String(items[0].maSP) : ""); setChoicesError(""); }
+    }).catch(() => { if (active) setChoicesError("Không tải được quy cách sản phẩm."); });
+    return () => { active = false; };
+  }, [family]);
   async function inspect(id: number) {
+    setFamily(""); setProduct(""); setTypeChoices([]); setPrice(""); setQuota("");
     setPending(true);
     setError("");
     try {
@@ -66,21 +115,21 @@ export default function PromotionsPage() {
     }
     setPending(true);
     try {
-      await adminRequest(
+      const saved = await adminRequest<Promotion>(
         editing ? `/api/v1/admin/promotions/${editing}` : "/api/v1/promotions",
         {
           method: editing ? "PUT" : "POST",
           body: JSON.stringify({
             ...draft,
-            ngayBatDau: draft.ngayBatDau + ":00",
-            ngayKetThuc: draft.ngayKetThuc + ":00",
+            ngayBatDau: promotionUtc(draft.ngayBatDau),
+            ngayKetThuc: promotionUtc(draft.ngayKetThuc),
           }),
         },
       );
       setForm(false);
       list.refresh();
-      setDetail(null);
-      setMessage("Đã lưu chương trình.");
+      setDetail(await adminRequest<Promotion>(`/api/v1/promotions/${editing ?? saved.maKM}`));
+      setMessage("Đã lưu chương trình. Thêm sản phẩm và giá ưu đãi bên dưới để khách có thể mua.");
     } catch (e) {
       setError(adminError(e));
     } finally {
@@ -116,14 +165,21 @@ export default function PromotionsPage() {
             setError("");
             setMessage("");
             try {
-              await adminRequest(confirm.path, {
+              const result = await adminRequest<{ maKM?: number; soLuongSanPhamDaThem?: number }>(confirm.path, {
                 method: confirm.method,
                 body: confirm.body,
               });
               setConfirm(null);
               setDetail(null);
               list.refresh();
-              setMessage("Đã cập nhật khuyến mãi.");
+              if (confirm.path.includes("auto-clearance")) {
+                setScanPreview(null);
+                setMessage(
+                  `Đã áp dụng xả kho thành công: ${result.soLuongSanPhamDaThem ?? 0} sản phẩm cận hạn đã được cập nhật ưu đãi.`,
+                );
+              } else {
+                setMessage("Đã cập nhật khuyến mãi.");
+              }
             } catch (e) {
               setError(adminError(e));
             } finally {
@@ -235,13 +291,14 @@ export default function PromotionsPage() {
                   </small>
                 </td>
                 <td>
-                  {datetime(p.ngayBatDau)}
-                  <small>Đến {datetime(p.ngayKetThuc)}</small>
+                  {promotionTime(p.ngayBatDau)}
+                  <small>Đến {promotionTime(p.ngayKetThuc)}</small>
                 </td>
                 <td>
                   <span className={`ad-tag ${p.trangThai ? "" : "bad"}`}>
-                    {p.trangThai ? "Đã bật" : "Tạm dừng"}
+                    {promotionStates[p.trangThaiHienThi] || (p.trangThai ? "Đã bật" : "Tạm dừng")}
                   </span>
+                  <small>{p.soLuongSanPham || 0} sản phẩm{!p.soLuongSanPham ? " · Chưa có ưu đãi để bán" : ""}</small>
                 </td>
                 <td>
                   <div className="ad-row-actions">
@@ -258,8 +315,8 @@ export default function PromotionsPage() {
                           tenKM: p.tenKM,
                           moTa: p.moTa || "",
                           loaiKM: p.loaiKM,
-                          ngayBatDau: p.ngayBatDau.slice(0, 16),
-                          ngayKetThuc: p.ngayKetThuc.slice(0, 16),
+                          ngayBatDau: promotionInput(p.ngayBatDau),
+                          ngayKetThuc: promotionInput(p.ngayKetThuc),
                         });
                         setForm(true);
                       }}
@@ -295,6 +352,7 @@ export default function PromotionsPage() {
       {detail && (
         <section className="ad-panel" style={{ marginTop: 24 }}>
           <h2>Sản phẩm · {detail.tenKM}</h2>
+          <p className="ad-help">Chỉ ưu đãi còn hiệu lực, còn suất và còn hàng bán được mới xuất hiện trên trang chủ. Với sản phẩm nhiều quy cách, hãy thêm từng quy cách cần giảm giá.</p>
           <div className="ad-table-wrap">
             <table className="ad-table">
               <thead>
@@ -344,8 +402,7 @@ export default function PromotionsPage() {
           </div>
           <h3>Thêm sản phẩm / cập nhật ưu đãi</h3>
           <p className="ad-help">
-            Giá khuyến mãi phải thấp hơn giá gốc. Mã sản phẩm có thể tra trong
-            mục Sản phẩm.
+            Chọn sản phẩm và đúng quy cách bán. Giá ưu đãi phải thấp hơn giá gốc.
           </p>
           <form
             onSubmit={async (e) => {
@@ -382,39 +439,34 @@ export default function PromotionsPage() {
             }}
           >
             <div className="ad-form-grid">
-              <label className="ad-field">
-                Mã sản phẩm
-                <input
-                  className="ad-input"
-                  type="number"
-                  min="1"
-                  step="1"
-                  required
-                  value={product}
-                  onChange={(e) => setProduct(e.target.value)}
-                />
-              </label>
+              <label className="ad-field">Tìm sản phẩm<input className="ad-input" value={productQuery} onChange={e => setProductQuery(e.target.value)} placeholder="Tên sản phẩm…" /></label>
+              <label className="ad-field">Sản phẩm<select className="ad-select" required value={family} onChange={e => { setFamily(e.target.value); setProduct(""); setTypeChoices([]); }}><option value="">Chọn sản phẩm</option>{productChoices.map(p => <option key={p.maSP} value={p.maSP}>{p.tenSP}</option>)}</select></label>
+              <label className="ad-field">Quy cách / mã bán<select className="ad-select" required value={product} onChange={e => setProduct(e.target.value)}><option value="">Chọn quy cách</option>{typeChoices.map(p => <option key={p.maSP} value={p.maSP}>{p.tenLoai || p.tenSP} · #{p.maSP} · {money(p.giaGoc)}</option>)}</select></label>
+              {choicesError && <p role="alert">{choicesError}</p>}
               <label className="ad-field">
                 Giá ưu đãi (đ)
                 <input
                   className="ad-input"
-                  type="number"
-                  min="1"
-                  step="1"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[1-9][0-9]*"
+                  placeholder="Nhập giá ưu đãi, VD: 25000"
                   required
                   value={price}
-                  onChange={(e) => setPrice(e.target.value)}
+                  onChange={(e) => setPrice(e.target.value.replace(/\D+/g, "").replace(/^0+/, ""))}
                 />
+                {price && <small>{Number(price).toLocaleString("vi-VN")} đ</small>}
               </label>
               <label className="ad-field">
                 Số suất (bỏ trống = không giới hạn)
                 <input
                   className="ad-input"
-                  type="number"
-                  min="1"
-                  step="1"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[1-9][0-9]*"
+                  placeholder="Bỏ trống nếu không giới hạn"
                   value={quota}
-                  onChange={(e) => setQuota(e.target.value)}
+                  onChange={(e) => setQuota(e.target.value.replace(/\D+/g, "").replace(/^0+/, ""))}
                 />
               </label>
             </div>
@@ -436,50 +488,164 @@ export default function PromotionsPage() {
       <section className="ad-panel" style={{ marginTop: 24 }}>
         <h2>Xả kho cận hạn</h2>
         <p className="ad-help">
-          Quét sản phẩm cận hạn và tạo ưu đãi thực tế bằng stored procedure.
+          Bước 1: Quét danh sách mặt hàng sắp hết hạn để kiểm tra giá và tồn kho. Bước 2: Xác nhận áp dụng ưu đãi xả kho bằng Stored Procedure.
         </p>
         <div className="ad-form-grid" style={{ marginTop: 16 }}>
           <label className="ad-field">
             Số ngày cận hạn
             <input
               className="ad-input"
-              type="number"
-              min="1"
-              max="30"
+              type="text"
+              inputMode="numeric"
+              placeholder="1 - 30"
               value={days}
-              onChange={(e) => setDays(Number(e.target.value))}
+              onChange={(e) => setDays(e.target.value.replace(/\D+/g, "").replace(/^0+/, ""))}
             />
           </label>
           <label className="ad-field">
             Giảm giá (%)
             <input
               className="ad-input"
-              type="number"
-              min="1"
-              max="99"
+              type="text"
+              inputMode="numeric"
+              placeholder="1 - 99"
               value={discount}
-              onChange={(e) => setDiscount(Number(e.target.value))}
+              onChange={(e) => setDiscount(e.target.value.replace(/\D+/g, "").replace(/^0+/, ""))}
             />
           </label>
         </div>
-        <div className="ad-actions">
-          <button
-            className="ad-btn secondary"
-            disabled={
-              pending || days < 1 || days > 30 || discount < 1 || discount > 99
-            }
-            onClick={() =>
-              setConfirm({
-                title: "Kích hoạt xả kho cận hạn?",
-                description: `Tạo ưu đãi giảm ${discount}% cho hàng còn hạn không quá ${days} ngày.`,
-                path: `/api/v1/promotions/auto-clearance?soNgayCanDate=${days}&phanTramGiam=${discount}`,
-                method: "POST",
-              })
-            }
-          >
-            Quét và áp dụng…
-          </button>
-        </div>
+        {(() => {
+          const validInputs =
+            !!days &&
+            !!discount &&
+            Number(days) >= 1 &&
+            Number(days) <= 30 &&
+            Number(discount) >= 1 &&
+            Number(discount) <= 99;
+          const isCurrentScan =
+            !!scanPreview &&
+            scanPreview.soNgayCanDate === Number(days) &&
+            Number(scanPreview.phanTramGiam) === Number(discount);
+          const canApply = validInputs && isCurrentScan && scanPreview.items.length > 0 && !pending && !scanning;
+
+          return (
+            <>
+              <div className="ad-actions">
+                <button
+                  type="button"
+                  className="ad-btn secondary"
+                  disabled={!validInputs || pending || scanning}
+                  onClick={async () => {
+                    setScanning(true);
+                    setError("");
+                    setMessage("");
+                    try {
+                      const res = await adminRequest<NonNullable<typeof scanPreview>>(
+                        `/api/v1/promotions/auto-clearance/preview?soNgayCanDate=${Number(days)}&phanTramGiam=${Number(discount)}`,
+                      );
+                      setScanPreview(res);
+                    } catch (e) {
+                      setError(adminError(e));
+                    } finally {
+                      setScanning(false);
+                    }
+                  }}
+                >
+                  {scanning ? "Đang quét kho…" : isCurrentScan ? "1. Quét lại danh sách" : "1. Quét hàng cận hạn"}
+                </button>
+
+                <button
+                  type="button"
+                  className="ad-btn"
+                  disabled={!canApply}
+                  title={
+                    !isCurrentScan
+                      ? "Vui lòng bấm Quét hàng cận hạn trước khi áp dụng"
+                      : scanPreview?.items.length === 0
+                        ? "Không có sản phẩm cận hạn nào để áp dụng"
+                        : undefined
+                  }
+                  onClick={() =>
+                    setConfirm({
+                      title: "Xác nhận áp dụng xả kho cận hạn?",
+                      description: `Áp dụng mức giảm ${Number(discount)}% cho ${scanPreview!.items.length} sản phẩm còn hạn không quá ${Number(days)} ngày vừa quét.`,
+                      path: `/api/v1/promotions/auto-clearance?soNgayCanDate=${Number(days)}&phanTramGiam=${Number(discount)}`,
+                      method: "POST",
+                    })
+                  }
+                >
+                  {isCurrentScan && scanPreview.items.length > 0
+                    ? `2. Áp dụng xả kho (${scanPreview.items.length} sản phẩm)`
+                    : "2. Áp dụng xả kho"}
+                </button>
+              </div>
+
+              {scanPreview && !isCurrentScan && (
+                <p className="ad-help" style={{ marginTop: 10, color: "#9a3412" }}>
+                  Thông số ngày hoặc mức giảm vừa thay đổi — vui lòng bấm <strong>1. Quét hàng cận hạn</strong> để cập nhật danh sách trước khi áp dụng.
+                </p>
+              )}
+
+              {scanPreview && isCurrentScan && (
+                <div style={{ marginTop: 16 }}>
+                  {scanPreview.items.length === 0 ? (
+                    <Empty>
+                      Không có sản phẩm nào còn hạn trong vòng {scanPreview.soNgayCanDate} ngày tới cần xả kho.
+                    </Empty>
+                  ) : (
+                    <>
+                      <p className="ad-help" style={{ marginBottom: 10 }}>
+                        Kết quả quét: tìm thấy <strong>{scanPreview.tongSanPham}</strong> mặt hàng còn hạn &le;{" "}
+                        <strong>{scanPreview.soNgayCanDate} ngày</strong> ({scanPreview.soSanPhamMoi} sản phẩm mới,{" "}
+                        {scanPreview.soSanPhamCapNhat} sản phẩm cập nhật mức giảm {Number(scanPreview.phanTramGiam)}%).
+                      </p>
+                      <div className="ad-table-wrap">
+                        <table className="ad-table">
+                          <thead>
+                            <tr>
+                              <th>Mặt hàng</th>
+                              <th>Tồn kho</th>
+                              <th>Hạn sử dụng</th>
+                              <th>Giá gốc</th>
+                              <th>Giá sau giảm (-{Number(scanPreview.phanTramGiam)}%)</th>
+                              <th>Trạng thái</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {scanPreview.items.map((item) => (
+                              <tr key={item.maSP}>
+                                <td>
+                                  <strong>{item.tenSP}</strong>
+                                  <small>
+                                    #{item.maSP} · {item.donViTinh}
+                                  </small>
+                                </td>
+                                <td>{item.soLuongTon}</td>
+                                <td>
+                                  {datetime(item.hanSuDung)}
+                                  <small>Còn khoảng {item.soNgayConLai} ngày</small>
+                                </td>
+                                <td className="number">{money(item.giaGoc)}</td>
+                                <td className="number">
+                                  <strong style={{ color: "#08783c" }}>{money(item.giaKhuyenMai)}</strong>
+                                </td>
+                                <td>
+                                  <span className="ad-tag">
+                                    {item.daCoTrongXaKho ? "Cập nhật giá xả kho" : "Mới đưa vào xả kho"}
+                                  </span>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+            </>
+          );
+        })()}
       </section>
     </>
   );

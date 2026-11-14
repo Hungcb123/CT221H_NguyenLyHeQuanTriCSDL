@@ -1,0 +1,1324 @@
+[
+  {
+    "name": "Thịt ba rọi heo VietGAP",
+    "category": 2,
+    "aliases": [
+      "thịt ba chỉ",
+      "ba rọi",
+      "thịt heo ba rọi",
+      "thịt lợn ba chỉ"
+    ],
+    "use": "Phần bụng heo có lớp nạc xen mỡ; thái miếng để kho trứng, rang cháy cạnh hoặc nướng.",
+    "basePricePerKg": 145000,
+    "image": "/api/v1/product-images/demo-02.jpg",
+    "article": null,
+    "existing": true,
+    "storage": "Ngăn mát 0–4°C",
+    "shelfLifeDays": 3,
+    "packs": [
+      {
+        "label": "300g",
+        "grams": 300,
+        "unit": "khay",
+        "price": 43500,
+        "stock": 24
+      },
+      {
+        "label": "500g",
+        "grams": 500,
+        "unit": "khay",
+        "price": 72500,
+        "stock": 19
+      },
+      {
+        "label": "1kg",
+        "grams": 1000,
+        "unit": "khay",
+        "price": 145000,
+        "stock": 14
+      }
+    ]
+  },
+  {
+    "name": "Thịt nạc vai heo",
+    "category": 2,
+    "aliases": [
+      "nạc vai lợn",
+      "thịt heo nạc vai",
+      "thịt lợn nạc vai"
+    ],
+    "use": "Nạc vai có vân mỡ, dùng làm thịt băm, xay chả, nướng hoặc kho.",
+    "basePricePerKg": 125000,
+    "image": "/api/v1/product-images/demo-26.jpg",
+    "article": null,
+    "existing": true,
+    "storage": "Ngăn mát 0–4°C",
+    "shelfLifeDays": 3,
+    "packs": [
+      {
+        "label": "300g",
+        "grams": 300,
+        "unit": "khay",
+        "price": 37500,
+        "stock": 24
+      },
+      {
+        "label": "500g",
+        "grams": 500,
+        "unit": "khay",
+        "price": 62500,
+        "stock": 19
+      },
+      {
+        "label": "1kg",
+        "grams": 1000,
+        "unit": "khay",
+        "price": 125000,
+        "stock": 14
+      }
+    ]
+  },
+  {
+    "name": "Sườn non heo",
+    "category": 2,
+    "aliases": [
+      "sườn non lợn",
+      "sườn heo",
+      "sườn lợn"
+    ],
+    "use": "Sườn non cắt miếng, phù hợp rim chua ngọt hoặc nấu canh rau củ.",
+    "basePricePerKg": 165000,
+    "image": "/api/v1/product-images/demo-25.jpg",
+    "article": null,
+    "existing": true,
+    "storage": "Ngăn mát 0–4°C",
+    "shelfLifeDays": 3,
+    "packs": [
+      {
+        "label": "300g",
+        "grams": 300,
+        "unit": "khay",
+        "price": 49500,
+        "stock": 24
+      },
+      {
+        "label": "500g",
+        "grams": 500,
+        "unit": "khay",
+        "price": 82500,
+        "stock": 19
+      },
+      {
+        "label": "1kg",
+        "grams": 1000,
+        "unit": "khay",
+        "price": 165000,
+        "stock": 14
+      }
+    ]
+  },
+  {
+    "name": "Chân giò heo",
+    "category": 2,
+    "aliases": [
+      "giò heo",
+      "chân giò lợn",
+      "móng giò"
+    ],
+    "use": "Chân giò cắt khoanh, còn da và xương; phù hợp hầm đậu hoặc nấu bún.",
+    "basePricePerKg": 115000,
+    "image": "/api/v1/product-images/demo-28.jpg",
+    "article": null,
+    "existing": true,
+    "storage": "Ngăn mát 0–4°C",
+    "shelfLifeDays": 3,
+    "packs": [
+      {
+        "label": "500g",
+        "grams": 500,
+        "unit": "khay",
+        "price": 57500,
+        "stock": 24
+      },
+      {
+        "label": "1kg",
+        "grams": 1000,
+        "unit": "khay",
+        "price": 115000,
+        "stock": 19
+      }
+    ]
+  },
+  {
+    "name": "Thịt heo nạc thăn",
+    "category": 2,
+    "aliases": [
+      "thăn heo",
+      "thăn lợn",
+      "thịt lợn nạc thăn"
+    ],
+    "use": "Phần thăn heo ít mỡ, dùng áp chảo, xào rau củ hoặc nấu cháo.",
+    "basePricePerKg": 155000,
+    "image": "/api/v1/product-images/catalog-05.jpg",
+    "article": "Pork tenderloin",
+    "existing": false,
+    "storage": "Ngăn mát 0–4°C",
+    "shelfLifeDays": 3,
+    "packs": [
+      {
+        "label": "300g",
+        "grams": 300,
+        "unit": "khay",
+        "price": 46500,
+        "stock": 24
+      },
+      {
+        "label": "500g",
+        "grams": 500,
+        "unit": "khay",
+        "price": 77500,
+        "stock": 19
+      },
+      {
+        "label": "1kg",
+        "grams": 1000,
+        "unit": "khay",
+        "price": 155000,
+        "stock": 14
+      }
+    ]
+  },
+  {
+    "name": "Thịt heo xay tươi",
+    "category": 2,
+    "aliases": [
+      "thịt heo băm",
+      "thịt lợn xay",
+      "thịt lợn băm",
+      "thịt bằm"
+    ],
+    "use": "Thịt heo xay nhỏ, phù hợp nấu canh bí, nhồi khổ qua hoặc làm viên thịt.",
+    "basePricePerKg": 130000,
+    "image": "/api/v1/product-images/demo-27.jpg",
+    "article": null,
+    "existing": false,
+    "storage": "Ngăn mát 0–4°C",
+    "shelfLifeDays": 3,
+    "packs": [
+      {
+        "label": "300g",
+        "grams": 300,
+        "unit": "khay",
+        "price": 39000,
+        "stock": 24
+      },
+      {
+        "label": "500g",
+        "grams": 500,
+        "unit": "khay",
+        "price": 65000,
+        "stock": 19
+      },
+      {
+        "label": "1kg",
+        "grams": 1000,
+        "unit": "khay",
+        "price": 130000,
+        "stock": 14
+      }
+    ]
+  },
+  {
+    "name": "Thịt bò thăn",
+    "category": 2,
+    "aliases": [
+      "thăn bò",
+      "thịt thăn bò"
+    ],
+    "use": "Thăn bò mềm, thái lát làm bít tết, áp chảo nhanh hoặc xào rau củ.",
+    "basePricePerKg": 320000,
+    "image": "/api/v1/product-images/demo-33.jpg",
+    "article": null,
+    "existing": true,
+    "storage": "Ngăn mát 0–4°C",
+    "shelfLifeDays": 3,
+    "packs": [
+      {
+        "label": "300g",
+        "grams": 300,
+        "unit": "khay",
+        "price": 96000,
+        "stock": 24
+      },
+      {
+        "label": "500g",
+        "grams": 500,
+        "unit": "khay",
+        "price": 160000,
+        "stock": 19
+      },
+      {
+        "label": "1kg",
+        "grams": 1000,
+        "unit": "khay",
+        "price": 320000,
+        "stock": 14
+      }
+    ]
+  },
+  {
+    "name": "Thịt bò bắp Úc tươi",
+    "category": 2,
+    "aliases": [
+      "bắp bò",
+      "bò bắp",
+      "thịt bắp bò"
+    ],
+    "use": "Bắp bò có gân mảnh xen thịt, dùng hầm, luộc, kho gừng hoặc ngâm mắm.",
+    "basePricePerKg": 285000,
+    "image": "/api/v1/product-images/demo-10.jpg",
+    "article": null,
+    "existing": true,
+    "storage": "Ngăn mát 0–4°C",
+    "shelfLifeDays": 3,
+    "packs": [
+      {
+        "label": "300g",
+        "grams": 300,
+        "unit": "khay",
+        "price": 85500,
+        "stock": 24
+      },
+      {
+        "label": "500g",
+        "grams": 500,
+        "unit": "khay",
+        "price": 142500,
+        "stock": 19
+      },
+      {
+        "label": "1kg",
+        "grams": 1000,
+        "unit": "khay",
+        "price": 285000,
+        "stock": 14
+      }
+    ]
+  },
+  {
+    "name": "Thịt bò nạm",
+    "category": 2,
+    "aliases": [
+      "nạm bò",
+      "thịt nạm bò"
+    ],
+    "use": "Nạm bò có mô liên kết xen nạc, phù hợp hầm mềm, bò kho hoặc nấu phở.",
+    "basePricePerKg": 220000,
+    "image": "/api/v1/product-images/catalog-09-photo.jpg",
+    "article": null,
+    "existing": false,
+    "storage": "Ngăn mát 0–4°C",
+    "shelfLifeDays": 3,
+    "packs": [
+      {
+        "label": "300g",
+        "grams": 300,
+        "unit": "khay",
+        "price": 66000,
+        "stock": 24
+      },
+      {
+        "label": "500g",
+        "grams": 500,
+        "unit": "khay",
+        "price": 110000,
+        "stock": 19
+      },
+      {
+        "label": "1kg",
+        "grams": 1000,
+        "unit": "khay",
+        "price": 220000,
+        "stock": 14
+      }
+    ]
+  },
+  {
+    "name": "Thịt bò gầu",
+    "category": 2,
+    "aliases": [
+      "gầu bò",
+      "thịt gầu bò"
+    ],
+    "use": "Gầu bò có nạc xen mỡ; thái lát nhúng lẩu, nấu phở hoặc xào nhanh.",
+    "basePricePerKg": 260000,
+    "image": "/api/v1/product-images/catalog-10-photo.jpg",
+    "article": null,
+    "existing": false,
+    "storage": "Ngăn mát 0–4°C",
+    "shelfLifeDays": 3,
+    "packs": [
+      {
+        "label": "300g",
+        "grams": 300,
+        "unit": "khay",
+        "price": 78000,
+        "stock": 24
+      },
+      {
+        "label": "500g",
+        "grams": 500,
+        "unit": "khay",
+        "price": 130000,
+        "stock": 19
+      },
+      {
+        "label": "1kg",
+        "grams": 1000,
+        "unit": "khay",
+        "price": 260000,
+        "stock": 14
+      }
+    ]
+  },
+  {
+    "name": "Thịt bò ức",
+    "category": 2,
+    "aliases": [
+      "ức bò",
+      "thịt ức bò",
+      "beef brisket"
+    ],
+    "use": "Phần ức bò có thớ dài và mô liên kết; phù hợp hầm lâu, bò kho hoặc nấu phở.",
+    "basePricePerKg": 235000,
+    "image": "/api/v1/product-images/catalog-11-photo.jpg",
+    "article": "Brisket",
+    "existing": false,
+    "storage": "Ngăn mát 0–4°C",
+    "shelfLifeDays": 3,
+    "packs": [
+      {
+        "label": "300g",
+        "grams": 300,
+        "unit": "khay",
+        "price": 70500,
+        "stock": 24
+      },
+      {
+        "label": "500g",
+        "grams": 500,
+        "unit": "khay",
+        "price": 117500,
+        "stock": 19
+      },
+      {
+        "label": "1kg",
+        "grams": 1000,
+        "unit": "khay",
+        "price": 235000,
+        "stock": 14
+      }
+    ]
+  },
+  {
+    "name": "Thịt bò sườn rút xương",
+    "category": 2,
+    "aliases": [
+      "sườn bò rút xương",
+      "dẻ sườn bò"
+    ],
+    "use": "Thịt sườn bò đã rút xương, có vân mỡ, dùng nướng hoặc hầm rau củ.",
+    "basePricePerKg": 295000,
+    "image": "/api/v1/product-images/catalog-12-photo.jpg",
+    "article": null,
+    "existing": false,
+    "storage": "Ngăn mát 0–4°C",
+    "shelfLifeDays": 3,
+    "packs": [
+      {
+        "label": "300g",
+        "grams": 300,
+        "unit": "khay",
+        "price": 88500,
+        "stock": 24
+      },
+      {
+        "label": "500g",
+        "grams": 500,
+        "unit": "khay",
+        "price": 147500,
+        "stock": 19
+      },
+      {
+        "label": "1kg",
+        "grams": 1000,
+        "unit": "khay",
+        "price": 295000,
+        "stock": 14
+      }
+    ]
+  },
+  {
+    "name": "Ức gà phi lê",
+    "category": 2,
+    "aliases": [
+      "ức gà",
+      "thịt gà ức",
+      "lườn gà",
+      "thịt lườn gà"
+    ],
+    "use": "Ức gà bỏ xương, bỏ da, phù hợp luộc, xé trộn gỏi, áp chảo hoặc làm salad.",
+    "basePricePerKg": 90000,
+    "image": "/api/v1/product-images/demo-29.jpg",
+    "article": null,
+    "existing": true,
+    "storage": "Ngăn mát 0–4°C",
+    "shelfLifeDays": 3,
+    "packs": [
+      {
+        "label": "300g",
+        "grams": 300,
+        "unit": "khay",
+        "price": 27000,
+        "stock": 24
+      },
+      {
+        "label": "500g",
+        "grams": 500,
+        "unit": "khay",
+        "price": 45000,
+        "stock": 19
+      },
+      {
+        "label": "1kg",
+        "grams": 1000,
+        "unit": "khay",
+        "price": 90000,
+        "stock": 14
+      }
+    ]
+  },
+  {
+    "name": "Đùi gà góc tư",
+    "category": 2,
+    "aliases": [
+      "đùi gà",
+      "thịt đùi gà",
+      "thịt gà đùi"
+    ],
+    "use": "Đùi gà góc tư còn da và xương, phù hợp nướng, chiên nước mắm hoặc rô ti.",
+    "basePricePerKg": 78000,
+    "image": "/api/v1/product-images/demo-30.jpg",
+    "article": null,
+    "existing": true,
+    "storage": "Ngăn mát 0–4°C",
+    "shelfLifeDays": 3,
+    "packs": [
+      {
+        "label": "500g",
+        "grams": 500,
+        "unit": "khay",
+        "price": 39000,
+        "stock": 24
+      },
+      {
+        "label": "1kg",
+        "grams": 1000,
+        "unit": "khay",
+        "price": 78000,
+        "stock": 19
+      }
+    ]
+  },
+  {
+    "name": "Cánh gà tươi",
+    "category": 2,
+    "aliases": [
+      "cánh gà",
+      "thịt gà cánh"
+    ],
+    "use": "Cánh gà làm sạch, còn da và xương; dùng chiên giòn, rim mắm hoặc nướng.",
+    "basePricePerKg": 95000,
+    "image": "/api/v1/product-images/demo-31.jpg",
+    "article": null,
+    "existing": true,
+    "storage": "Ngăn mát 0–4°C",
+    "shelfLifeDays": 3,
+    "packs": [
+      {
+        "label": "300g",
+        "grams": 300,
+        "unit": "khay",
+        "price": 28500,
+        "stock": 24
+      },
+      {
+        "label": "500g",
+        "grams": 500,
+        "unit": "khay",
+        "price": 47500,
+        "stock": 19
+      },
+      {
+        "label": "1kg",
+        "grams": 1000,
+        "unit": "khay",
+        "price": 95000,
+        "stock": 14
+      }
+    ]
+  },
+  {
+    "name": "Gà ta nguyên con",
+    "category": 2,
+    "aliases": [
+      "gà nguyên con",
+      "thịt gà ta"
+    ],
+    "use": "Gà ta nguyên con đã làm sạch, còn da và xương, dùng luộc, hấp hoặc nấu cháo.",
+    "basePricePerKg": 185000,
+    "image": "/api/v1/product-images/demo-32.jpg",
+    "article": null,
+    "existing": true,
+    "storage": "Ngăn mát 0–4°C",
+    "shelfLifeDays": 3,
+    "packs": [
+      {
+        "label": "Nguyên con khoảng 1,2kg",
+        "grams": 1200,
+        "unit": "con",
+        "price": 222000,
+        "stock": 12
+      },
+      {
+        "label": "Nguyên con khoảng 1,5kg",
+        "grams": 1500,
+        "unit": "con",
+        "price": 277500,
+        "stock": 10
+      }
+    ]
+  },
+  {
+    "name": "Thịt gà má đùi rút xương",
+    "category": 2,
+    "aliases": [
+      "má đùi gà",
+      "đùi gà phi lê",
+      "thịt má đùi gà"
+    ],
+    "use": "Má đùi gà đã rút xương, còn da; dùng áp chảo, nướng hoặc xào.",
+    "basePricePerKg": 115000,
+    "image": "/api/v1/product-images/demo-30.jpg",
+    "article": null,
+    "existing": false,
+    "storage": "Ngăn mát 0–4°C",
+    "shelfLifeDays": 3,
+    "packs": [
+      {
+        "label": "300g",
+        "grams": 300,
+        "unit": "khay",
+        "price": 34500,
+        "stock": 24
+      },
+      {
+        "label": "500g",
+        "grams": 500,
+        "unit": "khay",
+        "price": 57500,
+        "stock": 19
+      },
+      {
+        "label": "1kg",
+        "grams": 1000,
+        "unit": "khay",
+        "price": 115000,
+        "stock": 14
+      }
+    ]
+  },
+  {
+    "name": "Chân gà làm sạch",
+    "category": 2,
+    "aliases": [
+      "chân gà",
+      "chân gà nguyên xương"
+    ],
+    "use": "Chân gà đã làm sạch, còn xương; phù hợp ngâm sả tắc hoặc nướng.",
+    "basePricePerKg": 65000,
+    "image": "/api/v1/product-images/catalog-18-photo.jpg",
+    "article": "Chicken feet",
+    "existing": false,
+    "storage": "Ngăn mát 0–4°C",
+    "shelfLifeDays": 3,
+    "packs": [
+      {
+        "label": "500g",
+        "grams": 500,
+        "unit": "khay",
+        "price": 32500,
+        "stock": 24
+      },
+      {
+        "label": "1kg",
+        "grams": 1000,
+        "unit": "khay",
+        "price": 65000,
+        "stock": 19
+      }
+    ]
+  },
+  {
+    "name": "Gà công nghiệp nguyên con",
+    "category": 2,
+    "aliases": [
+      "gà nguyên con",
+      "thịt gà công nghiệp"
+    ],
+    "use": "Gà công nghiệp nguyên con đã làm sạch, còn da và xương; dùng nướng, luộc hoặc chia phần.",
+    "basePricePerKg": 62000,
+    "image": "/api/v1/product-images/demo-32.jpg",
+    "article": null,
+    "existing": false,
+    "storage": "Ngăn mát 0–4°C",
+    "shelfLifeDays": 3,
+    "packs": [
+      {
+        "label": "Nguyên con khoảng 1,5kg",
+        "grams": 1500,
+        "unit": "con",
+        "price": 93000,
+        "stock": 15
+      },
+      {
+        "label": "Nguyên con khoảng 2kg",
+        "grams": 2000,
+        "unit": "con",
+        "price": 124000,
+        "stock": 10
+      }
+    ]
+  },
+  {
+    "name": "Ngò rí tươi",
+    "category": 1,
+    "aliases": [
+      "rau mùi",
+      "mùi ta",
+      "ngò rí",
+      "coriander",
+      "cilantro"
+    ],
+    "use": "Rau thơm lá nhỏ, dùng rắc cháo, súp, ăn kèm bánh mì hoặc trộn gỏi; rửa sạch trước khi chế biến.",
+    "basePricePerKg": 70000,
+    "image": "/api/v1/product-images/catalog-20.jpg",
+    "article": "Coriander",
+    "existing": false,
+    "storage": "Ngăn mát 4–8°C",
+    "shelfLifeDays": 5,
+    "packs": [
+      {
+        "label": "50g",
+        "grams": 50,
+        "unit": "túi",
+        "price": 3500,
+        "stock": 40
+      },
+      {
+        "label": "100g",
+        "grams": 100,
+        "unit": "túi",
+        "price": 7000,
+        "stock": 32
+      }
+    ]
+  },
+  {
+    "name": "Ngò gai tươi",
+    "category": 1,
+    "aliases": [
+      "mùi tàu",
+      "ngò gai",
+      "culantro"
+    ],
+    "use": "Rau thơm lá dài có răng cưa, dùng ăn phở, nêm canh chua hoặc món hầm.",
+    "basePricePerKg": 60000,
+    "image": "/api/v1/product-images/catalog-21.jpg",
+    "article": "Eryngium foetidum",
+    "existing": false,
+    "storage": "Ngăn mát 4–8°C",
+    "shelfLifeDays": 5,
+    "packs": [
+      {
+        "label": "50g",
+        "grams": 50,
+        "unit": "túi",
+        "price": 3000,
+        "stock": 40
+      },
+      {
+        "label": "100g",
+        "grams": 100,
+        "unit": "túi",
+        "price": 6000,
+        "stock": 32
+      }
+    ]
+  },
+  {
+    "name": "Rau ngổ tươi",
+    "category": 1,
+    "aliases": [
+      "ngò om",
+      "rau om",
+      "rau ngổ"
+    ],
+    "use": "Rau thơm thân mềm dùng nêm canh chua cá, lẩu cá hoặc món om.",
+    "basePricePerKg": 60000,
+    "image": "/api/v1/product-images/catalog-22-photo.jpg",
+    "article": "Limnophila aromatica",
+    "existing": false,
+    "storage": "Ngăn mát 4–8°C",
+    "shelfLifeDays": 5,
+    "packs": [
+      {
+        "label": "50g",
+        "grams": 50,
+        "unit": "túi",
+        "price": 3000,
+        "stock": 40
+      },
+      {
+        "label": "100g",
+        "grams": 100,
+        "unit": "túi",
+        "price": 6000,
+        "stock": 32
+      }
+    ]
+  },
+  {
+    "name": "Hành lá tươi",
+    "category": 1,
+    "aliases": [
+      "hành hoa",
+      "hành lá",
+      "scallion"
+    ],
+    "use": "Hành lá còn phần lá xanh và gốc, dùng nêm canh, làm mỡ hành hoặc xào.",
+    "basePricePerKg": 40000,
+    "image": "/api/v1/product-images/catalog-23.jpg",
+    "article": "Scallion",
+    "existing": false,
+    "storage": "Ngăn mát 4–8°C",
+    "shelfLifeDays": 5,
+    "packs": [
+      {
+        "label": "100g",
+        "grams": 100,
+        "unit": "túi",
+        "price": 4000,
+        "stock": 40
+      },
+      {
+        "label": "200g",
+        "grams": 200,
+        "unit": "túi",
+        "price": 8000,
+        "stock": 32
+      }
+    ]
+  },
+  {
+    "name": "Húng quế tươi",
+    "category": 1,
+    "aliases": [
+      "rau quế",
+      "húng quế",
+      "Thai basil"
+    ],
+    "use": "Lá rau thơm dùng ăn kèm phở, bún hoặc cuốn bánh tráng.",
+    "basePricePerKg": 60000,
+    "image": "/api/v1/product-images/catalog-24-photo.jpg",
+    "article": "Thai basil",
+    "existing": false,
+    "storage": "Ngăn mát 4–8°C",
+    "shelfLifeDays": 5,
+    "packs": [
+      {
+        "label": "50g",
+        "grams": 50,
+        "unit": "túi",
+        "price": 3000,
+        "stock": 40
+      },
+      {
+        "label": "100g",
+        "grams": 100,
+        "unit": "túi",
+        "price": 6000,
+        "stock": 32
+      }
+    ]
+  },
+  {
+    "name": "Rau răm tươi",
+    "category": 1,
+    "aliases": [
+      "rau răm",
+      "Vietnamese coriander"
+    ],
+    "use": "Rau thơm dùng ăn kèm trứng vịt lộn, trộn gỏi gà hoặc nêm cháo.",
+    "basePricePerKg": 50000,
+    "image": "/api/v1/product-images/catalog-25.jpg",
+    "article": "Persicaria odorata",
+    "existing": false,
+    "storage": "Ngăn mát 4–8°C",
+    "shelfLifeDays": 5,
+    "packs": [
+      {
+        "label": "50g",
+        "grams": 50,
+        "unit": "túi",
+        "price": 2500,
+        "stock": 40
+      },
+      {
+        "label": "100g",
+        "grams": 100,
+        "unit": "túi",
+        "price": 5000,
+        "stock": 32
+      }
+    ]
+  },
+  {
+    "name": "Tía tô tươi",
+    "category": 1,
+    "aliases": [
+      "lá tía tô",
+      "tía tô",
+      "perilla"
+    ],
+    "use": "Lá rau thơm dùng ăn kèm bún, cuốn thịt hoặc nêm cháo; rửa sạch trước khi dùng.",
+    "basePricePerKg": 60000,
+    "image": "/api/v1/product-images/catalog-26-photo.jpg",
+    "article": "Perilla frutescens",
+    "existing": false,
+    "storage": "Ngăn mát 4–8°C",
+    "shelfLifeDays": 5,
+    "packs": [
+      {
+        "label": "50g",
+        "grams": 50,
+        "unit": "túi",
+        "price": 3000,
+        "stock": 40
+      },
+      {
+        "label": "100g",
+        "grams": 100,
+        "unit": "túi",
+        "price": 6000,
+        "stock": 32
+      }
+    ]
+  },
+  {
+    "name": "Thì là tươi",
+    "category": 1,
+    "aliases": [
+      "rau thì là",
+      "thì là",
+      "dill"
+    ],
+    "use": "Rau thơm lá nhỏ dạng sợi, dùng nấu canh cá, chả cá hoặc món hấp.",
+    "basePricePerKg": 70000,
+    "image": "/api/v1/product-images/catalog-27-photo.jpg",
+    "article": "Dill",
+    "existing": false,
+    "storage": "Ngăn mát 4–8°C",
+    "shelfLifeDays": 5,
+    "packs": [
+      {
+        "label": "50g",
+        "grams": 50,
+        "unit": "túi",
+        "price": 3500,
+        "stock": 40
+      },
+      {
+        "label": "100g",
+        "grams": 100,
+        "unit": "túi",
+        "price": 7000,
+        "stock": 32
+      }
+    ]
+  },
+  {
+    "name": "Rau tần ô",
+    "category": 1,
+    "aliases": [
+      "cải cúc",
+      "tần ô",
+      "rau cải cúc"
+    ],
+    "use": "Rau lá mềm dùng nấu canh thịt băm, canh tôm hoặc nhúng lẩu.",
+    "basePricePerKg": 30000,
+    "image": "/api/v1/product-images/catalog-28-photo.jpg",
+    "article": "Glebionis coronaria",
+    "existing": false,
+    "storage": "Ngăn mát 4–8°C",
+    "shelfLifeDays": 5,
+    "packs": [
+      {
+        "label": "200g",
+        "grams": 200,
+        "unit": "túi",
+        "price": 6000,
+        "stock": 40
+      },
+      {
+        "label": "500g",
+        "grams": 500,
+        "unit": "túi",
+        "price": 15000,
+        "stock": 32
+      }
+    ]
+  },
+  {
+    "name": "Khổ qua xanh",
+    "category": 1,
+    "aliases": [
+      "mướp đắng",
+      "khổ qua"
+    ],
+    "use": "Quả khổ qua dùng nhồi thịt nấu canh, xào trứng hoặc thái lát nhúng lẩu.",
+    "basePricePerKg": 26000,
+    "image": "/api/v1/product-images/demo-22.png",
+    "article": null,
+    "existing": true,
+    "storage": "Ngăn mát 4–8°C",
+    "shelfLifeDays": 5,
+    "packs": [
+      {
+        "label": "300g",
+        "grams": 300,
+        "unit": "túi",
+        "price": 8000,
+        "stock": 40
+      },
+      {
+        "label": "500g",
+        "grams": 500,
+        "unit": "túi",
+        "price": 13000,
+        "stock": 32
+      },
+      {
+        "label": "1kg",
+        "grams": 1000,
+        "unit": "túi",
+        "price": 26000,
+        "stock": 24
+      }
+    ]
+  },
+  {
+    "name": "Bí đao xanh",
+    "category": 1,
+    "aliases": [
+      "bí xanh",
+      "bí đao"
+    ],
+    "use": "Bí đao vỏ xanh, dùng nấu canh xương, canh tôm hoặc hấp.",
+    "basePricePerKg": 22000,
+    "image": "/api/v1/product-images/demo-18.jpg",
+    "article": null,
+    "existing": true,
+    "storage": "Ngăn mát 4–8°C",
+    "shelfLifeDays": 5,
+    "packs": [
+      {
+        "label": "300g",
+        "grams": 300,
+        "unit": "túi",
+        "price": 6500,
+        "stock": 40
+      },
+      {
+        "label": "500g",
+        "grams": 500,
+        "unit": "túi",
+        "price": 11000,
+        "stock": 32
+      },
+      {
+        "label": "1kg",
+        "grams": 1000,
+        "unit": "túi",
+        "price": 22000,
+        "stock": 24
+      }
+    ]
+  },
+  {
+    "name": "Dưa leo baby",
+    "category": 1,
+    "aliases": [
+      "dưa chuột",
+      "dưa leo"
+    ],
+    "use": "Dưa leo quả nhỏ giòn, phù hợp salad, ăn kèm hoặc làm dưa góp.",
+    "basePricePerKg": 30000,
+    "image": "/api/v1/product-images/demo-21.jpg",
+    "article": null,
+    "existing": true,
+    "storage": "Ngăn mát 4–8°C",
+    "shelfLifeDays": 5,
+    "packs": [
+      {
+        "label": "300g",
+        "grams": 300,
+        "unit": "túi",
+        "price": 9000,
+        "stock": 40
+      },
+      {
+        "label": "500g",
+        "grams": 500,
+        "unit": "túi",
+        "price": 15000,
+        "stock": 32
+      }
+    ]
+  },
+  {
+    "name": "Đậu bắp tươi",
+    "category": 1,
+    "aliases": [
+      "mướp tây",
+      "đậu bắp",
+      "okra"
+    ],
+    "use": "Quả đậu bắp non, dùng nấu canh chua, luộc hoặc nướng.",
+    "basePricePerKg": 35000,
+    "image": "/api/v1/product-images/catalog-32-photo.jpg",
+    "article": "Okra",
+    "existing": false,
+    "storage": "Ngăn mát 4–8°C",
+    "shelfLifeDays": 5,
+    "packs": [
+      {
+        "label": "250g",
+        "grams": 250,
+        "unit": "túi",
+        "price": 9000,
+        "stock": 40
+      },
+      {
+        "label": "500g",
+        "grams": 500,
+        "unit": "túi",
+        "price": 17500,
+        "stock": 32
+      }
+    ]
+  },
+  {
+    "name": "Đậu cô ve xanh",
+    "category": 1,
+    "aliases": [
+      "đậu que",
+      "đậu cô ve",
+      "đậu cove",
+      "đỗ cô ve"
+    ],
+    "use": "Đậu cô ve dạng quả xanh, dùng xào thịt bò, luộc hoặc nấu canh.",
+    "basePricePerKg": 40000,
+    "image": "/api/v1/product-images/catalog-33-photo.jpg",
+    "article": "Green bean",
+    "existing": false,
+    "storage": "Ngăn mát 4–8°C",
+    "shelfLifeDays": 5,
+    "packs": [
+      {
+        "label": "300g",
+        "grams": 300,
+        "unit": "túi",
+        "price": 12000,
+        "stock": 40
+      },
+      {
+        "label": "500g",
+        "grams": 500,
+        "unit": "túi",
+        "price": 20000,
+        "stock": 32
+      }
+    ]
+  },
+  {
+    "name": "Củ đậu tươi",
+    "category": 1,
+    "aliases": [
+      "củ sắn",
+      "củ đậu",
+      "jicama"
+    ],
+    "use": "Củ đậu thịt trắng giòn; bỏ vỏ, dùng phần củ để trộn gỏi hoặc xào.",
+    "basePricePerKg": 25000,
+    "image": "/api/v1/product-images/catalog-34-photo.jpg",
+    "article": "Pachyrhizus erosus",
+    "existing": false,
+    "storage": "Ngăn mát 4–8°C",
+    "shelfLifeDays": 5,
+    "packs": [
+      {
+        "label": "500g",
+        "grams": 500,
+        "unit": "túi",
+        "price": 12500,
+        "stock": 40
+      },
+      {
+        "label": "1kg",
+        "grams": 1000,
+        "unit": "túi",
+        "price": 25000,
+        "stock": 32
+      }
+    ]
+  },
+  {
+    "name": "Khoai mì tươi",
+    "category": 1,
+    "aliases": [
+      "sắn",
+      "khoai mì",
+      "cassava"
+    ],
+    "use": "Củ khoai mì dùng chế biến món chín như hấp hoặc nấu chè; cần sơ chế và nấu chín trước khi dùng.",
+    "basePricePerKg": 22000,
+    "image": "/api/v1/product-images/catalog-35-roots.jpg",
+    "article": "Cassava",
+    "existing": false,
+    "storage": "Ngăn mát 4–8°C",
+    "shelfLifeDays": 5,
+    "packs": [
+      {
+        "label": "500g",
+        "grams": 500,
+        "unit": "túi",
+        "price": 11000,
+        "stock": 40
+      },
+      {
+        "label": "1kg",
+        "grams": 1000,
+        "unit": "túi",
+        "price": 22000,
+        "stock": 32
+      }
+    ]
+  },
+  {
+    "name": "Bắp ngọt vàng",
+    "category": 1,
+    "aliases": [
+      "ngô ngọt",
+      "bắp ngọt",
+      "ngô vàng"
+    ],
+    "use": "Hạt bắp vàng ngọt, còn lõi, dùng luộc, nấu súp hoặc xào.",
+    "basePricePerKg": 28000,
+    "image": "/api/v1/product-images/catalog-36.jpg",
+    "article": "Sweet corn",
+    "existing": false,
+    "storage": "Ngăn mát 4–8°C",
+    "shelfLifeDays": 5,
+    "packs": [
+      {
+        "label": "Gói 500g",
+        "grams": 500,
+        "unit": "túi",
+        "price": 14000,
+        "stock": 40
+      },
+      {
+        "label": "Gói 1kg",
+        "grams": 1000,
+        "unit": "túi",
+        "price": 28000,
+        "stock": 32
+      }
+    ]
+  },
+  {
+    "name": "Dứa chín gọt sẵn",
+    "category": 4,
+    "aliases": [
+      "thơm",
+      "khóm",
+      "dứa"
+    ],
+    "use": "Dứa chín đã gọt vỏ và bỏ mắt, dùng ăn tươi, xào chua ngọt hoặc nấu canh chua.",
+    "basePricePerKg": 40000,
+    "image": "/api/v1/product-images/demo-50.jpg",
+    "article": null,
+    "existing": true,
+    "storage": "Ngăn mát 4–8°C",
+    "shelfLifeDays": 5,
+    "packs": [
+      {
+        "label": "Hộp 300g",
+        "grams": 300,
+        "unit": "túi",
+        "price": 12000,
+        "stock": 40
+      },
+      {
+        "label": "Hộp 500g",
+        "grams": 500,
+        "unit": "túi",
+        "price": 20000,
+        "stock": 32
+      }
+    ]
+  },
+  {
+    "name": "Đậu phộng hạt khô",
+    "category": 5,
+    "aliases": [
+      "lạc",
+      "đậu phộng",
+      "hạt lạc"
+    ],
+    "use": "Hạt đậu phộng sống đã tách vỏ cứng, còn vỏ lụa; dùng rang, nấu chè hoặc làm muối đậu.",
+    "basePricePerKg": 60000,
+    "image": "/api/v1/product-images/catalog-38-photo.jpg",
+    "article": "Peanut",
+    "existing": false,
+    "storage": "Nơi khô ráo, kín, tránh ẩm",
+    "shelfLifeDays": 180,
+    "packs": [
+      {
+        "label": "Gói 200g",
+        "grams": 200,
+        "unit": "gói",
+        "price": 12000,
+        "stock": 40
+      },
+      {
+        "label": "Gói 500g",
+        "grams": 500,
+        "unit": "gói",
+        "price": 30000,
+        "stock": 32
+      }
+    ]
+  }
+]

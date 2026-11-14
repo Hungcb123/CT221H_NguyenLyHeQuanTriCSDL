@@ -18,11 +18,14 @@ const nextConfig: NextConfig = {
       },
     },
   },
+  experimental: {
+    proxyClientMaxBodySize: "15mb",
+  },
   async rewrites() {
     return [
       {
         source: "/api/:path*",
-        destination: "http://localhost:8085/api/:path*",
+        destination: "http://127.0.0.1:8085/api/:path*",
       },
     ];
   },

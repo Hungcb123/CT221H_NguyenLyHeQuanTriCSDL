@@ -47,4 +47,12 @@ sqlcmd -i /database/08_catalog_images.sql
 
 sqlcmd -i /database/10_available_recipes.sql
 
+sqlcmd -i /database/16_payment_test_products.sql
+
+sqlcmd -i /database/17_demo_search_catalog.sql
+
+sqlcmd -i /database/18_demo_catalog_images.sql
+
+sqlcmd -i /database/19_semantic_search_enrichment.sql
+
 echo "🎉 HOÀN TẤT KHỞI TẠO CƠ SỞ DỮ LIỆU FreshGroceryDB THÀNH CÔNG!"

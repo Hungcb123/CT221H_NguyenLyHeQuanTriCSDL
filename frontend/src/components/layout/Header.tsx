@@ -2,13 +2,14 @@
 
 import React from "react";
 import Link from "next/link";
-import { Search, ShoppingCart, Sparkles } from "lucide-react";
+import { Search, ShoppingCart, Sparkles, X } from "lucide-react";
 import { AccountMenu } from "@/components/customer/AccountMenu";
 
 interface HeaderProps {
   cartCount: number;
   onOpenCart: () => void;
   onSearch: (keyword: string) => void;
+  onClearSearch?: () => void;
   searchTerm: string;
   onSearchTermChange: (value: string) => void;
   activeFilter: string;
@@ -19,6 +20,7 @@ export const Header: React.FC<HeaderProps> = ({
   cartCount,
   onOpenCart,
   onSearch,
+  onClearSearch,
   searchTerm,
   onSearchTermChange,
   activeFilter,
@@ -53,10 +55,24 @@ export const Header: React.FC<HeaderProps> = ({
                 type="text"
                 value={searchTerm}
                 onChange={(e) => onSearchTermChange(e.target.value)}
-                placeholder="Tìm tên sản phẩm hoặc nhu cầu: nguyên liệu nấu canh chua…"
+                placeholder="Tìm món ăn, dinh dưỡng hoặc nguyên liệu: nấu canh chua, giàu protein, detox…"
                 aria-label="Tìm kiếm sản phẩm theo tên hoặc nhu cầu"
-                className="w-full h-11 pl-4 pr-20 sm:pr-40 rounded-full border border-white/30 bg-white text-stone-900 text-base transition-all outline-hidden focus:border-emerald-300"
+                className="w-full h-11 pl-4 pr-28 sm:pr-44 rounded-full border border-white/30 bg-white text-stone-900 text-base transition-all outline-hidden focus:border-emerald-300"
               />
+              {searchTerm && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onSearchTermChange("");
+                    onClearSearch?.();
+                  }}
+                  aria-label="Xóa nội dung tìm kiếm"
+                  title="Xóa tìm kiếm"
+                  className="absolute right-20 sm:right-36 p-1 text-stone-400 hover:text-stone-700 rounded-full transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
               <span className="absolute right-12 flex items-center gap-1 text-sm font-semibold text-emerald-800 pointer-events-none">
                 <Sparkles className="w-3 h-3" aria-hidden="true" />
                 <span className="hidden sm:inline">Thông minh</span>

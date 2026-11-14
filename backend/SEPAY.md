@@ -1,6 +1,6 @@
 # Thanh toán SePay (VietQR + webhook)
 
-Checkout mới dùng SePay chuyển khoản ngân hàng; thanh toán ví vẫn hoạt động.
+Checkout khách hàng dùng COD (thanh toán khi nhận hàng) hoặc SePay chuyển khoản ngân hàng.
 Đơn MoMo cũ và API cũ được giữ để xem lịch sử/đối soát.
 
 ## Chuẩn bị
@@ -15,7 +15,7 @@ Copy `.env.sepay.example` thành `.env.sepay.local`, điền cấu hình và b�
 Không đưa khóa vào frontend hay commit file local.
 
 ```bash
-docker compose --env-file .env.sepay.local up -d --build backend
+docker compose --env-file .env.sepay.local up -d --build
 ```
 
 Frontend chạy riêng bằng `npm run dev` trong thư mục `frontend`.
@@ -23,6 +23,29 @@ Frontend chạy riêng bằng `npm run dev` trong thư mục `frontend`.
 Nếu chạy Maven trực tiếp, đưa cùng các biến môi trường vào process backend.
 Schema `db/sepay.sql` tự chạy khi backend khởi động; giữ nguyên dữ liệu MoMo.
 Chưa cấu hình thì checkout hiển thị SePay chưa khả dụng.
+
+## Ngrok chạy cùng Docker
+
+Điền thêm `NGROK_AUTHTOKEN` vào `.env.sepay.local` (lấy từ ngrok dashboard).
+Đây là token tài khoản ngrok, khác với `SEPAY_WEBHOOK_API_KEY`.
+Lệnh Compose phía trên khởi động cả service `ngrok`, chuyển tiếp HTTPS công khai tới `backend:8085`.
+Không cần chạy thêm `ngrok http 8085` trong terminal. Dừng ngrok terminal cũ trước khi chuyển sang Docker để tránh trùng endpoint/cổng 4040.
+
+`ngrok http` tự dùng dev domain cố định của tài khoản, nên restart container vẫn giữ URL khi dùng cùng tài khoản.
+Xem URL và lỗi kết nối bằng:
+
+```bash
+docker compose --env-file .env.sepay.local logs --tail=30 ngrok
+```
+
+Giao diện kiểm tra request chỉ mở trên máy local: http://localhost:4040.
+Sau khi đã tạo container, có thể khởi động lại bằng `docker compose start` (không cần nạp lại env).
+Docker tự khởi động lại ngrok theo `restart: unless-stopped`; Docker Desktop và mạng vẫn phải hoạt động.
+Nếu chủ động `docker compose stop` hoặc `down`, cần bật lại bằng `start` hoặc lệnh `up` phía trên.
+Đóng terminal không làm dừng container khi dùng `-d`.
+
+Tham khảo chính thức: [Docker](https://ngrok.com/docs/using-ngrok-with/docker),
+[dev domain cố định](https://ngrok.com/docs/gateway/domains).
 
 ## Cấu hình trên SePay
 

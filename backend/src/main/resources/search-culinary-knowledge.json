@@ -1,0 +1,219 @@
+{
+  "concepts": [
+    {
+      "id": "canh_chua",
+      "triggers": ["canh chua", "canh chua miền tây", "canh chua cá", "nấu canh chua"],
+      "english": "vietnamese mekong sour fish soup canh chua snakehead fish tomato pineapple okra bean sprouts elephant ear stem tamarind rice paddy herb culantro",
+      "productSignals": ["canh chua", "me vắt", "bạc hà", "dọc mùng", "rau ngổ", "ngò om", "cá lóc", "đậu bắp"]
+    },
+    {
+      "id": "pho_bo",
+      "triggers": ["phở bò", "nấu phở", "ăn phở", "rau thơm ăn phở"],
+      "english": "vietnamese beef pho noodle soup brisket flank tenderloin ginger shallot scallion culantro thai basil bean sprouts lime",
+      "productSignals": ["phở bò", "nấu phở", "ăn phở", "ăn kèm phở"]
+    },
+    {
+      "id": "lau_hai_san",
+      "triggers": ["lẩu hải sản", "lẩu thái", "lẩu chua cay", "hải sản nhúng lẩu"],
+      "english": "seafood hotpot thai tom yum hotpot shrimp squid octopus clam crab enoki mushroom napa cabbage lemongrass tamarind",
+      "productSignals": ["lẩu hải sản", "nhúng lẩu", "nấu lẩu"]
+    },
+    {
+      "id": "rau_an_lau",
+      "triggers": ["rau ăn lẩu", "rau nhúng lẩu", "nấm nhúng lẩu", "ăn lẩu"],
+      "english": "hotpot vegetables and mushrooms napa cabbage water spinach crown daisy enoki king oyster mushroom",
+      "productSignals": ["nhúng lẩu", "ăn lẩu", "nấu lẩu"]
+    },
+    {
+      "id": "thit_kho_tau",
+      "triggers": ["thịt kho tàu", "kho tàu", "thịt kho trứng", "thịt kho hột vịt"],
+      "english": "vietnamese braised caramelized pork belly with eggs and coconut water fish sauce garlic shallot",
+      "productSignals": ["kho tàu", "kho thịt"]
+    },
+    {
+      "id": "ca_kho_to",
+      "triggers": ["cá kho tộ", "kho tộ", "cá kho tiêu"],
+      "english": "vietnamese claypot braised fish snakehead basa fish sauce black pepper chili shallot caramel",
+      "productSignals": ["kho tộ", "kho tiêu"]
+    },
+    {
+      "id": "bo_luc_lac",
+      "triggers": ["bò lúc lắc", "lúc lắc", "bít tết", "beefsteak"],
+      "english": "vietnamese shaking beef cubes pan seared beef tenderloin bell pepper garlic soy sauce black pepper tomato",
+      "productSignals": ["bò lúc lắc", "bít tết"]
+    },
+    {
+      "id": "goi_cuon",
+      "triggers": ["gỏi cuốn", "gỏi cuốn tôm thịt", "cuốn bánh tráng"],
+      "english": "vietnamese fresh spring rolls shrimp pork belly rice vermicelli lettuce thai basil bean sprouts",
+      "productSignals": ["gỏi cuốn", "cuốn bánh tráng"]
+    },
+    {
+      "id": "detox_juice",
+      "triggers": ["nước ép", "thanh lọc", "detox", "giảm mỡ", "nước ép giảm cân"],
+      "english": "green detox juice weight loss fat burn cleansing celery green apple cucumber pineapple guava lime orange pomelo",
+      "productSignals": ["thanh lọc", "detox", "ép nước", "vắt nước"]
+    },
+    {
+      "id": "high_protein_gym",
+      "triggers": ["giàu protein", "giàu đạm", "tập gym", "tăng cơ", "eat clean", "ăn kiêng", "ít béo"],
+      "english": "high protein lean meat fitness gym workout muscle diet eat clean chicken breast salmon beef tenderloin eggs tofu sweet potato avocado broccoli",
+      "productSignals": ["giàu protein", "giàu đạm", "tập gym", "eat clean", "ít béo"]
+    },
+    {
+      "id": "vitamin_c",
+      "triggers": ["vitamin c", "giàu vitamin c", "tăng đề kháng", "tăng sức đề kháng"],
+      "english": "fresh citrus tropical fruits rich in vitamin c immune system booster orange guava pomelo mandarin lime green apple pineapple mango bell pepper tomato",
+      "productSignals": ["vitamin c", "tăng đề kháng", "tăng sức đề kháng"]
+    },
+    {
+      "id": "omega_3",
+      "triggers": ["omega 3", "omega-3", "tim mạch", "sashimi"],
+      "english": "fresh ocean fish rich in omega 3 fatty acids heart health sashimi salmon mackerel",
+      "productSignals": ["omega-3", "omega 3", "sashimi"]
+    },
+    {
+      "id": "breakfast_quick",
+      "triggers": ["ăn sáng", "bữa sáng", "đồ ăn sáng", "bữa sáng nhanh", "nhanh gọn"],
+      "english": "quick healthy nutritious breakfast eggs sweet potato banana avocado rice noodles",
+      "productSignals": ["bữa sáng", "ăn sáng"]
+    },
+    {
+      "id": "vegetarian",
+      "triggers": ["ăn chay", "món chay", "thuần chay", "đồ chay", "thanh đạm"],
+      "english": "vegetarian vegan light healthy meal silken tofu white tofu mushrooms napa cabbage broccoli vegetables soy sauce",
+      "productSignals": ["ăn chay", "món chay", "kho tiêu chay", "kho tộ chay", "thanh đạm"]
+    },
+    {
+      "id": "tomato_sauce",
+      "triggers": ["làm sốt", "nấu sốt", "sốt cà", "sốt cà chua"],
+      "english": "ripe red tomato for cooking tomato sauce pasta stew braised tofu and fish",
+      "productSignals": ["làm sốt", "sốt cà chua"]
+    },
+    {
+      "id": "bbq_grill",
+      "triggers": ["nướng bbq", "tiệc nướng", "đồ nướng", "thịt nướng", "hải sản nướng"],
+      "english": "bbq grill party pork belly beef short ribs chicken wings shrimp squid octopus king oyster mushroom bell pepper lettuce",
+      "productSignals": ["nướng bbq", "nướng sa tế", "nướng muối ớt", "đồ nướng"]
+    },
+    {
+      "id": "steamed_seafood",
+      "triggers": ["hải sản để hấp", "hải sản hấp", "nghêu hấp", "mực hấp", "tôm hấp"],
+      "english": "fresh seafood for steaming shrimp squid clam crab fish with lemongrass and ginger",
+      "productSignals": ["hấp bia", "hấp gừng", "hấp sả", "hấp hành"]
+    },
+    {
+      "id": "cold_relief",
+      "triggers": ["giải cảm", "ấm bụng", "trà gừng", "cháo giải cảm"],
+      "english": "warming ginger perilla scallion porridge cold relief soothing stomach",
+      "productSignals": ["giải cảm", "ấm bụng", "tía tô", "gừng tươi"]
+    }
+  ],
+  "ingredientEnglish": {
+    "cá lóc": "fresh snakehead fish fillet slices for sour soup and claypot braise",
+    "cá hồi": "fresh norwegian salmon fillet sashimi pan seared omega 3 high protein",
+    "cá basa": "fresh basa catfish steaks for braising and soup",
+    "cá diêu hồng": "fresh red tilapia whole fish for steaming and hotpot",
+    "cá thu": "fresh mackerel slices omega 3 tomato sauce",
+    "cá nục": "fresh scad ocean fish for braising",
+    "chả cá": "seasoned featherback fish paste cake",
+    "tôm sú": "fresh black tiger shrimp prawn seafood hotpot spring rolls steam bbq",
+    "tôm thẻ": "fresh whiteleg shrimp for soup stir fry and spring rolls",
+    "mực ống": "fresh tube squid calamari steam ginger stir fry hotpot",
+    "bạch tuộc": "fresh octopus bbq grill spicy hotpot",
+    "nghêu": "fresh white clams steamed with lemongrass sour soup hotpot",
+    "sò huyết": "fresh blood cockles tamarind stir fry garlic",
+    "cua biển": "fresh mud sea crab steamed tamarind seafood hotpot",
+    "ba rọi": "fresh pork belly streaky pork braised caramelized eggs boiled bbq spring rolls",
+    "sườn non": "fresh pork baby back ribs sweet and sour soup",
+    "nạc vai": "fresh pork shoulder butt minced grilled braised",
+    "nạc thăn": "lean pork tenderloin fillet low fat stir fry porridge",
+    "heo xay": "minced ground pork meat soup stuffed bitter melon",
+    "chân giò": "pork hock trotter stewed noodle soup",
+    "ức gà": "skinless boneless chicken breast fillet lean high protein gym diet salad",
+    "má đùi gà": "boneless chicken thigh fillet juicy pan seared grill",
+    "đùi gà": "fresh chicken leg quarter roasted fried fish sauce",
+    "cánh gà": "fresh chicken wings fried bbq glazed",
+    "chân gà": "cleaned chicken feet lemongrass kumquat",
+    "gà ta": "whole free range chicken boiled porridge",
+    "gà công nghiệp": "whole broiler chicken roast boil",
+    "bò bắp": "beef shin shank beef pho hotpot stew",
+    "bò thăn": "beef tenderloin sirloin steak shaking beef stir fry high protein",
+    "bò nạm": "beef flank brisket stew beef pho",
+    "bò gầu": "beef brisket point hotpot beef pho",
+    "bò ức": "beef brisket slow braise pho stew",
+    "sườn rút xương": "boneless beef short ribs bbq grill stew",
+    "trứng gà": "fresh farm chicken eggs high protein quick breakfast braised pork",
+    "trứng vịt": "fresh duck eggs braised pork baking",
+    "cần tây": "fresh celery stalks green detox juice weight loss fat burn stir fry",
+    "xà lách": "fresh crisp green lettuce salad spring rolls bbq wrap",
+    "cải thảo": "fresh napa cabbage hotpot soup kimchi",
+    "bắp cải": "fresh white cabbage boiled vegetable soup salad",
+    "cải thìa": "fresh bok choy stir fry garlic soup",
+    "cải ngọt": "fresh choy sum minced pork soup",
+    "rau muống": "fresh water spinach morning glory garlic stir fry sour soup hotpot",
+    "rau dền": "fresh red amaranth leaves shrimp soup",
+    "mồng tơi": "fresh malabar spinach crab shrimp soup",
+    "tần ô": "crown daisy chrysanthemum greens hotpot minced meat soup",
+    "bông cải": "fresh green broccoli florets high fiber vitamin c beef stir fry diet",
+    "cà chua": "ripe red tomato rich vitamin c tomato sauce sour soup salad",
+    "dưa leo": "fresh baby cucumber salad detox juice side dish",
+    "khổ qua": "fresh bitter melon stuffed pork soup stir fry eggs",
+    "bí đỏ": "butternut pumpkin squash creamy soup rib soup porridge",
+    "bí đao": "winter melon wax gourd light bone soup shrimp soup",
+    "cà rốt": "fresh sweet carrot bone stew salad juice",
+    "khoai tây": "yellow potato fries mash beef stew",
+    "khoai lang": "honey sweet potato high fiber breakfast eat clean gym diet",
+    "khoai mì": "fresh cassava root steamed sweet dessert",
+    "củ đậu": "fresh jicama crisp sweet root salad",
+    "đậu bắp": "fresh green okra lady finger sour soup grilled boiled",
+    "đậu cô ve": "fresh green french beans stir fry beef",
+    "bắp ngọt": "fresh sweet yellow corn boiled soup stir fry",
+    "nấm kim châm": "fresh enoki mushrooms hotpot beef rolls",
+    "nấm đùi gà": "fresh king oyster mushrooms bbq hotpot vegan braise",
+    "nấm rơm": "fresh straw mushrooms porridge vegan claypot hotpot",
+    "giá đỗ": "fresh mung bean sprouts pho sour soup spring rolls",
+    "bạc hà": "taro stem elephant ear stalk vietnamese sour fish soup",
+    "ớt chuông": "sweet bell pepper vitamin c shaking beef salad bbq",
+    "đậu hũ": "fresh soft silken white tofu plant protein vegan soup tomato sauce",
+    "ngò rí": "fresh cilantro coriander leaves garnish soup banh mi",
+    "ngò gai": "fresh culantro sawtooth herb beef pho sour soup",
+    "rau ngổ": "rice paddy herb vietnamese sour fish soup",
+    "hành lá": "fresh green scallion spring onion garnish soup",
+    "húng quế": "fresh thai basil leaves beef pho spring rolls",
+    "rau răm": "vietnamese coriander herb chicken salad",
+    "tía tô": "fresh perilla leaves herbs cold relief porridge",
+    "thì là": "fresh dill herb fish soup fish cake",
+    "chuối": "ripe sweet banana potassium quick breakfast gym dessert",
+    "xoài": "sweet hoa loc mango tropical fruit vitamin c smoothie dessert",
+    "cam sành": "juicy green orange high vitamin c fresh orange juice immunity",
+    "bưởi": "pink pomelo grapefruit high vitamin c low calorie diet dessert",
+    "dưa hấu": "red watermelon hydrating summer fruit juice dessert",
+    "thanh long": "red dragon fruit pitaya high fiber vitamin c smoothie",
+    "ổi": "crisp guava fruit very high vitamin c low sugar detox juice diet",
+    "dứa": "peeled ripe pineapple sour fish soup detox juice vitamin c",
+    "đu đủ": "ripe sweet papaya digestion dessert",
+    "chôm chôm": "sweet crisp rambutan tropical fruit",
+    "quýt": "sweet mandarin tangerine vitamin c fruit",
+    "dừa xiêm": "fresh young coconut water electrolyte braised pork",
+    "táo xanh": "crisp granny smith green apple detox juice celery weight loss vitamin c",
+    "bơ sáp": "creamy ripe avocado healthy fats smoothie breakfast eat clean gym",
+    "chanh tươi": "fresh seedless lime vitamin c lemonade pho seafood dipping sauce",
+    "tỏi": "fresh aromatic ly son garlic seasoning stir fry marinade dipping sauce",
+    "hành tím": "fresh purple shallots crispy fried shallots braise marinade",
+    "gừng": "fresh ginger root rhizome warming tea pho broth steamed seafood cold relief",
+    "sả cây": "fresh lemongrass stalks steamed clams seafood hotpot marinade",
+    "ớt hiểm": "fresh red birds eye chili pepper spicy braise dipping sauce",
+    "me vắt": "seedless sour tamarind paste vietnamese sour soup tamarind crab sauce",
+    "nước mắm": "traditional anchovy fish sauce vietnamese seasoning dipping",
+    "nước tương": "fermented soy sauce dipping marinade vegetarian cooking",
+    "dầu ăn": "soybean cooking oil frying stir fry",
+    "đường trắng": "refined white sugar cooking dessert seasoning",
+    "muối": "iodized table salt daily cooking seasoning",
+    "hạt nêm": "pork bone seasoning granules soup stir fry braise",
+    "tiêu đen": "ground phu quoc black pepper spice claypot fish steak",
+    "gạo thơm": "fragrant st25 jasmine rice family meal porridge",
+    "bún gạo": "dried rice vermicelli noodles spring rolls breakfast soup",
+    "đậu phộng": "raw shelled peanuts roasted dessert dipping"
+  }
+}

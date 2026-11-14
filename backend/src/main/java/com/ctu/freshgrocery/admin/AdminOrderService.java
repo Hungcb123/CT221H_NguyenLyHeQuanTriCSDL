@@ -28,21 +28,22 @@ public class AdminOrderService {
         if (target.equals(current)) return Map.of("maDH", id, "trangThai", current, "refunded", false);
         if("CANCELLED".equals(target) && ("MOMO_SANDBOX".equals(order.get("PhuongThucThanhToan")) || "SEPAY".equals(order.get("PhuongThucThanhToan"))))
             throw new AppException(HttpStatus.CONFLICT,"Đơn thanh toán ngoài ví cần được hủy/hoàn và đối soát riêng. Không hoàn vào ví DailyMart.");
+        boolean cod = "COD".equals(order.get("PhuongThucThanhToan"));
         boolean valid = ("PAID".equals(current) && Set.of("DELIVERED", "CANCELLED").contains(target))
-                || ("PENDING".equals(current) && "CANCELLED".equals(target));
+                || ("PENDING".equals(current) && ("CANCELLED".equals(target) || (cod && "DELIVERED".equals(target))));
         if (!valid) throw new AppException(HttpStatus.CONFLICT, "Không thể chuyển trạng thái đơn từ " + current + " sang " + target);
-        boolean refunded = "PAID".equals(current) && "CANCELLED".equals(target);
-        if (refunded) {
+        boolean refunded = !cod && "PAID".equals(current) && "CANCELLED".equals(target);
+        if (refunded || (cod && "CANCELLED".equals(target))) {
             var items = jdbc.queryForList("SELECT MaSP, SoLuong, MaKM FROM ChiTietDonHang WHERE MaDH = ? ORDER BY MaSP", id);
             if (items.isEmpty()) throw new AppException(HttpStatus.CONFLICT, "Đơn không có chi tiết; không được hoàn ví cho dữ liệu benchmark.");
             BigDecimal amount = (BigDecimal) order.get("TongTien");
-            jdbc.update("UPDATE KhachHang SET SoDuVi = SoDuVi + ? WHERE MaKH = ?", amount, customer);
+            if (refunded) jdbc.update("UPDATE KhachHang SET SoDuVi = SoDuVi + ? WHERE MaKH = ?", amount, customer);
             for (var item : items) {
                 jdbc.update("UPDATE SanPham SET SoLuongTon = SoLuongTon + ?, NgayCapNhat = GETDATE() WHERE MaSP = ?", item.get("SoLuong"), item.get("MaSP"));
                 if (item.get("MaKM") != null) jdbc.update("UPDATE ChiTietKhuyenMai SET SoLuongDaBan = CASE WHEN SoLuongDaBan >= ? THEN SoLuongDaBan - ? ELSE 0 END WHERE MaKM = ? AND MaSP = ?",
                         item.get("SoLuong"), item.get("SoLuong"), item.get("MaKM"), item.get("MaSP"));
             }
-            jdbc.update("INSERT INTO LichSuGiaoDichVi (MaKH, MaDH, LoaiGiaoDich, SoDuTruoc, SoTienThayDoi, SoDuSau, NoiDung) VALUES (?, ?, 'HOAN_TIEN', ?, ?, ?, ?)",
+            if (refunded) jdbc.update("INSERT INTO LichSuGiaoDichVi (MaKH, MaDH, LoaiGiaoDich, SoDuTruoc, SoTienThayDoi, SoDuSau, NoiDung) VALUES (?, ?, 'HOAN_TIEN', ?, ?, ?, ?)",
                     customer, id, balance, amount, balance.add(amount), "Hoàn ví do quản trị hủy đơn #" + id);
         }
         jdbc.update("UPDATE DonHang SET TrangThai = ? WHERE MaDH = ?", target, id);

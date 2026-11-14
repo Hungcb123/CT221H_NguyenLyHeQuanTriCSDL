@@ -207,5 +207,14 @@ export interface CheckoutResponse {
   statusCode: number;
   message: string;
   tongTien: number;
-  soDuConLai: number;
+  soDuConLai: number | null;
+}
+
+export interface PromotionCampaign {
+  maKM: number;
+  tenKM: string;
+  moTa?: string;
+  loaiKM: string;
+  ngayKetThuc: string;
+  products: ProductResponse[];
 }

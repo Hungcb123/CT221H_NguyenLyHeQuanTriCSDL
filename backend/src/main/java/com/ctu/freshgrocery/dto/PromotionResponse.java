@@ -40,6 +40,8 @@ public class PromotionResponse {
     @Schema(description = "Chương trình hiện tại có đang trong hiệu lực thời gian hay không", example = "true")
     private Boolean dangHieuLuc;
 
+    private String trangThaiHienThi;
+
     @Schema(description = "Số lượng sản phẩm áp dụng ưu đãi trong chương trình", example = "3")
     private Integer itemsCount;
 

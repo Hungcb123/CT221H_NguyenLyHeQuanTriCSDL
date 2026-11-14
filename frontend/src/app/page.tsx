@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCustomer } from "@/components/customer/CustomerProvider";
 import { Header } from "@/components/layout/Header";
 import { CategorySidebar } from "@/components/layout/CategorySidebar";
+import { PromotionOffers } from "@/components/home/PromotionOffers";
 import { HeroBanner } from "@/components/home/HeroBanner";
 import { ProductCard } from "@/components/product/ProductCard";
 import { ProductOptionsModal } from "@/components/product/ProductOptionsModal";
@@ -33,6 +34,17 @@ export default function HomePage() {
   const [isSemanticResult, setIsSemanticResult] = useState(false);
   const [semanticScoreNotice, setSemanticScoreNotice] = useState<string | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<ProductResponse | null>(null);
+
+  const smartSuggestions = [
+    "Nguyên liệu nấu canh chua miền Tây",
+    "Thực phẩm giàu protein tập gym",
+    "Nước ép giảm cân detox",
+    "Nấu phở bò",
+    "Nguyên liệu nấu lẩu hải sản",
+    "Trái cây giàu Vitamin C",
+    "Rau ăn lẩu",
+    "Hành tỏi ớt gừng sả",
+  ];
 
   // Fetch initial data
   useEffect(() => {
@@ -142,9 +154,14 @@ export default function HomePage() {
   };
 
   const handleSearch = (keyword: string) => {
+    const trimmed = keyword.trim();
+    if (!trimmed) {
+      resetProducts();
+      return;
+    }
     resetProducts();
-    setSearchTerm(keyword);
-    setSearch({ keyword });
+    setSearchTerm(trimmed);
+    setSearch({ keyword: trimmed });
   };
 
   const handleAddToCart = async (product: ProductResponse, quantity = 1) => {
@@ -160,6 +177,7 @@ export default function HomePage() {
         cartCount={cart?.tongSoLuong ?? 0}
         onOpenCart={() => { if(!customer){router.push("/login?next=/");return;} setIsCartOpen(true); void loadCart(); }}
         onSearch={handleSearch}
+        onClearSearch={resetProducts}
         searchTerm={searchTerm}
         onSearchTermChange={setSearchTerm}
         activeFilter={activeNavFilter}
@@ -197,6 +215,35 @@ export default function HomePage() {
                 setSelectedCategoryId(seafood?.maDanhMuc ?? null);
               }}
             />}
+
+            {!search && selectedCategoryId === null && <PromotionOffers onSelect={setSelectedProduct} />}
+
+            {/* Quick AI Semantic Search Chips */}
+            <div className="mb-4 rounded-xl border border-stone-200 bg-white px-4 py-3 shadow-xs">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-[#08783c]">
+                  <Sparkles className="size-3.5" aria-hidden="true" />
+                  Gợi ý tìm kiếm AI:
+                </span>
+                {smartSuggestions.map((item) => {
+                  const active = search?.keyword.toLowerCase() === item.toLowerCase();
+                  return (
+                    <button
+                      key={item}
+                      type="button"
+                      onClick={() => (active ? resetProducts() : handleSearch(item))}
+                      className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                        active
+                          ? "border-[#079447] bg-[#079447] text-white"
+                          : "border-stone-200 bg-stone-50 text-stone-700 hover:border-[#079447]/60 hover:bg-emerald-50 hover:text-[#08783c]"
+                      }`}
+                    >
+                      {item}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
             {/* Semantic Search AI Alert Banner (when active) */}
             {isSemanticResult && (
@@ -292,7 +339,10 @@ export default function HomePage() {
       <FloatingChatbot
         key={customer?.maKH ?? "guest"}
         onCartUpdated={loadCart}
-        onNavigateCheckout={() => router.push("/checkout")}
+        onNavigateCheckout={() => {
+          setIsCartOpen(false);
+          router.push(`/checkout?v=${Date.now()}`);
+        }}
       />
 
       <ProductOptionsModal
@@ -317,7 +367,10 @@ export default function HomePage() {
           setCart(await apiService.updateCartQuantity({ customerId: customer.maKH, productId, quantity }));
           setCartError(null);
         }}
-        onCheckout={() => router.push("/checkout")}
+        onCheckout={() => {
+          setIsCartOpen(false);
+          router.push(`/checkout?v=${Date.now()}`);
+        }}
       />
     </div>
   );

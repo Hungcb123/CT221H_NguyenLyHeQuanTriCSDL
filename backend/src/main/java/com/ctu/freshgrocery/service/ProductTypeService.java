@@ -26,7 +26,7 @@ public class ProductTypeService {
     public void enrich(List<ProductResponse> products) {
         if (products.isEmpty()) return;
         var placeholders = String.join(",", Collections.nCopies(products.size(), "?"));
-        var rows = jdbc.queryForList("SELECT s.MaSP, s.MaSPCha, s.TenLoai, p.TenSP AS TenSanPhamCha FROM SanPham s LEFT JOIN SanPham p ON p.MaSP = s.MaSPCha WHERE s.MaSP IN (" + placeholders + ")", products.stream().map(ProductResponse::getMaSP).toArray());
+        var rows = jdbc.queryForList("SELECT s.MaSP, s.MaSPCha, s.TenLoai, p.TenSP AS TenSanPhamCha, CAST(CASE WHEN EXISTS (SELECT 1 FROM SanPham child WHERE child.MaSPCha = s.MaSP) THEN 1 ELSE 0 END AS bit) AS HasTypes FROM SanPham s LEFT JOIN SanPham p ON p.MaSP = s.MaSPCha WHERE s.MaSP IN (" + placeholders + ")", products.stream().map(ProductResponse::getMaSP).toArray());
         var byId = new HashMap<Integer, Map<String, Object>>();
         rows.forEach(row -> byId.put((Integer) row.get("MaSP"), row));
         var statuses = saleStatuses(products.stream().map(ProductResponse::getMaSP).toList());
@@ -37,6 +37,15 @@ public class ProductTypeService {
                 p.setMaSPCha((Integer) row.get("MaSPCha"));
                 p.setTenLoai((String) row.get("TenLoai"));
                 p.setTenSanPhamCha((String) row.get("TenSanPhamCha"));
+                // Legacy offers on a family do not discount its separately priced types.
+                if (Boolean.TRUE.equals(row.get("HasTypes"))) {
+                    p.setGia(p.getGiaGoc());
+                    p.setGiaHienTai(p.getGiaGoc());
+                    p.setDangKhuyenMai(false);
+                    p.setPhanTramGiam(null);
+                    p.setMaKM(null);
+                    p.setTenChuongTrinhKM(null);
+                }
             }
         });
     }
@@ -47,7 +56,7 @@ public class ProductTypeService {
         var rows = jdbc.queryForList("""
                 SELECT s.MaSP, CASE
                   WHEN s.TrangThaiXoa = 1 OR p.TrangThaiXoa = 1 THEN 'STOPPED'
-                  WHEN EXISTS (SELECT 1 FROM SanPham c WHERE c.MaSPCha = s.MaSP AND c.TrangThaiXoa = 0)
+                  WHEN EXISTS (SELECT 1 FROM SanPham c WHERE c.MaSPCha = s.MaSP)
                     THEN CASE WHEN EXISTS (SELECT 1 FROM SanPham c WHERE c.MaSPCha = s.MaSP
                            AND c.TrangThaiXoa = 0 AND c.HanSuDung > GETDATE() AND c.SoLuongTon > 0)
                          THEN 'AVAILABLE' ELSE 'NO_AVAILABLE_TYPES' END

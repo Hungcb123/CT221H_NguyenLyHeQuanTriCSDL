@@ -8,14 +8,21 @@ import java.util.*;
 public final class ProductSearchEvidence {
     // Remove request wording BEFORE accent folding: “để” must not erase the product term “dê”.
     private static final Set<String> REQUEST_WORDS = Set.of(
-            "để", "làm", "nấu", "món", "ăn", "kèm", "cho", "với", "cần", "tìm", "muốn", "giúp", "tôi");
+            "để", "làm", "nấu", "món", "ăn", "kèm", "cho", "với", "cần", "tìm", "muốn", "giúp", "tôi",
+            "mua", "các", "loại", "những", "nào", "gì", "hôm", "nay");
 
     private ProductSearchEvidence() {}
 
     public static Set<String> requiredTerms(String query) {
         String text = Normalizer.normalize(Objects.toString(query, ""), Normalizer.Form.NFC)
                 .toLowerCase(Locale.ROOT).replaceAll("[^\\p{L}\\p{N}]+", " ")
-                .replaceAll("\\bnguyên liệu\\b", " ").trim();
+                .replaceAll("\\bnguyên liệu\\b", " ")
+                .replaceAll("\\bthực phẩm\\b", " ")
+                .replaceAll("\\bgợi ý\\b", " ")
+                .replaceAll("\\bthích hợp\\b", " ")
+                .replaceAll("\\bphù hợp\\b", " ")
+                .replaceAll("\\bnhanh gọn\\b", " ")
+                .trim();
         Set<String> terms = new LinkedHashSet<>();
         for (String term : text.split(" +")) {
             if (!term.isBlank() && !REQUEST_WORDS.contains(term)) terms.add(term);

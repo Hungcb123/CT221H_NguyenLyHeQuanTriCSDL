@@ -57,7 +57,14 @@ public class OrderDetailResponse {
     @Schema(description = "Mặt hàng trong hóa đơn")
     public static class OrderItemDetailDto {
         private Integer maSP;
+        private Integer maSPCha;
         private String tenSP;
+        private String tenSanPhamCha;
+        private String tenLoai;
+        private String donViTinh;
+        private String tenDanhMuc;
+        private String nhietDoBaoQuan;
+        private String hinhAnh;
         private Integer soLuong;
         private BigDecimal donGia;
         private BigDecimal giaGoc;

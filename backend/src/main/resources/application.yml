@@ -1,9 +1,12 @@
 server:
   port: ${SERVER_PORT:8085}
+  tomcat:
+    max-swallow-size: 15MB
+    max-http-form-post-size: 15MB
   servlet:
     context-path: /
     session:
-      timeout: 30m
+      timeout: 120m
       cookie:
         http-only: true
         same-site: lax
@@ -12,8 +15,8 @@ server:
 spring:
   servlet:
     multipart:
-      max-file-size: 5MB
-      max-request-size: 6MB
+      max-file-size: 10MB
+      max-request-size: 12MB
   application:
     name: fresh-grocery-backend
 

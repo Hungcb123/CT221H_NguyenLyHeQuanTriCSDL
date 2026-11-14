@@ -66,4 +66,26 @@ class RecipeAvailabilityTest {
         other.setTenSP("Ca loc moi"); other.setDonViTinh("kg");
         assertFalse(detail(old).getDuNguyenLieuTrongKho());
     }
+    @Test void resolvesSellableChildVariantInsteadOfUnsellableParentFamily() {
+        var parent = Product.builder().maSP(10).tenSP("Đậu bắp tươi").donViTinh("kg").maDanhMuc(1)
+                .gia(BigDecimal.valueOf(34000)).soLuongTon(50)
+                .hanSuDung(LocalDateTime.now().plusDays(3)).trangThaiXoa(false).build();
+        var pack250 = Product.builder().maSP(101).maSPCha(10).tenSP("Đậu bắp tươi - 250g").donViTinh("250g").maDanhMuc(1)
+                .gia(BigDecimal.valueOf(9000)).soLuongTon(30)
+                .hanSuDung(LocalDateTime.now().plusDays(3)).trangThaiXoa(false).build();
+        var pack500 = Product.builder().maSP(102).maSPCha(10).tenSP("Đậu bắp tươi - 500g").donViTinh("500g").maDanhMuc(1)
+                .gia(BigDecimal.valueOf(17500)).soLuongTon(20)
+                .hanSuDung(LocalDateTime.now().plusDays(3)).trangThaiXoa(false).build();
+        when(catalog.findAll()).thenReturn(List.of(parent, pack500, pack250));
+
+        var result = detail(parent);
+        assertTrue(result.getDuNguyenLieuTrongKho());
+        assertEquals(101, result.getNguyenLieuList().getFirst().getMaSP());
+        assertEquals("Đậu bắp tươi - 250g", result.getNguyenLieuList().getFirst().getTenSP());
+        assertNull(result.getNguyenLieuList().getFirst().getThayTheCho());
+
+        pack250.setSoLuongTon(0);
+        pack500.setSoLuongTon(0);
+        assertFalse(detail(parent).getDuNguyenLieuTrongKho());
+    }
 }

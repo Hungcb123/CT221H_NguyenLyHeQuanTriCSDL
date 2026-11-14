@@ -29,13 +29,24 @@ interface Detail {
   tenKhachHang: string;
   soDienThoai: string;
   diaChiGiaoHang: string;
+  ghiChu?: string;
+  ngayTao?: string;
+  phuongThucThanhToan?: string;
   trangThai: string;
   tongTien: number;
   items: {
     maSP: number;
+    maSPCha?: number | null;
     tenSP: string;
+    tenSanPhamCha?: string | null;
+    tenLoai?: string | null;
+    donViTinh?: string | null;
+    tenDanhMuc?: string | null;
+    nhietDoBaoQuan?: string | null;
+    hinhAnh?: string | null;
     soLuong: number;
     donGia: number;
+    giaGoc?: number;
     thanhTien: number;
   }[];
 }
@@ -54,12 +65,13 @@ export default function OrdersPage() {
     id: number;
     status: string;
     paid: boolean;
+    cod?: boolean;
   } | null>(null);
   return (
     <>
       <AdminTitle
         title="Đơn hàng"
-        description="Xem hóa đơn, xác nhận giao hàng hoặc hủy đơn với hoàn ví và tồn kho nguyên tử."
+        description="Xem hóa đơn, xác nhận giao hàng và thu tiền COD, hoặc hủy đơn COD để hoàn tồn kho."
       />
       <Notice error={error || list.error} message={message} />
       {change && (
@@ -67,8 +79,8 @@ export default function OrdersPage() {
           title={`${change.status === "DELIVERED" ? "Xác nhận đã giao" : "Hủy"} đơn #${change.id}?`}
           description={
             change.status === "DELIVERED"
-              ? "Chỉ xác nhận sau khi đơn đã được giao thành công."
-              : change.paid
+              ? change.cod ? "Chỉ xác nhận sau khi đã giao hàng và thu đủ tiền COD." : "Chỉ xác nhận sau khi đơn đã được giao thành công."
+              : change.cod ? "Hệ thống hoàn tồn kho và lượt khuyến mãi; không hoàn tiền vào ví vì đơn COD chưa thu tiền." : change.paid
                 ? "Hệ thống sẽ hoàn toàn bộ tiền vào ví, hoàn số lượng tồn và ghi sổ cái trong cùng giao dịch. Không thực hiện lại nếu đơn đã hủy."
                 : "Đơn chưa thanh toán sẽ được chuyển sang đã hủy."
           }
@@ -128,6 +140,7 @@ export default function OrdersPage() {
         <section className="ad-panel">
           <div className="ad-toolbar">
             <h2>Hóa đơn #{detail.maDH}</h2>
+            <span className="ad-tag">{orderStatuses[detail.trangThai] ?? detail.trangThai}</span>
             <button
               className="ad-btn secondary"
               onClick={() => setDetail(null)}
@@ -136,15 +149,23 @@ export default function OrdersPage() {
             </button>
           </div>
           <p>
-            {detail.tenKhachHang} · {detail.soDienThoai}
+            <strong>{detail.tenKhachHang}</strong> · {detail.soDienThoai}
+            {detail.ngayTao ? ` · Đặt lúc ${datetime(detail.ngayTao)}` : ""}
           </p>
-          <p className="ad-help">{detail.diaChiGiaoHang}</p>
+          <p className="ad-help">Giao đến: {detail.diaChiGiaoHang}</p>
+          {detail.ghiChu && (
+            <p className="ad-help" style={{ color: "#9a3412", fontWeight: 600 }}>
+              Ghi chú khách hàng: {detail.ghiChu}
+            </p>
+          )}
           <div className="ad-table-wrap" style={{ marginTop: 16 }}>
             <table className="ad-table">
               <thead>
                 <tr>
                   <th>Mặt hàng</th>
-                  <th>Số lượng</th>
+                  <th>Phân loại / Quy cách</th>
+                  <th>Đơn vị tính</th>
+                  <th>Số lượng cần soạn</th>
                   <th>Đơn giá</th>
                   <th>Thành tiền</th>
                 </tr>
@@ -152,17 +173,60 @@ export default function OrdersPage() {
               <tbody>
                 {detail.items.map((i) => (
                   <tr key={i.maSP}>
-                    <td>{i.tenSP}</td>
-                    <td>{i.soLuong}</td>
-                    <td>{money(i.donGia)}</td>
-                    <td>{money(i.thanhTien)}</td>
+                    <td>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        {i.hinhAnh && (
+                          <img
+                            src={i.hinhAnh}
+                            alt={i.tenSP}
+                            style={{
+                              width: 44,
+                              height: 44,
+                              objectFit: "contain",
+                              borderRadius: 6,
+                              border: "1px solid #e7e5e4",
+                              background: "#fff",
+                              flexShrink: 0,
+                            }}
+                          />
+                        )}
+                        <div>
+                          <strong>{i.tenSanPhamCha || i.tenSP}</strong>
+                          <small>
+                            Mã SKU #{i.maSP}
+                            {i.tenDanhMuc ? ` · ${i.tenDanhMuc}` : ""}
+                            {i.nhietDoBaoQuan ? ` · ${i.nhietDoBaoQuan}` : ""}
+                          </small>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      {i.tenLoai ? (
+                        <span className="ad-tag">{i.tenLoai}</span>
+                      ) : (
+                        <span className="ad-help">Nguyên bản</span>
+                      )}
+                    </td>
+                    <td>{i.donViTinh || "—"}</td>
+                    <td>
+                      <strong>
+                        {i.soLuong} {i.donViTinh || ""}
+                      </strong>
+                    </td>
+                    <td className="number">
+                      {money(i.donGia)}
+                      {i.donViTinh ? <small>/ {i.donViTinh}</small> : null}
+                    </td>
+                    <td className="number">
+                      <strong>{money(i.thanhTien)}</strong>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
           <p style={{ marginTop: 16, fontWeight: 700 }}>
-            Tổng: {money(detail.tongTien)}
+            Tổng thanh toán ({detail.items.reduce((s, it) => s + it.soLuong, 0)} phần): {money(detail.tongTien)}
           </p>
         </section>
       )}
@@ -189,7 +253,7 @@ export default function OrdersPage() {
                   {o.HoTen}
                   <small>{o.DiaChiGiaoHang}</small>
                 </td>
-                <td className="number">{money(o.TongTien)}</td>
+                <td className="number">{money(o.TongTien)}{o.PhuongThucThanhToan === "COD" && <small>COD · trả khi nhận hàng</small>}</td>
                 <td>
                   <span className="ad-tag">{orderStatuses[o.TrangThai] ?? o.TrangThai}</span>
                 </td>
@@ -212,26 +276,28 @@ export default function OrdersPage() {
                     >
                       Chi tiết
                     </button>
-                    {o.NguonDon === "SALE" && o.TrangThai === "PAID" && (
+                    {o.NguonDon === "SALE" && (o.TrangThai === "PAID" || (o.TrangThai === "PENDING" && o.PhuongThucThanhToan === "COD")) && (
                       <button
                         onClick={() =>
                           setChange({
                             id: o.MaDH,
                             status: "DELIVERED",
-                            paid: true,
+                            paid: o.TrangThai === "PAID",
+                            cod: o.PhuongThucThanhToan === "COD",
                           })
                         }
                       >
                         Đã giao
                       </button>
                     )}
-                    {o.NguonDon === "SALE" && ["PAID", "PENDING"].includes(o.TrangThai) && (
+                    {o.NguonDon === "SALE" && !["SEPAY", "MOMO_SANDBOX"].includes(o.PhuongThucThanhToan ?? "") && ["PAID", "PENDING"].includes(o.TrangThai) && (
                       <button
                         onClick={() =>
                           setChange({
                             id: o.MaDH,
                             status: "CANCELLED",
                             paid: o.TrangThai === "PAID",
+                            cod: o.PhuongThucThanhToan === "COD",
                           })
                         }
                       >
@@ -239,6 +305,9 @@ export default function OrdersPage() {
                       </button>
                     )}
                   </div>
+                  {["SEPAY", "MOMO_SANDBOX"].includes(o.PhuongThucThanhToan ?? "") && ["PAID", "PENDING"].includes(o.TrangThai) && (
+                    <small>Đơn chuyển khoản cần đối soát riêng khi hủy hoặc hoàn tiền.</small>
+                  )}
                 </td>
               </tr>
             ))}

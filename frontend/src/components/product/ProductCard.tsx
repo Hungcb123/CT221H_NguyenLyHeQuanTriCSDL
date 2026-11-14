@@ -15,8 +15,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) =
   const availability = productAvailability(product);
 
   // Determine badge label and color
-  const badgeText = product.tag || (product.dangKhuyenMai && product.phanTramGiam ? `-${product.phanTramGiam}%` : null);
-  const isNew = badgeText === "Mới";
+  const discountBadge = product.dangKhuyenMai && product.phanTramGiam ? `-${product.phanTramGiam}%` : null;
+  const badgeText = product.tag || discountBadge;
+  const badgeTone =
+    badgeText === "Mới" || badgeText === "Khớp kết hợp" || badgeText === "Khớp ngữ nghĩa"
+      ? "bg-emerald-700 text-white"
+      : badgeText === "Khớp từ khóa"
+        ? "bg-teal-700 text-white"
+        : badgeText === "Tham khảo"
+          ? "bg-stone-600 text-white"
+          : "bg-[#B91C1C] text-white";
 
   return (
     <div className="group bg-white rounded-lg border border-stone-200 overflow-hidden hover:border-[#079447]/50 hover:shadow-md transition-all duration-200 flex flex-col justify-between">
@@ -25,13 +33,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) =
         <div className="relative aspect-square w-full bg-stone-50 overflow-hidden flex items-center justify-center p-2.5">
           {badgeText && (
             <span
-              className={`absolute left-2.5 top-2.5 z-10 max-w-[85%] rounded-sm px-2 py-0.5 text-xs font-bold leading-snug shadow-xs ${
-                isNew
-                  ? "bg-emerald-600 text-white"
-                  : "bg-[#B91C1C] text-white"
-              }`}
+              className={`absolute left-2.5 top-2.5 z-10 max-w-[75%] rounded-sm px-2 py-0.5 text-xs font-bold leading-snug shadow-xs ${badgeTone}`}
             >
               {badgeText}
+            </span>
+          )}
+          {product.tag && discountBadge && (
+            <span className="absolute right-2.5 top-2.5 z-10 rounded-sm bg-[#B91C1C] px-1.5 py-0.5 text-xs font-bold leading-snug text-white shadow-xs">
+              {discountBadge}
             </span>
           )}
 

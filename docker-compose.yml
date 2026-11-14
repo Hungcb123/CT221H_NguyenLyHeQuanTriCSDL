@@ -64,6 +64,20 @@ services:
       - MOMO_IPN_URL=${MOMO_IPN_URL:-}
       - MOMO_RECEIVER_PHONE=${MOMO_RECEIVER_PHONE:-0366643213}
 
+  # Uses the static dev domain of the account owning NGROK_AUTHTOKEN.
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: freshgrocery-ngrok
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_started
+    command: ["http", "http://backend:8085", "--log=stdout"]
+    environment:
+      - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN:-}
+    ports:
+      - "127.0.0.1:4040:4040"
+
   qdrant:
     image: qdrant/qdrant:latest
     container_name: freshgrocery-qdrant

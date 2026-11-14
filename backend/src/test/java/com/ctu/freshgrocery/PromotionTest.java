@@ -60,6 +60,14 @@ public class PromotionTest {
     }
 
     @Test
+    public void rejectParentOfferRatherThanPretendItsTypesAreDiscounted() {
+        when(productRepository.existsByMaSPCha(42)).thenReturn(true);
+        var response = promotionService.addProductToPromotion(1, PromotionAddProductRequest.builder().maSP(42).giaKhuyenMai(BigDecimal.ONE).build());
+        assertEquals(-5, response.getStatusCode());
+        Mockito.verifyNoInteractions(promotionSpRepository);
+    }
+
+    @Test
     public void testGetAllPromotions_ActiveOnly() {
         Promotion p1 = Promotion.builder()
                 .maKM(1)

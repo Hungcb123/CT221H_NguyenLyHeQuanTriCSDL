@@ -77,4 +77,24 @@ class MoMoDatabaseTest {
         assertThrows(AppException.class,this::reserve);assertEquals(5,stock());
         assertEquals(0,jdbc.queryForObject("SELECT COUNT(*) FROM DonHang WHERE MaKH=?",Integer.class,customer));walletUntouched();
     }
+
+    int relatedProduct(String label, Integer parent, boolean hidden) {
+        return jdbc.queryForObject("""
+            INSERT INTO SanPham(TenSP,Gia,DonViTinh,SoLuongTon,HanSuDung,MaDanhMuc,MaSPCha,TenLoai,TrangThaiXoa)
+            OUTPUT INSERTED.MaSP SELECT ?,10000,N'kg',5,DATEADD(DAY,2,GETDATE()),MaDanhMuc,?,?,? FROM SanPham WHERE MaSP=?
+            """,Integer.class,"QA "+label+" "+UUID.randomUUID(),parent,parent==null?null:label,hidden,product);
+    }
+    @Test void visibleVariantOfHiddenParentCannotBePurchased() {
+        int parent=relatedProduct("hidden parent",null,true);
+        jdbc.update("UPDATE SanPham SET MaSPCha=?,TenLoai=N'variant' WHERE MaSP=?",parent,product);
+        assertThrows(AppException.class,this::reserve);
+        assertEquals(5,stock());walletUntouched();
+        assertEquals(0,jdbc.queryForObject("SELECT COUNT(*) FROM DonHang WHERE MaKH=?",Integer.class,customer));
+    }
+    @Test void parentWithOnlyHiddenVariantsCannotBePurchasedDirectly() {
+        relatedProduct("hidden variant",product,true);
+        assertThrows(AppException.class,this::reserve);
+        assertEquals(5,stock());walletUntouched();
+        assertEquals(2,jdbc.queryForObject("SELECT SoLuong FROM ChiTietGioHang WHERE MaGioHang=? AND MaSP=?",Integer.class,cart,product));
+    }
 }

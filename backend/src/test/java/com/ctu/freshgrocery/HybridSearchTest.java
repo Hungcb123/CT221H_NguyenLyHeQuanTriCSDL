@@ -86,6 +86,24 @@ class HybridSearchTest {
         assertFallback(service.searchWithStatus("cá lóc", 12, 0.3f));
     }
 
+    @Test void familySearchPreviewIgnoresLegacyParentPromotion() {
+        var promotions = mock(PromotionDetailRepository.class);
+        var search = new SemanticSearchServiceImpl(embedding, qdrant, repository, categories, promotions);
+        ReflectionTestUtils.setField(search, "collectionName", "products");
+        when(repository.findAll()).thenReturn(List.of(product(1, "Dứa chín gọt sẵn")));
+        when(repository.existsByMaSPCha(1)).thenReturn(true);
+        when(promotions.findActiveDiscountsForProduct(eq(1), any())).thenReturn(List.of(
+                com.ctu.freshgrocery.model.PromotionDetail.builder().giaKhuyenMai(BigDecimal.ONE)
+                        .phanTramGiam(BigDecimal.valueOf(90)).build()));
+        var preview = search.searchWithStatus("Dứa chín gọt sẵn", 12, 0.3f).getProducts().getFirst();
+        assertFalse(preview.getDangKhuyenMai());
+        assertEquals(BigDecimal.TEN, preview.getGiaHienTai());
+        assertEquals(BigDecimal.TEN, preview.getGia());
+        assertNull(preview.getPhanTramGiam());
+        assertNull(preview.getMaKM());
+        assertNull(preview.getTenChuongTrinhKM());
+    }
+
     void assertFallback(HybridSearchResponse response) {
         assertEquals("KEYWORD_FALLBACK", response.getMode());
         assertEquals(0f, response.getSemanticWeight());

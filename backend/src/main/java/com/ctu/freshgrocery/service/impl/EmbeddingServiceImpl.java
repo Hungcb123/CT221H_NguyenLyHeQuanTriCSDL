@@ -24,7 +24,7 @@ import java.util.Map;
 public class EmbeddingServiceImpl implements EmbeddingService {
 
     private static final int DIMENSION = 384;
-    private static final int MAX_SEQ_LENGTH = 64;
+    private static final int MAX_SEQ_LENGTH = 192;
 
     private OrtEnvironment env;
     private OrtSession session;

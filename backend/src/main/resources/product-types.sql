@@ -23,3 +23,33 @@ BEGIN
     SET @Definition = REPLACE(@Definition, N'WHERE sp.TrangThaiXoa = 0', N'WHERE sp.TrangThaiXoa = 0 AND sp.MaSPCha IS NULL');
     EXEC sp_executesql @Definition;
 END;
+
+-- A family remains a family when all its types are hidden. Parent visibility gates sales.
+DECLARE @TypeProcedure SYSNAME, @TypeDefinition NVARCHAR(MAX);
+DECLARE TypeSaleProcedures CURSOR LOCAL FAST_FORWARD FOR
+    SELECT name FROM sys.procedures WHERE name IN (N'sp_ThemVaoGioHang', N'sp_LayGioHangKhachHang', N'sp_ThanhToanDonHang', N'sp_ThemNguyenLieuMonAnVaoGioHang');
+OPEN TypeSaleProcedures;
+FETCH NEXT FROM TypeSaleProcedures INTO @TypeProcedure;
+WHILE @@FETCH_STATUS = 0
+BEGIN
+    SET @TypeDefinition = OBJECT_DEFINITION(OBJECT_ID(N'dbo.' + QUOTENAME(@TypeProcedure)));
+    IF @TypeDefinition IS NOT NULL AND @TypeDefinition NOT LIKE N'%child.MaSPCha = sp.MaSP%'
+    BEGIN
+        SET @TypeDefinition = REPLACE(@TypeDefinition, N'CREATE OR ALTER PROCEDURE', N'ALTER PROCEDURE');
+        SET @TypeDefinition = REPLACE(@TypeDefinition, N'CREATE   PROCEDURE', N'ALTER PROCEDURE');
+        SET @TypeDefinition = REPLACE(@TypeDefinition, N'CREATE PROCEDURE', N'ALTER PROCEDURE');
+        SET @TypeDefinition = REPLACE(@TypeDefinition, N'IF EXISTS (SELECT 1 FROM SanPham WHERE MaSPCha = @MaSP AND TrangThaiXoa = 0)', N'IF EXISTS (SELECT 1 FROM SanPham WHERE MaSPCha = @MaSP)');
+        SET @TypeDefinition = REPLACE(@TypeDefinition, N'OR EXISTS (SELECT 1 FROM SanPham parent WHERE parent.MaSP = sp.MaSPCha AND parent.TrangThaiXoa = 1)', N'OR EXISTS (SELECT 1 FROM SanPham parent WHERE parent.MaSP = sp.MaSPCha AND parent.TrangThaiXoa = 1)
+                  OR EXISTS (SELECT 1 FROM SanPham child WHERE child.MaSPCha = sp.MaSP)');
+        SET @TypeDefinition = REPLACE(@TypeDefinition, N'WHERE sp.SoLuongTon < item.SoLuongMua OR sp.HanSuDung <= GETDATE() OR sp.TrangThaiXoa = 1', N'WHERE sp.SoLuongTon < item.SoLuongMua OR sp.HanSuDung <= GETDATE() OR sp.TrangThaiXoa = 1
+               OR EXISTS (SELECT 1 FROM SanPham parent WHERE parent.MaSP = sp.MaSPCha AND parent.TrangThaiXoa = 1)
+               OR EXISTS (SELECT 1 FROM SanPham child WHERE child.MaSPCha = sp.MaSP)');
+        SET @TypeDefinition = REPLACE(@TypeDefinition, N'AND (sp.MaSP IS NULL OR sp.TrangThaiXoa = 1 OR sp.HanSuDung <= GETDATE()', N'AND (sp.MaSP IS NULL OR sp.TrangThaiXoa = 1 OR sp.HanSuDung <= GETDATE()
+                   OR EXISTS (SELECT 1 FROM SanPham parent WHERE parent.MaSP = sp.MaSPCha AND parent.TrangThaiXoa = 1)
+                   OR EXISTS (SELECT 1 FROM SanPham child WHERE child.MaSPCha = sp.MaSP)');
+        EXEC sp_executesql @TypeDefinition;
+    END;
+    FETCH NEXT FROM TypeSaleProcedures INTO @TypeProcedure;
+END;
+CLOSE TypeSaleProcedures;
+DEALLOCATE TypeSaleProcedures;

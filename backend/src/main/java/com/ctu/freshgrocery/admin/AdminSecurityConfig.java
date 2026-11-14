@@ -36,6 +36,7 @@ public class AdminSecurityConfig {
                 .requestMatchers("/api/v1/admin/auth/session", "/api/v1/admin/auth/login").permitAll()
                 .requestMatchers("/api/v1/admin/**", "/api/v1/benchmark/**", "/api/v1/ai/forecast/**", "/api/v1/alerts/**").hasRole("ADMIN")
                 .requestMatchers("/api/v1/search/sync", "/api/v1/orders/concurrency-test").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/v1/promotions/auto-clearance/preview").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/v1/wallets/top-up").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/v1/products/**", "/api/v1/categories/**", "/api/v1/promotions/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/api/v1/products/**", "/api/v1/categories/**", "/api/v1/promotions/**").hasRole("ADMIN")

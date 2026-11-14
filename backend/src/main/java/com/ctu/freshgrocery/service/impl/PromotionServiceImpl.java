@@ -43,7 +43,7 @@ public class PromotionServiceImpl implements PromotionService {
     public List<PromotionResponse> getAllPromotions(Boolean activeOnly) {
         List<Promotion> promotions;
         if (Boolean.TRUE.equals(activeOnly)) {
-            promotions = promotionRepository.findActivePromotions(LocalDateTime.now());
+            promotions = promotionRepository.findActivePromotions(LocalDateTime.now(java.time.ZoneOffset.UTC));
         } else {
             promotions = promotionRepository.findAll();
         }
@@ -87,6 +87,9 @@ public class PromotionServiceImpl implements PromotionService {
         log.info("Thêm sản phẩm #{} vào chương trình KM #{} với giá KM: {}",
                 request.getMaSP(), promotionId, request.getGiaKhuyenMai());
 
+        if (productRepository.existsByMaSPCha(request.getMaSP())) {
+            return ApiResponse.error(-5, "Sản phẩm có nhiều quy cách. Hãy chọn mã của từng quy cách cần giảm giá.");
+        }
         Map<String, Object> result = promotionSpRepository.executeThemSanPhamVaoKhuyenMai(promotionId, request);
         Integer statusCode = (Integer) result.get("StatusCode");
         String message = (String) result.get("Message");
@@ -136,8 +139,32 @@ public class PromotionServiceImpl implements PromotionService {
                 .build();
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Map<String, Object> previewAutoClearance(Integer soNgayCanDate, BigDecimal phanTramGiam) {
+        int days = soNgayCanDate != null ? soNgayCanDate : 2;
+        BigDecimal discountPercent = phanTramGiam != null ? phanTramGiam : new BigDecimal("30.00");
+        if (days < 1 || days > 30 || discountPercent.compareTo(BigDecimal.ZERO) <= 0
+                || discountPercent.compareTo(BigDecimal.valueOf(100)) >= 0) {
+            throw new AppException(HttpStatus.BAD_REQUEST,
+                    "Số ngày phải từ 1 đến 30; phần trăm giảm phải lớn hơn 0 và nhỏ hơn 100.");
+        }
+        List<Map<String, Object>> items = promotionSpRepository.previewAutoClearanceCandidates(days, discountPercent);
+        long newCount = items.stream()
+                .filter(row -> !Boolean.TRUE.equals(row.get("daCoTrongXaKho")))
+                .count();
+        Map<String, Object> result = new java.util.LinkedHashMap<>();
+        result.put("soNgayCanDate", days);
+        result.put("phanTramGiam", discountPercent);
+        result.put("tongSanPham", items.size());
+        result.put("soSanPhamMoi", newCount);
+        result.put("soSanPhamCapNhat", items.size() - newCount);
+        result.put("items", items);
+        return result;
+    }
+
     private PromotionResponse mapToPromotionSummary(Promotion p) {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(java.time.ZoneOffset.UTC);
         boolean isActive = Boolean.TRUE.equals(p.getTrangThai())
                 && !now.isBefore(p.getNgayBatDau())
                 && !now.isAfter(p.getNgayKetThuc());
@@ -153,13 +180,14 @@ public class PromotionServiceImpl implements PromotionService {
                 .ngayKetThuc(p.getNgayKetThuc())
                 .trangThai(p.getTrangThai())
                 .dangHieuLuc(isActive)
+                .trangThaiHienThi(!Boolean.TRUE.equals(p.getTrangThai()) ? "PAUSED" : now.isBefore(p.getNgayBatDau()) ? "UPCOMING" : now.isAfter(p.getNgayKetThuc()) ? "ENDED" : "ACTIVE")
                 .soLuongSanPham(count)
                 .items(Collections.emptyList())
                 .build();
     }
 
     private PromotionResponse mapToPromotionDetail(Promotion p) {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(java.time.ZoneOffset.UTC);
         boolean isActive = Boolean.TRUE.equals(p.getTrangThai())
                 && !now.isBefore(p.getNgayBatDau())
                 && !now.isAfter(p.getNgayKetThuc());
@@ -180,6 +208,7 @@ public class PromotionServiceImpl implements PromotionService {
                 .ngayKetThuc(p.getNgayKetThuc())
                 .trangThai(p.getTrangThai())
                 .dangHieuLuc(isActive)
+                .trangThaiHienThi(!Boolean.TRUE.equals(p.getTrangThai()) ? "PAUSED" : now.isBefore(p.getNgayBatDau()) ? "UPCOMING" : now.isAfter(p.getNgayKetThuc()) ? "ENDED" : "ACTIVE")
                 .soLuongSanPham(itemResponses.size())
                 .items(itemResponses)
                 .build();

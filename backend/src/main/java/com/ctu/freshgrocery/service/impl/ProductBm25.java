@@ -16,7 +16,10 @@ public final class ProductBm25 {
         // product families/cuts (e.g. ba chỉ and nạc vai) from the intent vocabulary.
         String canonical = (text == null ? "" : java.text.Normalizer.normalize(text, java.text.Normalizer.Form.NFC))
                 .replaceAll("(?iu)\\blợn\\b", "heo")
-                .replaceAll("(?iu)\\bthit lon\\b", "thit heo");
+                .replaceAll("(?iu)\\bthit lon\\b", "thit heo")
+                .replaceAll("(?iu)\\bxì dầu\\b", "nước tương")
+                .replaceAll("(?iu)\\bdọc mùng\\b", "bạc hà")
+                .replaceAll("(?iu)\\bsúp lơ xanh\\b", "bông cải xanh");
         return BertTokenizer.removeDiacritics(canonical)
                 .toLowerCase(Locale.ROOT).replaceAll("[^\\p{L}\\p{N}]+", " ").trim();
     }

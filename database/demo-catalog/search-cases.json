@@ -1,0 +1,186 @@
+[
+  {
+    "query": "rau mùi",
+    "expected": "Ngò rí tươi",
+    "excluded": [
+      "Ngò gai tươi",
+      "Rau răm tươi"
+    ]
+  },
+  {
+    "query": "ngo ri",
+    "expected": "Ngò rí tươi",
+    "excluded": [
+      "Ngò gai tươi"
+    ]
+  },
+  {
+    "query": "mùi tàu",
+    "expected": "Ngò gai tươi",
+    "excluded": [
+      "Ngò rí tươi"
+    ]
+  },
+  {
+    "query": "ngò om",
+    "expected": "Rau ngổ tươi",
+    "excluded": []
+  },
+  {
+    "query": "hành hoa",
+    "expected": "Hành lá tươi",
+    "excluded": []
+  },
+  {
+    "query": "rau quế",
+    "expected": "Húng quế tươi",
+    "excluded": []
+  },
+  {
+    "query": "cải cúc",
+    "expected": "Rau tần ô",
+    "excluded": []
+  },
+  {
+    "query": "mướp đắng",
+    "expected": "Khổ qua xanh",
+    "excluded": []
+  },
+  {
+    "query": "bí xanh",
+    "expected": "Bí đao xanh",
+    "excluded": []
+  },
+  {
+    "query": "dưa chuột",
+    "expected": "Dưa leo baby",
+    "excluded": []
+  },
+  {
+    "query": "mướp tây",
+    "expected": "Đậu bắp tươi",
+    "excluded": []
+  },
+  {
+    "query": "đậu que",
+    "expected": "Đậu cô ve xanh",
+    "excluded": []
+  },
+  {
+    "query": "củ sắn",
+    "expected": "Củ đậu tươi",
+    "excluded": [
+      "Khoai mì tươi"
+    ]
+  },
+  {
+    "query": "khoai mì",
+    "expected": "Khoai mì tươi",
+    "excluded": [
+      "Củ đậu tươi"
+    ]
+  },
+  {
+    "query": "ngô ngọt",
+    "expected": "Bắp ngọt vàng",
+    "excluded": []
+  },
+  {
+    "query": "khóm",
+    "expected": "Dứa chín gọt sẵn",
+    "excluded": []
+  },
+  {
+    "query": "hạt lạc",
+    "expected": "Đậu phộng hạt khô",
+    "excluded": []
+  },
+  {
+    "query": "thịt lợn 300g",
+    "expected": "Thịt heo nạc thăn",
+    "excluded": []
+  },
+  {
+    "query": "thịt heo 300 g",
+    "expected": "Thịt heo nạc thăn",
+    "excluded": []
+  },
+  {
+    "query": "thăn bò 500g",
+    "expected": "Thịt bò thăn",
+    "excluded": [
+      "Thịt bò ức"
+    ]
+  },
+  {
+    "query": "nạm bò",
+    "expected": "Thịt bò nạm",
+    "excluded": [
+      "Thịt bò thăn"
+    ]
+  },
+  {
+    "query": "gầu bò",
+    "expected": "Thịt bò gầu",
+    "excluded": [
+      "Thịt bò thăn"
+    ]
+  },
+  {
+    "query": "ức bò 500g",
+    "expected": "Thịt bò ức",
+    "excluded": [
+      "Ức gà phi lê"
+    ]
+  },
+  {
+    "query": "lườn gà 300g",
+    "expected": "Ức gà phi lê",
+    "excluded": [
+      "Thịt bò ức"
+    ]
+  },
+  {
+    "query": "má đùi gà",
+    "expected": "Thịt gà má đùi rút xương",
+    "excluded": []
+  },
+  {
+    "query": "cánh gà 500g",
+    "expected": "Cánh gà tươi",
+    "excluded": []
+  },
+  {
+    "query": "thịt heo xay 300g",
+    "expected": "Thịt heo xay tươi",
+    "excluded": []
+  },
+  {
+    "query": "rau mùi 50g",
+    "expected": "Ngò rí tươi",
+    "excluded": [
+      "Ngò gai tươi"
+    ]
+  },
+  {
+    "query": "rau thơm",
+    "expected": "Ngò rí tươi",
+    "excluded": [
+      "Dứa chín gọt sẵn"
+    ]
+  },
+  {
+    "query": "gạo thơm",
+    "expected": "Gạo thơm ST25 túi 5kg",
+    "excluded": [
+      "Dứa chín gọt sẵn"
+    ]
+  },
+  {
+    "query": "rau mùi tàu",
+    "expected": "Ngò gai tươi",
+    "excluded": [
+      "Ngò rí tươi"
+    ]
+  }
+]

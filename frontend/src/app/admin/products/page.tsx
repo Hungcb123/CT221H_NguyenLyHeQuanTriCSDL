@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { Plus, RotateCw } from "lucide-react";
-import { Category, ProductCreateRequest, ProductResponse } from "@/types";
+import { useEffect, useRef, useState } from "react";
+import { Plus, RotateCw, Upload } from "lucide-react";
+import { Category, ProductResponse } from "@/types";
 import {
   adminError,
   adminRequest,
@@ -10,8 +10,14 @@ import {
   AdminProduct,
   datetime,
   money,
+  uploadAdminProductImage,
 } from "@/services/admin-api";
-import { ProductTypeEditor } from "@/components/admin/ProductTypeEditor";
+import {
+  cleanNonNegativeIntInput,
+  cleanPositiveIntInput,
+  ProductTypeEditor,
+  ProductTypeFormItem,
+} from "@/components/admin/ProductTypeEditor";
 import { useAdminResource } from "@/components/admin/useAdminResource";
 import {
   AdminTitle,
@@ -21,18 +27,40 @@ import {
   Pagination,
 } from "@/components/admin/AdminUI";
 
-const fresh = (category: number): ProductCreateRequest => ({
+interface ProductFormDraft {
+  tenSP: string;
+  hinhAnh: string;
+  moTa: string;
+  gia: string;
+  donViTinh: string;
+  soLuongTon: string;
+  hanSuDung: string;
+  nhietDoBaoQuan: string;
+  maDanhMuc: number;
+  cacLoai: ProductTypeFormItem[];
+}
+
+const DRAFT_STORAGE_KEY = "dailymart_admin_new_product_draft_v1";
+
+function defaultExpiryLocal(daysAhead = 7): string {
+  const d = new Date(Date.now() + daysAhead * 24 * 60 * 60 * 1000);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+const fresh = (category: number): ProductFormDraft => ({
   tenSP: "",
   hinhAnh: "",
   moTa: "",
-  gia: 0,
+  gia: "",
   donViTinh: "",
-  soLuongTon: 0,
-  hanSuDung: "",
+  soLuongTon: "",
+  hanSuDung: defaultExpiryLocal(7),
   nhietDoBaoQuan: "",
   maDanhMuc: category,
   cacLoai: [],
 });
+
 type Confirmation = {
   title: string;
   description: string;
@@ -51,7 +79,17 @@ export default function ProductAdminPage() {
   const [typesError, setTypesError] = useState("");
   const [typesUploading, setTypesUploading] = useState(false);
   const loadVersion = useRef(0);
-  const [draft, setDraft] = useState<ProductCreateRequest | null>(null);
+  const [draft, setDraft] = useState<ProductFormDraft | null>(() => {
+    if (typeof window === "undefined") return null;
+    try {
+      const saved = window.sessionStorage.getItem(DRAFT_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved) as ProductFormDraft;
+        if (parsed && typeof parsed.tenSP === "string") return parsed;
+      }
+    } catch {}
+    return null;
+  });
   const [editing, setEditing] = useState<number | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
@@ -59,12 +97,24 @@ export default function ProductAdminPage() {
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
   const categoryName = (id: number) =>
     categories.data?.find((c) => c.maDanhMuc === id)?.tenDanhMuc ?? `#${id}`;
-  function field<K extends keyof ProductCreateRequest>(
+
+  useEffect(() => {
+    try {
+      if (draft && editing === null) {
+        window.sessionStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
+      } else if (!draft && editing === null) {
+        window.sessionStorage.removeItem(DRAFT_STORAGE_KEY);
+      }
+    } catch {}
+  }, [draft, editing]);
+
+  function field<K extends keyof ProductFormDraft>(
     key: K,
-    value: ProductCreateRequest[K],
+    value: ProductFormDraft[K],
   ) {
     setDraft((current) => (current ? { ...current, [key]: value } : current));
   }
+
   return (
     <>
       <AdminTitle
@@ -75,7 +125,9 @@ export default function ProductAdminPage() {
           className="ad-btn"
           disabled={!categories.data?.length || pending || typesUploading}
           onClick={() => {
-            loadVersion.current++; setTypesLoading(false); setTypesError("");
+            loadVersion.current++;
+            setTypesLoading(false);
+            setTypesError("");
             setDraft(fresh(categories.data![0].maDanhMuc));
             setEditing(null);
             setMessage("");
@@ -126,8 +178,17 @@ export default function ProductAdminPage() {
               setError("");
               setMessage("");
               try {
-                if (!editing && new Date(draft.hanSuDung) <= new Date())
+                const parsedGia = Number(draft.gia);
+                const parsedTon = Number(draft.soLuongTon);
+                if (!draft.gia || !Number.isFinite(parsedGia) || parsedGia < 1) {
+                  throw new Error("Vui lòng nhập giá niêm yết hợp lệ (từ 1đ trở lên).");
+                }
+                if (draft.soLuongTon === "" || !Number.isFinite(parsedTon) || parsedTon < 0) {
+                  throw new Error("Vui lòng nhập số lượng tồn kho hợp lệ (từ 0 trở lên).");
+                }
+                if (!editing && new Date(draft.hanSuDung) <= new Date()) {
                   throw new Error("Hạn dùng sản phẩm mới phải ở tương lai.");
+                }
                 await adminRequest(
                   `/api/v1/products${editing ? `/${editing}` : ""}`,
                   {
@@ -136,22 +197,27 @@ export default function ProductAdminPage() {
                       ...draft,
                       tenSP: draft.tenSP.trim(),
                       donViTinh: draft.donViTinh.trim(),
-                      hanSuDung: `${draft.hanSuDung}:00`,
+                      gia: parsedGia,
+                      soLuongTon: parsedTon,
+                      hanSuDung: draft.hanSuDung.length === 16 ? `${draft.hanSuDung}:00` : draft.hanSuDung,
                       cacLoai: (draft.cacLoai || []).map((type) => ({
                         ...type,
                         tenLoai: type.tenLoai.trim(),
                         donViTinh: type.donViTinh.trim(),
+                        gia: Number(type.gia),
+                        soLuongTon: Number(type.soLuongTon),
                         hanSuDung: type.hanSuDung.length === 16 ? type.hanSuDung + ":00" : type.hanSuDung,
                       })),
                     }),
                   },
                 );
+                try {
+                  window.sessionStorage.removeItem(DRAFT_STORAGE_KEY);
+                } catch {}
                 setDraft(null);
                 setEditing(null);
                 setMessage(
-                  editing
-                    ? "Đã lưu thay đổi."
-                    : "Đã tạo sản phẩm.",
+                  editing ? "Đã lưu thay đổi." : "Đã tạo sản phẩm.",
                 );
                 list.refresh();
               } catch (failure) {
@@ -168,6 +234,7 @@ export default function ProductAdminPage() {
                   className="ad-input"
                   value={draft.tenSP}
                   onChange={(e) => field("tenSP", e.target.value)}
+                  placeholder="Ví dụ: Cà rốt mini Đà Lạt"
                   required
                   maxLength={200}
                 />
@@ -189,14 +256,18 @@ export default function ProductAdminPage() {
               <label className="ad-field">
                 Giá niêm yết (đ)
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[1-9][0-9]*"
                   className="ad-input"
-                  min="1"
-                  step="1"
+                  placeholder="Nhập giá bán, VD: 35000"
                   value={draft.gia}
-                  onChange={(e) => field("gia", Number(e.target.value))}
+                  onChange={(e) => field("gia", cleanPositiveIntInput(e.target.value))}
                   required
                 />
+                {draft.gia && (
+                  <small>{Number(draft.gia).toLocaleString("vi-VN")} đ</small>
+                )}
               </label>
               <label className="ad-field">
                 Đơn vị tính
@@ -212,12 +283,13 @@ export default function ProductAdminPage() {
               <label className="ad-field">
                 Số lượng tồn
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]+"
                   className="ad-input"
-                  min="0"
-                  step="1"
+                  placeholder="Nhập số lượng tồn, VD: 50"
                   value={draft.soLuongTon}
-                  onChange={(e) => field("soLuongTon", Number(e.target.value))}
+                  onChange={(e) => field("soLuongTon", cleanNonNegativeIntInput(e.target.value))}
                   required
                 />
               </label>
@@ -237,11 +309,12 @@ export default function ProductAdminPage() {
                   className="ad-input"
                   value={draft.nhietDoBaoQuan ?? ""}
                   onChange={(e) => field("nhietDoBaoQuan", e.target.value)}
+                  placeholder="Ví dụ: Ngăn mát 4 - 8°C"
                   maxLength={50}
                 />
               </label>
-              <label className="ad-field ad-span-full">
-                Ảnh sản phẩm
+              <div className="ad-field ad-span-full">
+                <span>Ảnh sản phẩm</span>
                 <input
                   className="ad-input"
                   value={draft.hinhAnh ?? ""}
@@ -249,46 +322,74 @@ export default function ProductAdminPage() {
                   placeholder="Dán URL ảnh https://… hoặc tải ảnh từ máy bên dưới"
                   maxLength={1000}
                 />
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  disabled={pending}
-                  onChange={async (e) => {
-                    const file = e.target.files?.[0];
-                    e.target.value = "";
-                    if (!file) return;
-                    if (file.size > 5 * 1024 * 1024) {
-                      setError("Ảnh tối đa 5 MB.");
-                      return;
-                    }
-                    setPending(true);
-                    setError("");
-                    try {
-                      const body = new FormData();
-                      body.append("file", file);
-                      const uploaded = await adminRequest<{ url: string }>("/api/v1/admin/product-images", { method: "POST", body });
-                      field("hinhAnh", uploaded.url);
-                    } catch (failure) {
-                      setError(adminError(failure));
-                    } finally {
-                      setPending(false);
-                    }
-                  }}
-                />
-                <small>Chọn ảnh JPG, PNG hoặc WebP, tối đa 5 MB. Bấm Lưu sản phẩm để áp dụng.</small>
+                <div className="mt-1 flex flex-wrap items-center gap-3">
+                  <label
+                    className="ad-btn secondary"
+                    style={{ cursor: pending ? "not-allowed" : "pointer" }}
+                  >
+                    <Upload size={15} aria-hidden="true" />
+                    {pending ? "Đang tải ảnh…" : "Chọn ảnh từ máy"}
+                    <input
+                      type="file"
+                      hidden
+                      accept="image/*"
+                      disabled={pending}
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        e.target.value = "";
+                        if (!file) return;
+                        setPending(true);
+                        setError("");
+                        setMessage("");
+                        try {
+                          const uploaded = await uploadAdminProductImage(
+                            file,
+                            editing ?? undefined,
+                          );
+                          field("hinhAnh", uploaded.url);
+                          if (uploaded.savedToProduct) {
+                            setMessage("Đã tải ảnh lên và lưu trực tiếp vào sản phẩm.");
+                            list.refresh();
+                          } else {
+                            setMessage("Đã tải ảnh lên máy chủ thành công (ảnh đã được giữ sẵn trong biểu mẫu).");
+                          }
+                        } catch (failure) {
+                          setError(adminError(failure));
+                        } finally {
+                          setPending(false);
+                        }
+                      }}
+                    />
+                  </label>
+                  <small>
+                    Hỗ trợ JPG, PNG, WebP… Khi sửa sản phẩm có sẵn, ảnh tải lên sẽ tự động lưu luôn.
+                  </small>
+                </div>
                 {draft.hinhAnh && (
-                  <div className="flex items-center gap-4">
-                    <img src={draft.hinhAnh} alt="Xem trước ảnh sản phẩm" className="h-32 w-32 rounded-lg border object-contain bg-white" />
-                    <button type="button" className="ad-btn secondary" disabled={pending} onClick={() => field("hinhAnh", "")}>Xóa ảnh</button>
+                  <div className="mt-2 flex items-center gap-4">
+                    <img
+                      src={draft.hinhAnh}
+                      alt="Xem trước ảnh sản phẩm"
+                      className="h-32 w-32 rounded-lg border object-contain bg-white"
+                    />
+                    <button
+                      type="button"
+                      className="ad-btn secondary"
+                      disabled={pending}
+                      onClick={() => field("hinhAnh", "")}
+                    >
+                      Xóa ảnh
+                    </button>
                   </div>
                 )}
-              </label>
+              </div>
               <label className="ad-field ad-span-full">
                 Mô tả và công dụng
                 <textarea
                   className="ad-textarea"
                   value={draft.moTa ?? ""}
                   onChange={(e) => field("moTa", e.target.value)}
+                  placeholder="Mô tả hương vị, cách chế biến, món ăn phù hợp, giá trị dinh dưỡng…"
                 />
                 <small>
                   Dùng mô tả đúng thực tế để hỗ trợ tìm kiếm ngữ nghĩa.
@@ -303,16 +404,31 @@ export default function ProductAdminPage() {
               onUploading={setTypesUploading}
             />
             {typesLoading && <p role="status">Đang tải các loại của sản phẩm…</p>}
-            {typesError && <p role="alert" className="text-red-800">{typesError} Hãy mở lại sản phẩm để tải lại trước khi lưu.</p>}
+            {typesError && (
+              <p role="alert" className="text-red-800">
+                {typesError} Hãy mở lại sản phẩm để tải lại trước khi lưu.
+              </p>
+            )}
             <div className="ad-actions">
-              <button className="ad-btn" disabled={pending || typesLoading || !!typesError || typesUploading}>
+              <button
+                className="ad-btn"
+                disabled={pending || typesLoading || !!typesError || typesUploading}
+              >
                 {pending ? "Đang lưu…" : "Lưu sản phẩm"}
               </button>
               <button
                 type="button"
                 className="ad-btn secondary"
                 disabled={pending}
-                onClick={() => { loadVersion.current++; setDraft(null); setTypesError(""); }}
+                onClick={() => {
+                  loadVersion.current++;
+                  try {
+                    window.sessionStorage.removeItem(DRAFT_STORAGE_KEY);
+                  } catch {}
+                  setDraft(null);
+                  setEditing(null);
+                  setTypesError("");
+                }}
               >
                 Hủy chỉnh sửa
               </button>
@@ -341,7 +457,7 @@ export default function ProductAdminPage() {
           }}
         >
           <option value="false">Đang kinh doanh</option>
-          <option value="true">Đã xóa mềm</option>
+          <option value="true">Đã xóa</option>
         </select>
         <button className="ad-btn secondary" onClick={list.refresh}>
           <RotateCw size={15} aria-hidden="true" />
@@ -372,7 +488,14 @@ export default function ProductAdminPage() {
             {list.data?.items.map((p) => (
               <tr key={p.maSP}>
                 <td>
-                  {p.hinhAnh && <img src={p.hinhAnh} alt={p.tenSP} className="mb-2 h-14 w-14 rounded-md border bg-white object-contain" loading="lazy" />}
+                  {p.hinhAnh && (
+                    <img
+                      src={p.hinhAnh}
+                      alt={p.tenSP}
+                      className="mb-2 h-14 w-14 rounded-md border bg-white object-contain"
+                      loading="lazy"
+                    />
+                  )}
                   <strong>{p.tenSP}</strong>
                   <small>
                     #{p.maSP} · {p.donViTinh}
@@ -398,25 +521,56 @@ export default function ProductAdminPage() {
                         disabled={pending || typesUploading}
                         onClick={async () => {
                           const version = ++loadVersion.current;
-                          setTypesLoading(true); setTypesError("");
+                          setTypesLoading(true);
+                          setTypesError("");
                           setEditing(p.maSP);
                           setDraft({
-                            ...p,
-                            cacLoai: [],
+                            tenSP: p.tenSP,
+                            hinhAnh: p.hinhAnh ?? "",
                             moTa: p.moTa ?? "",
+                            gia: String(p.gia),
+                            donViTinh: p.donViTinh,
+                            soLuongTon: String(p.soLuongTon),
                             hanSuDung: p.hanSuDung.slice(0, 16),
+                            nhietDoBaoQuan: p.nhietDoBaoQuan ?? "",
+                            maDanhMuc: p.maDanhMuc,
+                            cacLoai: [],
                           });
                           setError("");
                           window.scrollTo({ top: 0, behavior: "smooth" });
                           try {
-                            const types = await adminRequest<ProductResponse[]>(`/api/v1/admin/products/${p.maSP}/types`);
-                            if (version === loadVersion.current) setDraft((current) => current ? {
-                              ...current, cacLoai: types.map((t) => ({ ...t, tenLoai: t.tenLoai || "", gia: t.giaGoc, hanSuDung: t.hanSuDung.slice(0, 16) })),
-                            } : current);
+                            const types = await adminRequest<ProductResponse[]>(
+                              `/api/v1/admin/products/${p.maSP}/types`,
+                            );
+                            if (version === loadVersion.current) {
+                              setDraft((current) =>
+                                current
+                                  ? {
+                                      ...current,
+                                      cacLoai: types.map((t) => ({
+                                        maSP: t.maSP,
+                                        tenLoai: t.tenLoai || "",
+                                        gia: String(t.giaGoc),
+                                        donViTinh: t.donViTinh,
+                                        soLuongTon: String(t.soLuongTon),
+                                        hanSuDung: t.hanSuDung.slice(0, 16),
+                                        nhietDoBaoQuan: t.nhietDoBaoQuan ?? "",
+                                        hinhAnh: t.hinhAnh ?? "",
+                                        moTa: t.moTa ?? "",
+                                        trangThaiXoa: t.trangThaiXoa,
+                                      })),
+                                    }
+                                  : current,
+                              );
+                            }
                           } catch (failure) {
-                            if (version === loadVersion.current) setTypesError(adminError(failure));
+                            if (version === loadVersion.current) {
+                              setTypesError(adminError(failure));
+                            }
                           } finally {
-                            if (version === loadVersion.current) setTypesLoading(false);
+                            if (version === loadVersion.current) {
+                              setTypesLoading(false);
+                            }
                           }
                         }}
                       >
@@ -428,10 +582,10 @@ export default function ProductAdminPage() {
                         setConfirmation({
                           title: deleted
                             ? `Khôi phục ${p.tenSP}?`
-                            : `Xóa mềm ${p.tenSP}?`,
+                            : `Xóa ${p.tenSP}?`,
                           description: deleted
-                            ? "Sản phẩm được đưa lại vào danh sách kinh doanh. Kiểm tra tồn kho và hạn dùng trước khi bán."
-                            : "Sản phẩm và các loại của sản phẩm sẽ được xóa mềm khỏi cửa hàng. Lịch sử đơn hàng được giữ nguyên; bạn có thể khôi phục trong bộ lọc Đã xóa mềm.",
+                            ? "Sản phẩm và các loại đang kinh doanh được đưa lại vào cửa hàng; các loại đã ẩn riêng vẫn được giữ ẩn. Kiểm tra tồn kho và hạn dùng trước khi bán."
+                            : "Sản phẩm cùng các loại sẽ ngừng hiển thị và ngừng bán. Lịch sử đơn hàng được giữ nguyên; bạn có thể khôi phục trong bộ lọc Đã xóa.",
                           run: () =>
                             adminRequest(
                               deleted
@@ -442,7 +596,7 @@ export default function ProductAdminPage() {
                         })
                       }
                     >
-                      {deleted ? "Khôi phục" : "Xóa mềm"}
+                      {deleted ? "Khôi phục" : "Xóa"}
                     </button>
                   </div>
                 </td>

@@ -20,6 +20,7 @@ import com.ctu.freshgrocery.model.Product;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -89,8 +90,8 @@ public class ProductServiceImpl implements ProductService {
             return ApiResponse.error(-1, "Sản phẩm không tồn tại hoặc đã bị xóa mềm trước đó.");
         }
 
+        // The parent gates sales; keep individually hidden types hidden after restoration.
         for (var child : productTypes.childIds(id, false)) {
-            productSpRepository.callXoaSanPham(child);
             semanticSearchService.removeProduct(child);
         }
         semanticSearchService.removeProduct(id);
@@ -138,12 +139,16 @@ public class ProductServiceImpl implements ProductService {
 
     private ApiResponse<ProductPageResponse> searchByBm25(Integer categoryId, String keyword,
             BigDecimal minPrice, BigDecimal maxPrice, String sortBy, int page, int size) {
+        boolean allowTestProducts = VietnameseFoodSemantics.queryRequestsTestProduct(keyword);
         List<Product> catalog = productRepository.findAll().stream()
-                .filter(p -> !Boolean.TRUE.equals(p.getTrangThaiXoa()) && p.getMaSPCha() == null).toList();
-        Map<Integer, Float> scores = ProductBm25.score(catalog, keyword);
-        String query = ProductBm25.normalize(keyword);
-        var intent = new ProductQueryIntent(keyword);
-        var terms = ProductSearchEvidence.requiredTerms(keyword);
+                .filter(p -> !Boolean.TRUE.equals(p.getTrangThaiXoa()) && p.getMaSPCha() == null)
+                .filter(p -> allowTestProducts || !VietnameseFoodSemantics.isInternalTestProduct(p))
+                .toList();
+        String resolvedKeyword = VietnameseFoodSemantics.resolveTypoQuery(keyword, catalog);
+        Map<Integer, Float> scores = ProductBm25.score(catalog, resolvedKeyword);
+        String query = ProductBm25.normalize(resolvedKeyword);
+        var intent = new ProductQueryIntent(resolvedKeyword);
+        var terms = ProductSearchEvidence.requiredTerms(resolvedKeyword);
         List<ProductResponse> matches = catalog.stream()
                 .filter(p -> scores.containsKey(p.getMaSP()))
                 .sorted(Comparator.<Product, Boolean>comparing(p ->
@@ -159,7 +164,9 @@ public class ProductServiceImpl implements ProductService {
                 .filter(p -> {
                     var evidence = com.ctu.freshgrocery.dto.SemanticProductResponse.builder()
                             .tenSP(p.getTenSP()).moTa(p.getMoTa()).tenDanhMuc(p.getTenDanhMuc()).build();
-                    return intent.permits(evidence) && ProductSearchEvidence.matches(terms, evidence);
+                    return intent.permits(evidence) && (ProductSearchEvidence.matches(terms, evidence)
+                            || intent.isMultiProductList()
+                            || VietnameseFoodSemantics.matchesCulinaryOrRecipeConcept(resolvedKeyword, evidence, Set.of()));
                 }).collect(java.util.stream.Collectors.toList());
         if ("GIA_ASC".equals(sortBy)) matches.sort(Comparator.comparing(ProductResponse::getGiaHienTai));
         if ("GIA_DESC".equals(sortBy)) matches.sort(Comparator.comparing(ProductResponse::getGiaHienTai).reversed());

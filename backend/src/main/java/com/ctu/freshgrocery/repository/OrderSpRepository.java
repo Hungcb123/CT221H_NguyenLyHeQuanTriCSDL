@@ -91,7 +91,8 @@ public class OrderSpRepository {
                         new SqlOutParameter("MaDH_Output", Types.INTEGER),
                         new SqlOutParameter("StatusCode", Types.INTEGER),
                         new SqlOutParameter("Message", Types.NVARCHAR),
-                        new SqlParameter("NguonDon", Types.VARCHAR)
+                        new SqlParameter("NguonDon", Types.VARCHAR),
+                        new SqlParameter("PhuongThucThanhToan", Types.VARCHAR)
                 );
 
         log.info("Khởi tạo OrderSpRepository và nạp thành công 5 Stored Procedures Module 2.");
@@ -141,12 +142,18 @@ public class OrderSpRepository {
 
     public Map<String, Object> executeThanhToanDonHang(Integer maKH, Integer maGioHang, String diaChiGiaoHang,
                                                       String ghiChu, String nguonDon) {
+        return executeThanhToanDonHang(maKH, maGioHang, diaChiGiaoHang, ghiChu, nguonDon, "WALLET");
+    }
+
+    public Map<String, Object> executeThanhToanDonHang(Integer maKH, Integer maGioHang, String diaChiGiaoHang,
+                                                      String ghiChu, String nguonDon, String method) {
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("MaKH", maKH)
                 .addValue("MaGioHang", maGioHang)
                 .addValue("DiaChiGiaoHang", diaChiGiaoHang)
                 .addValue("GhiChu", ghiChu)
-                .addValue("NguonDon", nguonDon);
+                .addValue("NguonDon", nguonDon)
+                .addValue("PhuongThucThanhToan", method);
         return spThanhToanDonHangCall.execute(params);
     }
 

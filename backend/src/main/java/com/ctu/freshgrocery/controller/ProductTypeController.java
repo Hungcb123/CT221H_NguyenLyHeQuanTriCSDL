@@ -29,7 +29,7 @@ public class ProductTypeController {
         var parent = products.callLayChiTietSanPham(parentId).filter(p -> !Boolean.TRUE.equals(p.getTrangThaiXoa()))
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Sản phẩm đã ngừng kinh doanh."));
         var children = load(types.childIds(parentId, false));
-        return ApiResponse.ok("Các loại sản phẩm", children.isEmpty() ? List.of(parent) : children);
+        return ApiResponse.ok("Các loại sản phẩm", children.isEmpty() && types.childIds(parentId, true).isEmpty() ? List.of(parent) : children);
     }
     private List<ProductResponse> load(List<Integer> ids) {
         return ids.stream().map(products::callLayChiTietSanPham).flatMap(Optional::stream).toList();

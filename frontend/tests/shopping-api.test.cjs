@@ -42,11 +42,11 @@ test('removing a product sends the backend DELETE DTO', async () => {
     return ok(null);
   }).removeFromCart(1, 7);
 });
-test('checkout sends delivery fields and preserves a real zero wallet balance', async () => {
-  const result = { maDH: 42, statusCode: 1, tongTien: 60000, soDuConLai: 0 };
+test('COD checkout sends delivery fields and accepts no wallet balance', async () => {
+  const result = { maDH: 42, statusCode: 1, tongTien: 60000, soDuConLai: null };
   const api = service(async (url, init) => {
     assert.equal(url, '/api/v1/orders/checkout');
-    assert.deepEqual(JSON.parse(init.body), { maKH: 1, diaChiGiaoHang: 'Cần Thơ', ghiChu: 'Gọi trước' });
+    assert.deepEqual(JSON.parse(init.body), { maKH: 1, diaChiGiaoHang: 'Cần Thơ', ghiChu: 'Gọi trước', phuongThucThanhToan: 'COD' });
     return ok(result);
   });
   assert.deepEqual(await api.checkout(' Cần Thơ ', ' Gọi trước ', 1), result);

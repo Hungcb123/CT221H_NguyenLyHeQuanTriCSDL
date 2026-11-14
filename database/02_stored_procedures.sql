@@ -465,7 +465,7 @@ BEGIN
             THROW 50001, N'Sản phẩm chưa có hạn sử dụng hợp lệ nên chưa thể mua.', 1;
         IF @HanDung <= GETDATE()
             THROW 50001, N'Sản phẩm đã hết hạn sử dụng. Vui lòng chọn sản phẩm khác.', 1;
-        IF EXISTS (SELECT 1 FROM SanPham WHERE MaSPCha = @MaSP AND TrangThaiXoa = 0)
+        IF EXISTS (SELECT 1 FROM SanPham WHERE MaSPCha = @MaSP)
             THROW 50001, N'Vui lòng chọn loại sản phẩm trước khi thêm vào giỏ.', 1;
         IF @TonKho <= 0
             THROW 50001, N'Sản phẩm tạm hết hàng. Vui lòng chọn sản phẩm khác.', 1;
@@ -566,6 +566,7 @@ BEGIN
         sp.HanSuDung,
         CASE WHEN sp.SoLuongTon < ctgh.SoLuong OR sp.HanSuDung IS NULL OR sp.HanSuDung <= GETDATE() OR sp.TrangThaiXoa = 1
                   OR EXISTS (SELECT 1 FROM SanPham parent WHERE parent.MaSP = sp.MaSPCha AND parent.TrangThaiXoa = 1)
+                  OR EXISTS (SELECT 1 FROM SanPham child WHERE child.MaSPCha = sp.MaSP)
              THEN 0 ELSE 1 END AS ConDuHang,
         sp.HinhAnh
     FROM ChiTietGioHang ctgh
@@ -692,6 +693,8 @@ BEGIN
             FROM @Items item
             INNER JOIN SanPham sp ON item.MaSP = sp.MaSP
             WHERE sp.SoLuongTon < item.SoLuongMua OR sp.HanSuDung <= GETDATE() OR sp.TrangThaiXoa = 1
+               OR EXISTS (SELECT 1 FROM SanPham parent WHERE parent.MaSP = sp.MaSPCha AND parent.TrangThaiXoa = 1)
+               OR EXISTS (SELECT 1 FROM SanPham child WHERE child.MaSPCha = sp.MaSP)
         )
         BEGIN
             SET @StatusCode = -3;
@@ -947,6 +950,8 @@ BEGIN
             LEFT JOIN ChiTietGioHang ct ON ct.MaGioHang = gh.MaGioHang AND ct.MaSP = nl.MaSP
             WHERE nl.MaCongThuc = @MaCongThuc
               AND (sp.MaSP IS NULL OR sp.TrangThaiXoa = 1 OR sp.HanSuDung <= GETDATE()
+                   OR EXISTS (SELECT 1 FROM SanPham parent WHERE parent.MaSP = sp.MaSPCha AND parent.TrangThaiXoa = 1)
+                   OR EXISTS (SELECT 1 FROM SanPham child WHERE child.MaSPCha = sp.MaSP)
                    OR sp.SoLuongTon < CEILING(nl.SoLuongDinhLuong * @TyLe) + ISNULL(ct.SoLuong, 0))
         )
             THROW 50002, N'Nguyên liệu đã hết hạn, ngừng kinh doanh hoặc không đủ số lượng (kể cả trong giỏ).', 1;
@@ -1140,6 +1145,14 @@ BEGIN
     SET NOCOUNT ON;
     SET XACT_ABORT ON;
 
+    IF @SoNgayCanDate NOT BETWEEN 1 AND 30 OR @PhanTramGiamDeXuat <= 0 OR @PhanTramGiamDeXuat >= 100
+    BEGIN
+        SET @StatusCode = -1;
+        SET @Message = N'Số ngày phải từ 1 đến 30; phần trăm giảm phải lớn hơn 0 và nhỏ hơn 100.';
+        SET @SoLuongSanPhamDaThem = 0;
+        SET @MaKM_Output = 0;
+        RETURN;
+    END;
     BEGIN TRY
         BEGIN TRANSACTION;
 
@@ -1150,7 +1163,7 @@ BEGIN
         FROM ChuongTrinhKhuyenMai 
         WHERE LoaiKM = 'XA_KHO_CAN_DATE' 
           AND TrangThai = 1
-          AND CAST(NgayKetThuc AS DATE) >= CAST(GETDATE() AS DATE);
+          AND NgayBatDau <= GETDATE() AND NgayKetThuc > GETDATE();
 
         IF (@MaKM IS NULL)
         BEGIN
@@ -1181,11 +1194,14 @@ BEGIN
         SELECT 
             sp.MaSP,
             sp.Gia,
-            ROUND(sp.Gia * (1.0 - (@PhanTramGiamDeXuat / 100.0)), -3),
+            ROUND(sp.Gia * (1.0 - (@PhanTramGiamDeXuat / 100.0)), 2),
             @PhanTramGiamDeXuat
         FROM SanPham sp
         WHERE sp.TrangThaiXoa = 0 
           AND sp.SoLuongTon > 0
+          AND sp.HanSuDung > GETDATE()
+          AND NOT EXISTS (SELECT 1 FROM SanPham parent WHERE parent.MaSP = sp.MaSPCha AND parent.TrangThaiXoa = 1)
+          AND NOT EXISTS (SELECT 1 FROM SanPham child WHERE child.MaSPCha = sp.MaSP)
           AND DATEDIFF(day, GETDATE(), sp.HanSuDung) <= @SoNgayCanDate;
 
         MERGE ChiTietKhuyenMai AS target
