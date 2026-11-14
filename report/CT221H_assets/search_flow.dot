@@ -1,0 +1,18 @@
+digraph G { graph [rankdir=TB, bgcolor="white", pad="0.25", nodesep="0.35", ranksep="0.5"]; node [shape=box,style="rounded,filled",fillcolor="#F1F5F8",color="#334155",fontname="DejaVu Sans",fontsize=11,margin="0.16,0.12"]; edge [color="#64748B",fontname="DejaVu Sans",fontsize=9,arrowsize=0.65];
+ q [label="Truy vấn tiếng Việt"];
+ bm [label="BM25 tên + mô tả
+k1 = 1,2; b = 0,75"];
+ emb [label="ONNX MiniLM
+WordPiece → pooling → L2"];
+ vec [label="Qdrant cosine
+Xếp hạng vector"];
+ rrf [label="RRF (k = 60)
+Trọng số 0,5 / 0,5"];
+ policy [label="Đối chiếu loại hàng + bằng chứng
+Ngưỡng 0,60 / chênh lệch 0,05"];
+ out [label="products: kết quả chính
+relatedProducts: tham khảo"];
+ fall [label="KEYWORD_FALLBACK
+BM25 trọng số 1"];
+ q->bm;q->emb;emb->vec;bm->rrf;vec->rrf;rrf->policy->out;emb->fall [label="lỗi ONNX/Qdrant"];fall->policy;
+}

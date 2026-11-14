@@ -1,0 +1,17 @@
+digraph G { graph [rankdir=TB, bgcolor="white", pad="0.25", nodesep="0.35", ranksep="0.5"]; node [shape=box,style="rounded,filled",fillcolor="#F1F5F8",color="#334155",fontname="DejaVu Sans",fontsize=11,margin="0.16,0.12"]; edge [color="#64748B",fontname="DejaVu Sans",fontsize=9,arrowsize=0.65];
+ user [label="Khách hàng / Quản trị viên"];
+ web [label="Next.js + React
+Giao diện web"];
+ api [label="Spring Boot REST API
+Xác thực · Nghiệp vụ · JDBC/JPA"];
+ sql [label="SQL Server 2022
+Bảng · SP · Trigger · Chỉ mục"];
+ vector [label="Qdrant
+Chỉ mục vector 384 chiều"];
+ onnx [label="ONNX Runtime Java
+Embedding + Dự báo MLP"];
+ sepay [label="SePay
+Thông báo giao dịch ngân hàng"];
+ user -> web;web -> api [label="HTTP / JSON"];
+ api -> sql;api -> vector;api -> onnx;sepay -> api [label="Webhook có xác thực"];
+}

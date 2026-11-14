@@ -1,6 +1,8 @@
 # 🥬 HỆ THỐNG BÁCH HÓA THỰC PHẨM TƯƠI SỐNG (MÔ HÌNH BÁCH HÓA XANH)
 ## ĐỒ ÁN MÔN HỌC: CT221H - NGUYÊN LÝ HỆ QUẢN TRỊ CƠ SỞ DỮ LIỆU
 
+Thanh toán chuyển khoản SePay và thao tác xóa mềm: xem [hướng dẫn cấu hình](backend/SEPAY.md).
+
 ---
 
 ### 📌 THÀNH PHẦN VÀ CẤU TRÚC THƯ MỤC DỰ ÁN

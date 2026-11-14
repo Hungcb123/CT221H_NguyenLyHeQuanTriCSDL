@@ -32,4 +32,9 @@ class AdminOrderServiceTest {
         assertThrows(AppException.class,()->service.changeStatus(1,"CANCELLED","admin"));
         verify(jdbc,never()).update(anyString(),any(Object[].class));
     }
+    @Test void sepayCannotBeRefundedIntoInternalWallet(){
+        order("PAID");when(jdbc.queryForMap(anyString(),eq(1))).thenReturn(Map.of("TrangThai","PAID","TongTien",new BigDecimal("100"),"PhuongThucThanhToan","SEPAY"));
+        assertThrows(AppException.class,()->service.changeStatus(1,"CANCELLED","admin"));
+        verify(jdbc,never()).update(anyString(),any(Object[].class));
+    }
 }

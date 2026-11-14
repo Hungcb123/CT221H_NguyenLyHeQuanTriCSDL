@@ -341,7 +341,7 @@ export default function ProductAdminPage() {
           }}
         >
           <option value="false">Đang kinh doanh</option>
-          <option value="true">Đã ẩn</option>
+          <option value="true">Đã xóa mềm</option>
         </select>
         <button className="ad-btn secondary" onClick={list.refresh}>
           <RotateCw size={15} aria-hidden="true" />
@@ -428,10 +428,10 @@ export default function ProductAdminPage() {
                         setConfirmation({
                           title: deleted
                             ? `Khôi phục ${p.tenSP}?`
-                            : `Ẩn ${p.tenSP}?`,
+                            : `Xóa mềm ${p.tenSP}?`,
                           description: deleted
                             ? "Sản phẩm được đưa lại vào danh sách kinh doanh. Kiểm tra tồn kho và hạn dùng trước khi bán."
-                            : "Sản phẩm sẽ bị ẩn khỏi cửa hàng và chỉ mục tìm kiếm; lịch sử mua hàng được giữ nguyên.",
+                            : "Sản phẩm và các loại của sản phẩm sẽ được xóa mềm khỏi cửa hàng. Lịch sử đơn hàng được giữ nguyên; bạn có thể khôi phục trong bộ lọc Đã xóa mềm.",
                           run: () =>
                             adminRequest(
                               deleted
@@ -442,7 +442,7 @@ export default function ProductAdminPage() {
                         })
                       }
                     >
-                      {deleted ? "Khôi phục" : "Ẩn sản phẩm"}
+                      {deleted ? "Khôi phục" : "Xóa mềm"}
                     </button>
                   </div>
                 </td>

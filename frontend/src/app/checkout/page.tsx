@@ -7,7 +7,7 @@ import {useCustomer} from "@/components/customer/CustomerProvider";
 import { CartItemThumbnail } from "@/components/cart/CartItemThumbnail";
 import { ArrowLeft, ArrowRight, CheckCircle2, MapPin, ShoppingBag, Wallet } from "lucide-react";
 import { apiService } from "@/services/api";
-import {momoApi,isMoMoSandboxUrl,type MoMoConfig} from "@/services/momo-api";
+import {sepayApi,type SePayConfig} from "@/services/sepay-api";
 import type { CartResponse, CheckoutResponse } from "@/types";
 
 const money = (value: number) => `${value.toLocaleString("vi-VN")} đ`;
@@ -25,10 +25,10 @@ export default function CheckoutPage() {
   const [result, setResult] = useState<CheckoutResponse | null>(null);
   const submittingRef = useRef(false);
   const headingRef = useRef<HTMLHeadingElement>(null);
-  const [method,setMethod]=useState<"WALLET"|"MOMO">("WALLET");
-  const [momo,setMomo]=useState<MoMoConfig|null>(null);
-  const momoKey=useRef<string|null>(null);
-  useEffect(()=>{let cancelled=false;void momoApi.config().then(value=>{if(!cancelled)setMomo(value);}).catch(()=>{if(!cancelled)setMomo({available:false,sandbox:true,message:"Chưa kết nối được MoMo Sandbox."});});return()=>{cancelled=true;};},[]);
+  const [method,setMethod]=useState<"WALLET"|"SEPAY">("WALLET");
+  const [sepay,setSepay]=useState<SePayConfig|null>(null);
+  const sepayKey=useRef<string|null>(null);
+  useEffect(()=>{let cancelled=false;void sepayApi.config().then(value=>{if(!cancelled)setSepay(value);}).catch(()=>{if(!cancelled)setSepay({available:false,message:"Chưa kết nối được SePay."});});return()=>{cancelled=true;};},[]);
 
   useEffect(() => {
     if(authLoading)return;
@@ -46,7 +46,7 @@ export default function CheckoutPage() {
   const insufficient = balance !== null && cart !== null && balance < cart.tongTien;
   const unavailable = cart?.danhSachMon.some((item) => item.conDuHang === false);
   const canPay = !loading && !!cart?.danhSachMon.length && !unavailable
-    && (method==="MOMO"?!!momo?.available:balance!==null&&!insufficient);
+    && (method==="SEPAY"?!!sepay?.available:balance!==null&&!insufficient);
 
   async function checkout(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -55,13 +55,12 @@ export default function CheckoutPage() {
     setSubmitting(true);
     setError(null);
     try {
-      if(method==="MOMO"){
-        const storageKey=`momo-checkout:${customer.maKH}`;
-        if(!momoKey.current){momoKey.current=sessionStorage.getItem(storageKey)||crypto.randomUUID();sessionStorage.setItem(storageKey,momoKey.current);}
-        const payment=await momoApi.create(address.trim(),note.trim(),momoKey.current);
-        sessionStorage.removeItem(storageKey);momoKey.current=null;
-        if(payment.payUrl && isMoMoSandboxUrl(payment.payUrl))window.location.assign(payment.payUrl);
-        else router.push(`/payments/momo/return?orderId=${encodeURIComponent(payment.paymentId)}`);
+      if(method==="SEPAY"){
+        const storageKey=`sepay-checkout:${customer.maKH}`;
+        if(!sepayKey.current){sepayKey.current=sessionStorage.getItem(storageKey)||crypto.randomUUID();sessionStorage.setItem(storageKey,sepayKey.current);}
+        const payment=await sepayApi.create(address.trim(),note.trim(),sepayKey.current);
+        sessionStorage.removeItem(storageKey);sepayKey.current=null;
+        router.push(`/payments/sepay/return?orderId=${encodeURIComponent(payment.paymentId)}`);
         return;
       }
       setResult(await apiService.checkout(address, note, customer.maKH));
@@ -116,14 +115,14 @@ export default function CheckoutPage() {
                     <fieldset disabled={submitting} className="mb-5 space-y-3">
                       <legend className="mb-3 text-lg font-bold">Phương thức thanh toán</legend>
                       <label className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 ${method==="WALLET"?"border-emerald-700 bg-emerald-50":"border-stone-200"}`}><input type="radio" name="payment-method" checked={method==="WALLET"} onChange={()=>setMethod("WALLET")} className="mt-1"/><span><strong className="block">Ví DailyMart</strong><span className="text-sm text-stone-600">Thanh toán bằng số dư ví trong cửa hàng.</span></span></label>
-                      <label className={`flex items-start gap-3 rounded-lg border p-3 ${method==="MOMO"?"border-pink-700 bg-pink-50":"border-stone-200"} ${momo?.available?"cursor-pointer":"opacity-60"}`}><input type="radio" name="payment-method" checked={method==="MOMO"} disabled={!momo?.available} onChange={()=>setMethod("MOMO")} className="mt-1"/><span><strong className="block text-pink-800">MoMo Sandbox <span className="text-xs font-medium">· Thử nghiệm</span></strong><span className="text-sm text-stone-600">{momo?.message||"Đang kiểm tra kết nối MoMo…"}</span></span></label>
+                      <label className={`flex items-start gap-3 rounded-lg border p-3 ${method==="SEPAY"?"border-emerald-700 bg-emerald-50":"border-stone-200"} ${sepay?.available?"cursor-pointer":"opacity-60"}`}><input type="radio" name="payment-method" checked={method==="SEPAY"} disabled={!sepay?.available} onChange={()=>setMethod("SEPAY")} className="mt-1"/><span><strong className="block text-emerald-800">SePay · Chuyển khoản QR</strong><span className="text-sm text-stone-600">{sepay?.message||"Đang kiểm tra kết nối SePay…"}</span></span></label>
                     </fieldset>
                     {method==="WALLET"?<>
                     <h2 className="mb-3 flex items-center gap-2 text-lg font-bold"><Wallet className="h-5 w-5 text-emerald-800" />Ví DailyMart</h2>
                     <p>Số dư khả dụng: <strong className="text-emerald-800">{balance === null ? "Chưa tải được" : money(balance)}</strong></p>
                     {insufficient && <p role="status" className="mt-3 text-red-800">Số dư ví chưa đủ. Liên hệ quản trị viên để bổ sung tiền demo.</p>}
                     <Link href="/wallet" className="customer-action mt-3">Xem ví và giao dịch</Link>
-                    </>:<p className="rounded-lg bg-pink-50 p-3 text-sm text-pink-900">Bạn sẽ chuyển sang cổng MoMo thử nghiệm. Dùng ứng dụng và tài khoản MoMo Test; không sử dụng tiền thật. Đơn chỉ được xác nhận sau khi máy chủ nhận kết quả hợp lệ.</p>}
+                    </>:<p className="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-900">Quét QR bằng ứng dụng ngân hàng và chuyển đúng nội dung, số tiền. Đơn tự động xác nhận khi nhận tiền. Mã thanh toán giữ hàng trong 30 phút.</p>}
                   </section>
                 </div>
                 <section className="self-start rounded-xl border border-stone-200 bg-white p-5">
@@ -139,7 +138,7 @@ export default function CheckoutPage() {
                     </li>)}</ul>
                   )}
                   <div className="my-5 flex flex-wrap justify-between gap-2 border-t border-stone-200 pt-4 font-bold"><span>Tổng thanh toán</span><span className="text-red-800">{money(cart?.tongTien ?? 0)}</span></div>
-                  <button type="submit" disabled={!canPay || submitting || !address.trim()} className="min-h-12 w-full rounded-lg bg-emerald-800 px-3 py-3 font-bold text-white hover:bg-emerald-900 disabled:cursor-not-allowed disabled:opacity-50">{submitting ? "Đang xử lý…" : method==="MOMO"?"Thanh toán MoMo Sandbox":"Xác nhận thanh toán ví"}</button>
+                  <button type="submit" disabled={!canPay || submitting || !address.trim()} className="min-h-12 w-full rounded-lg bg-emerald-800 px-3 py-3 font-bold text-white hover:bg-emerald-900 disabled:cursor-not-allowed disabled:opacity-50">{submitting ? "Đang xử lý…" : method==="SEPAY"?"Thanh toán SePay":"Xác nhận thanh toán ví"}</button>
                 </section>
               </form>
             )}

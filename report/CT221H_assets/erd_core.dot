@@ -1,0 +1,13 @@
+digraph G { graph [rankdir=TB, bgcolor="white", pad="0.25", nodesep="0.35", ranksep="0.5"]; node [shape=box,style="rounded,filled",fillcolor="#F1F5F8",color="#334155",fontname="DejaVu Sans",fontsize=11,margin="0.16,0.12"]; edge [color="#64748B",fontname="DejaVu Sans",fontsize=9,arrowsize=0.65];
+ node [shape=record,style="filled",fillcolor="#F8FAFC"];
+ cat [label="{DanhMuc|PK MaDanhMuc}"];
+ sp [label="{SanPham|PK MaSP|FK MaDanhMuc|FK MaSPCha}"];
+ kh [label="{KhachHang|PK MaKH}"];
+ gh [label="{GioHang|PK MaGioHang|FK MaKH UNIQUE}"];
+ ctgh [label="{ChiTietGioHang|PK/FK MaGioHang|PK/FK MaSP}"];
+ dh [label="{DonHang|PK MaDH|FK MaKH}"];
+ ctdh [label="{ChiTietDonHang|PK/FK MaDH|PK/FK MaSP|FK MaKM}"];
+ vi [label="{LichSuGiaoDichVi|PK MaGiaoDich|FK MaKH, MaDH}"];
+ cat->sp [label="1–N"];kh->gh [label="1–0..1"];gh->ctgh [label="1–N"];sp->ctgh [label="1–N"];
+ kh->dh [label="1–N"];dh->ctdh [label="1–N"];sp->ctdh [label="1–N"];kh->vi [label="1–N"];dh->vi [label="1–N"];
+}

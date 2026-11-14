@@ -1,0 +1,18 @@
+digraph G { graph [rankdir=TB, bgcolor="white", pad="0.25", nodesep="0.35", ranksep="0.5"]; node [shape=box,style="rounded,filled",fillcolor="#F1F5F8",color="#334155",fontname="DejaVu Sans",fontsize=11,margin="0.16,0.12"]; edge [color="#64748B",fontname="DejaVu Sans",fontsize=9,arrowsize=0.65];
+ history [label="Lịch sử đơn / chi tiết
+Các ngày trước ngày dự báo"];
+ feat [label="10 đặc trưng
+Lịch · Giá · Mã SP · Lag · Rolling"];
+ scale [label="StandardScaler
+mean / scale từ tệp cấu hình"];
+ model [label="ONNX MLP
+10 → 64 → 32 → 1"];
+ rule [label="Nhu cầu không âm
+Nhập thêm: max(0, ceil(1,1 × dự báo) − tồn)
+Rủi ro: THẤP / TRUNG BÌNH / CAO"];
+ db [label="sp_LuuKetQuaDuBaoNhapHang
+DuBaoNhapHang + cảnh báo"];
+ ui [label="Trang quản trị AI
+Giả lập không lưu / vận hành có lưu"];
+ history->feat->scale->model->rule;rule->db;rule->ui;
+}

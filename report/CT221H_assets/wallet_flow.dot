@@ -1,0 +1,15 @@
+digraph G { graph [rankdir=TB, bgcolor="white", pad="0.25", nodesep="0.35", ranksep="0.5"]; node [shape=box,style="rounded,filled",fillcolor="#F1F5F8",color="#334155",fontname="DejaVu Sans",fontsize=11,margin="0.16,0.12"]; edge [color="#64748B",fontname="DejaVu Sans",fontsize=9,arrowsize=0.65];
+ a [label="Xác thực khách hàng
+Kiểm tra CSRF / chủ sở hữu"];
+ b [label="BEGIN TRANSACTION
+Khóa ví + sản phẩm + suất ưu đãi"];
+ c [label="Kiểm tra giỏ, tồn kho, hạn dùng
+Tính giá tại server + kiểm tra số dư"];
+ d [label="Trừ kho / ví · Tạo đơn PAID
+Ghi chi tiết + sổ cái · Xóa giỏ"];
+ e [label="COMMIT
+Trả kết quả từ database"];
+ f [label="ROLLBACK
+Không ghi nhận giao dịch dở dang",fillcolor="#FFF4F0"];
+ a->b->c->d->e;c->f [label="vi phạm nghiệp vụ"];d->f [label="lỗi SQL"];
+}

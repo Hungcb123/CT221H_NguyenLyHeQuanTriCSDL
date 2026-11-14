@@ -78,3 +78,9 @@ payments:
     redirect-url: ${MOMO_REDIRECT_URL:http://localhost:3000/payments/momo/return}
     ipn-url: ${MOMO_IPN_URL:}
     receiver-phone: ${MOMO_RECEIVER_PHONE:0366643213}
+  sepay:
+    enabled: ${SEPAY_ENABLED:false}
+    bank-code: ${SEPAY_BANK_CODE:}
+    account-number: ${SEPAY_ACCOUNT_NUMBER:}
+    account-name: ${SEPAY_ACCOUNT_NAME:}
+    webhook-api-key: ${SEPAY_WEBHOOK_API_KEY:}

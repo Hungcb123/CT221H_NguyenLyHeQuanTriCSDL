@@ -26,8 +26,8 @@ public class AdminOrderService {
         var order = jdbc.queryForMap("SELECT TrangThai, TongTien, PhuongThucThanhToan FROM DonHang WITH (UPDLOCK, ROWLOCK) WHERE MaDH = ?", id);
         String current = (String) order.get("TrangThai");
         if (target.equals(current)) return Map.of("maDH", id, "trangThai", current, "refunded", false);
-        if("CANCELLED".equals(target) && "MOMO_SANDBOX".equals(order.get("PhuongThucThanhToan")))
-            throw new AppException(HttpStatus.CONFLICT,"Đơn MoMo phải được hủy/hoàn qua cổng MoMo và đối soát. Không hoàn vào ví DailyMart.");
+        if("CANCELLED".equals(target) && ("MOMO_SANDBOX".equals(order.get("PhuongThucThanhToan")) || "SEPAY".equals(order.get("PhuongThucThanhToan"))))
+            throw new AppException(HttpStatus.CONFLICT,"Đơn thanh toán ngoài ví cần được hủy/hoàn và đối soát riêng. Không hoàn vào ví DailyMart.");
         boolean valid = ("PAID".equals(current) && Set.of("DELIVERED", "CANCELLED").contains(target))
                 || ("PENDING".equals(current) && "CANCELLED".equals(target));
         if (!valid) throw new AppException(HttpStatus.CONFLICT, "Không thể chuyển trạng thái đơn từ " + current + " sang " + target);

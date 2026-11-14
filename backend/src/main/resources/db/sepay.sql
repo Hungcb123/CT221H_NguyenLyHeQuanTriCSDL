@@ -1,0 +1,43 @@
+SET ANSI_NULLS ON;
+SET QUOTED_IDENTIFIER ON;
+BEGIN TRY
+BEGIN TRANSACTION;
+IF COL_LENGTH('dbo.DonHang','PhuongThucThanhToan') IS NULL
+    ALTER TABLE dbo.DonHang ADD PhuongThucThanhToan VARCHAR(20) NOT NULL
+        CONSTRAINT DF_DonHang_PhuongThucThanhToan DEFAULT 'WALLET';
+
+IF OBJECT_ID('dbo.ThanhToanSePay') IS NULL
+BEGIN
+    CREATE TABLE dbo.ThanhToanSePay (
+        PaymentId VARCHAR(50) NOT NULL PRIMARY KEY,
+        MaDH INT NOT NULL UNIQUE REFERENCES dbo.DonHang(MaDH),
+        MaKH INT NOT NULL REFERENCES dbo.KhachHang(MaKH),
+        IdempotencyKey VARCHAR(64) NOT NULL,
+        AccountNumber VARCHAR(100) NOT NULL,
+        BankCode VARCHAR(50) NOT NULL,
+        AccountName NVARCHAR(150) NOT NULL,
+        Amount BIGINT NOT NULL CHECK(Amount BETWEEN 1000 AND 50000000),
+        Status VARCHAR(20) NOT NULL DEFAULT 'PENDING'
+            CHECK(Status IN ('PENDING','PAID','FAILED','REVIEW')),
+        TransId VARCHAR(100) NULL,
+        CreatedAt DATETIME2 NOT NULL DEFAULT GETDATE(),
+        UpdatedAt DATETIME2 NOT NULL DEFAULT GETDATE(),
+        ExpiresAt DATETIME2 NOT NULL DEFAULT DATEADD(MINUTE,30,GETDATE()),
+        CONSTRAINT UQ_SePay_Customer_Key UNIQUE(MaKH,IdempotencyKey)
+    );
+    CREATE UNIQUE INDEX UX_SePay_TransId ON dbo.ThanhToanSePay(TransId) WHERE TransId IS NOT NULL;
+    CREATE INDEX IX_SePay_Pending ON dbo.ThanhToanSePay(Status,ExpiresAt);
+END;
+IF OBJECT_ID('dbo.SePayWebhook') IS NULL
+    CREATE TABLE dbo.SePayWebhook (
+        TransactionId VARCHAR(100) NOT NULL PRIMARY KEY,
+        Payload NVARCHAR(MAX) NOT NULL,
+        Outcome VARCHAR(30) NOT NULL,
+        CreatedAt DATETIME2 NOT NULL DEFAULT GETDATE()
+    );
+COMMIT TRANSACTION;
+END TRY
+BEGIN CATCH
+    IF @@TRANCOUNT>0 ROLLBACK TRANSACTION;
+    THROW;
+END CATCH;

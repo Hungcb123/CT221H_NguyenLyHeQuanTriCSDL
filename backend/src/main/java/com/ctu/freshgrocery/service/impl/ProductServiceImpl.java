@@ -94,7 +94,7 @@ public class ProductServiceImpl implements ProductService {
             semanticSearchService.removeProduct(child);
         }
         semanticSearchService.removeProduct(id);
-        return ApiResponse.ok(1, "Đã ẩn sản phẩm và ghi nhật ký xóa mềm.", "Soft-deleted successfully");
+        return ApiResponse.ok(1, "Đã xóa mềm sản phẩm và ghi nhật ký. Có thể khôi phục trong trang quản trị.", "Soft-deleted successfully");
     }
 
     @Override

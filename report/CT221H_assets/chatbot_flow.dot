@@ -1,0 +1,15 @@
+digraph G { graph [rankdir=TB, bgcolor="white", pad="0.25", nodesep="0.35", ranksep="0.5"]; node [shape=box,style="rounded,filled",fillcolor="#F1F5F8",color="#334155",fontname="DejaVu Sans",fontsize=11,margin="0.16,0.12"]; edge [color="#64748B",fontname="DejaVu Sans",fontsize=9,arrowsize=0.65];
+ q [label="Tin nhắn + công thức đã chọn"];
+ route [label="Nhận diện ý định bằng từ khóa / regex
+Điều phối công cụ trong Java"];
+ recipe [label="Tra công thức
+Đối chiếu nguyên liệu SQL"];
+ search [label="Tìm sản phẩm hybrid
+Tra khuyến mãi đang hiệu lực"];
+ add [label="Thêm nguyên liệu
+Phiên đăng nhập + CSRF
+SP kiểm tra lại toàn bộ"];
+ reply [label="Câu trả lời theo mẫu
+Công thức · Giá · Tồn · Liên kết checkout"];
+ q->route;route->recipe;route->search;route->add;recipe->reply;search->reply;add->reply;
+}

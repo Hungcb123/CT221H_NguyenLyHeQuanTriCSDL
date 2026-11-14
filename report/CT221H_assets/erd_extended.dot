@@ -1,0 +1,13 @@
+digraph G { graph [rankdir=TB, bgcolor="white", pad="0.25", nodesep="0.35", ranksep="0.5"]; node [shape=box,style="rounded,filled",fillcolor="#F1F5F8",color="#334155",fontname="DejaVu Sans",fontsize=11,margin="0.16,0.12"]; edge [color="#64748B",fontname="DejaVu Sans",fontsize=9,arrowsize=0.65];
+ node [shape=record,style="filled",fillcolor="#F8FAFC"];
+ sp [label="{SanPham|PK MaSP}"];
+ km [label="{ChuongTrinhKhuyenMai|PK MaKM}"];
+ ctkm [label="{ChiTietKhuyenMai|PK, FK MaKM + MaSP}"];
+ recipe [label="{CongThucMonAn|PK MaCongThuc}"];
+ ing [label="{NguyenLieuMonAn|PK, FK MaCongThuc + MaSP}"];
+ forecast [label="{DuBaoNhapHang|PK MaDuBao · FK MaSP}"];
+ dh [label="{DonHang|PK MaDH}"];
+ pay [label="{ThanhToanSePay|PK PaymentId · FK MaDH UNIQUE|FK MaKH · IdempotencyKey}"];
+ evt [label="{SePayWebhook|PK TransactionId|Không có FK thanh toán}"];
+ km->ctkm [label="1–N"];sp->ctkm [label="1–N"];recipe->ing [label="1–N"];sp->ing [label="1–N"];sp->forecast [label="1–N"];dh->pay [label="1–0..1"];evt->pay [style=dashed,label="không có FK trực tiếp",constraint=false];forecast->dh [style=invis];ing->evt [style=invis];
+}

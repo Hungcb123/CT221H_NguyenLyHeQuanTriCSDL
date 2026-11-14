@@ -1,0 +1,337 @@
+[
+  {
+    "page": 1,
+    "chars": 433,
+    "start": "ĐẠI HỌC CẦN THƠ | TRƯỜNG CÔNG NGHỆ THÔNG TIN VÀ TRUYỀN THÔNG | KHOA CÔNG NGHỆ PHẦN MỀM | BÁO CÁO ĐỒ ÁN | CT221H – NGUYÊN LÝ HỆ QUẢN TRỊ | CƠ"
+  },
+  {
+    "page": 2,
+    "chars": 1509,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | DailyMart | TÓM TẮT | DailyMart là hệ thống quản lý và bán thực phẩm tươi sống được xây"
+  },
+  {
+    "page": 3,
+    "chars": 2798,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | DailyMart | MỤC LỤC | TÓM TẮT.........................................................."
+  },
+  {
+    "page": 4,
+    "chars": 2913,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | DailyMart | 4.5. Trigger cập nhật và nhật ký trước–sau..............................."
+  },
+  {
+    "page": 5,
+    "chars": 3106,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | DailyMart | 8.2. Các ca nghiệp vụ tiêu biểu.........................................."
+  },
+  {
+    "page": 6,
+    "chars": 864,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | DailyMart | B.14. ChuongTrinhKhuyenMai..............................................."
+  },
+  {
+    "page": 7,
+    "chars": 1081,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | DailyMart | DANH MỤC HÌNH | Hình 2.1. Kiến trúc tổng thể DailyMart, dựng từ cấu trúc mã"
+  },
+  {
+    "page": 8,
+    "chars": 2723,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | DailyMart | DANH MỤC BẢNG | Bảng 1.1. Tác nhân và trách nhiệm.........................."
+  },
+  {
+    "page": 9,
+    "chars": 757,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | DailyMart | Bảng B.12. Các cột của CongThucMonAn theo khai báo gốc..................."
+  },
+  {
+    "page": 10,
+    "chars": 1186,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | DailyMart | DANH MỤC TỪ VIẾT TẮT | Từ viết tắt | Diễn giải | ACID | Atomicity, Consistency, I"
+  },
+  {
+    "page": 11,
+    "chars": 2114,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | CHƯƠNG 1. GIỚI THIỆU VÀ PHÂN TÍCH YÊU CẦU | 1.1. Bối cảnh và "
+  },
+  {
+    "page": 12,
+    "chars": 1856,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | 1.3. Tác nhân và phạm vi sử dụng | Bảng 1.1 xác định các tác "
+  },
+  {
+    "page": 13,
+    "chars": 1907,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | Mã | Nhóm yêu cầu | Hiện thực hoặc vị trí minh chứng | FR04 | Khuyế"
+  },
+  {
+    "page": 14,
+    "chars": 776,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | 1.6. Phương pháp thực hiện và phạm vi bằng chứng | Báo cáo đư"
+  },
+  {
+    "page": 15,
+    "chars": 1584,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | CHƯƠNG 2. CƠ SỞ KỸ THUẬT VÀ KIẾN TRÚC HỆ THỐNG | 2.1. Cơ sở d"
+  },
+  {
+    "page": 16,
+    "chars": 1370,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | Hình 2.1. Kiến trúc tổng thể DailyMart, dựng từ cấu trúc mã"
+  },
+  {
+    "page": 17,
+    "chars": 2115,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | Thành phần | Công nghệ trong dự án | Vai trò | Truy cập SQL | Sprin"
+  },
+  {
+    "page": 18,
+    "chars": 446,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | Webhook SePay là điểm nhận thông báo server–server nên khôn"
+  },
+  {
+    "page": 19,
+    "chars": 879,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | CHƯƠNG 3. THIẾT KẾ CƠ SỞ DỮ LIỆU VÀ VIEW | 3.1. Nhóm thực thể"
+  },
+  {
+    "page": 20,
+    "chars": 916,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | Hình 3.2. Quan hệ nhóm khuyến mãi, công thức, dự báo và tha"
+  },
+  {
+    "page": 21,
+    "chars": 2120,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | Bảng | Khóa và trường chính | Quy tắc đáng chú ý | SanPham | MaSP; "
+  },
+  {
+    "page": 22,
+    "chars": 2198,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | 3.4. Ràng buộc toàn vẹn | Ràng buộc miền kiểm tra giá dương, "
+  },
+  {
+    "page": 23,
+    "chars": 2088,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | View đề xuất | Nguồn dữ liệu | Ngữ nghĩa | vw_DoanhThuBanT | heoNga"
+  },
+  {
+    "page": 24,
+    "chars": 1815,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | CHƯƠNG 4. HIỆN THỰC T-SQL VÀ KIỂM SOÁT NGHIỆP VỤ | 4.1. Tổ ch"
+  },
+  {
+    "page": 25,
+    "chars": 2011,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | Không phải mọi đường truy cập database đều đi qua stored pr"
+  },
+  {
+    "page": 26,
+    "chars": 973,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | Hình 4.1. Luồng thanh toán ví và nhánh rollback. | Trong phần"
+  },
+  {
+    "page": 27,
+    "chars": 2147,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | phải trừ trước tồn kho rồi báo thiếu tiền. Con số trong ví "
+  },
+  {
+    "page": 28,
+    "chars": 2167,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | Bảng 4.2. Trigger và sự kiện dữ liệu | Trigger | Sự kiện | Kết qu"
+  },
+  {
+    "page": 29,
+    "chars": 1546,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | của hai kế hoạch, không phải chứng minh optimizer sẽ chọn g"
+  },
+  {
+    "page": 30,
+    "chars": 2177,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | CHƯƠNG 5. TÌM KIẾM NGỮ NGHĨA VÀ HYBRID SEARCH | 5.1. Bài toán"
+  },
+  {
+    "page": 31,
+    "chars": 1073,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | Dạng điểm được sử dụng là tổng theo từ truy vấn: IDF(t) × t"
+  },
+  {
+    "page": 32,
+    "chars": 915,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | Hình 5.1. Pipeline tìm kiếm hybrid và tách kết quả chính, t"
+  },
+  {
+    "page": 33,
+    "chars": 2358,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | khác không được đưa vào kết quả chính chỉ vì gần nghĩa. Pro"
+  },
+  {
+    "page": 34,
+    "chars": 1716,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | CHƯƠNG 6. AI DỰ BÁO NHU CẦU VÀ ĐỀ XUẤT NHẬP HÀNG | 6.1. Phát "
+  },
+  {
+    "page": 35,
+    "chars": 1858,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | Vị trí | Đặc trưng | Ý nghĩa | 9 | Rolling_Mean_7 | Trung bình các ng"
+  },
+  {
+    "page": 36,
+    "chars": 963,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | Hình 6.1. Pipeline lấy dữ liệu, chuẩn hóa, suy luận và áp d"
+  },
+  {
+    "page": 37,
+    "chars": 2271,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | phải xác suất dự báo của từng sản phẩm đúng. Hiển thị hai đ"
+  },
+  {
+    "page": 38,
+    "chars": 472,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | Bảng 8.4 sẽ báo cáo các giá trị từ metadata của mô hình tri"
+  },
+  {
+    "page": 39,
+    "chars": 1646,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | CHƯƠNG 7. CHATBOT, GIAO DIỆN VÀ TRIỂN KHAI | 7.1. Phạm vi cha"
+  },
+  {
+    "page": 40,
+    "chars": 1516,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | Hình 7.1. Luồng điều phối chatbot hiện có, không sử dụng LL"
+  },
+  {
+    "page": 41,
+    "chars": 1077,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | 7.4. Giao diện khách hàng và quản trị | Phía khách hàng có cử"
+  },
+  {
+    "page": 42,
+    "chars": 892,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | Hình 7.3. Trang QR SePay; thông tin tài khoản và đơn trong "
+  },
+  {
+    "page": 43,
+    "chars": 1389,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | Với SePay, copy .env.sepay.example thành .env.sepay.local, "
+  },
+  {
+    "page": 44,
+    "chars": 1893,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | CHƯƠNG 8. KIỂM THỬ VÀ ĐÁNH GIÁ KẾT QUẢ | 8.1. Phương pháp và "
+  },
+  {
+    "page": 45,
+    "chars": 1828,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | Bảng 8.2. Kịch bản kiểm thử nghiệp vụ | Mã | Kịch bản | Kết quả m"
+  },
+  {
+    "page": 46,
+    "chars": 1379,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | 8.3. Đánh giá chỉ mục trên 500.000 đơn hàng | Phép đo ngày 10"
+  },
+  {
+    "page": 47,
+    "chars": 1788,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | diện; đo thêm dữ liệu đa dạng và để optimizer tự chọn kế ho"
+  },
+  {
+    "page": 48,
+    "chars": 1901,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | thể đẩy nhiều đặc trưng về 0. Cần đánh giá theo từng đơn vị"
+  },
+  {
+    "page": 49,
+    "chars": 1944,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | 8.6. Đối chiếu yêu cầu và phần còn thiếu | Bảng 8.6. Trạng th"
+  },
+  {
+    "page": 50,
+    "chars": 519,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | đưa các số có tệp đo hoặc metadata xác định và không gán xá"
+  },
+  {
+    "page": 51,
+    "chars": 2179,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | CHƯƠNG 9. KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN | 9.1. Kết quả đạt đượ"
+  },
+  {
+    "page": 52,
+    "chars": 1352,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | khách phong phú, cold/warm cache và dữ liệu lớn hơn; báo cá"
+  },
+  {
+    "page": 53,
+    "chars": 2146,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | TÀI LIỆU THAM KHẢO | [1] Nhóm phát triển DailyMart. SRS.md – "
+  },
+  {
+    "page": 54,
+    "chars": 417,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | [13] SePay. Hướng dẫn tích hợp Webhook; Hướng dẫn lập trình"
+  },
+  {
+    "page": 55,
+    "chars": 1842,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | PHỤ LỤC A. ĐỊNH VỊ MÃ NGUỒN VÀ MINH CHỨNG | Các đường dẫn dướ"
+  },
+  {
+    "page": 56,
+    "chars": 1234,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | A.1. Lệnh kiểm tra thành phần | Các lệnh là hướng dẫn tái lập"
+  },
+  {
+    "page": 57,
+    "chars": 1235,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | PHỤ LỤC B. TỪ ĐIỂN DỮ LIỆU RÚT TỪ KHAI BÁO BẢNG | Phụ lục đượ"
+  },
+  {
+    "page": 58,
+    "chars": 988,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | Cột | Kiểu dữ liệu | Ràng buộc khai báo trên cột | NhietDoBaoQuan"
+  },
+  {
+    "page": 59,
+    "chars": 1000,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | B.5. ChiTietGioHang | Nguồn: database/01_init_schema.sql | Bảng"
+  },
+  {
+    "page": 60,
+    "chars": 1044,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | Cột | Kiểu dữ liệu | Ràng buộc khai báo trên cột | DonGia | DECIMAL"
+  },
+  {
+    "page": 61,
+    "chars": 1036,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | Cột | Kiểu dữ liệu | Ràng buộc khai báo trên cột | NgayGhi | DATETI"
+  },
+  {
+    "page": 62,
+    "chars": 1066,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | B.12. CongThucMonAn | Nguồn: database/01_init_schema.sql | Bảng"
+  },
+  {
+    "page": 63,
+    "chars": 992,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | Cột | Kiểu dữ liệu | Ràng buộc khai báo trên cột | LoaiKM | VARCHAR"
+  },
+  {
+    "page": 64,
+    "chars": 1211,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | B.17. ThanhToanMoMo | Nguồn: backend/src/main/resources/db/mo"
+  },
+  {
+    "page": 65,
+    "chars": 804,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | Cột | Kiểu dữ liệu | Ràng buộc khai báo trên cột | AccountNumber | "
+  },
+  {
+    "page": 66,
+    "chars": 1990,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | PHỤ LỤC C. SQL THIẾT KẾ VIEW BỔ SUNG | Trạng thái: thiết kế k"
+  },
+  {
+    "page": 67,
+    "chars": 1728,
+    "start": "CT221H – Nguyên lý hệ quản trị cơ sở dữ liệu | Báo cáo đồ án DailyMart | PHỤ LỤC D. KỊCH BẢN TRÌNH DIỄN VÀ BẢO VỆ | Kịch bản sau tập t"
+  }
+]
