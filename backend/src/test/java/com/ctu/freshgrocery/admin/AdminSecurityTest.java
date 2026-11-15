@@ -35,6 +35,7 @@ class AdminSecurityTest {
         @PostMapping("/api/v1/search/sync") String sync(){return "ok";}
         @PostMapping("/api/v1/orders/checkout") String checkout(){return "ok";}
         @PostMapping("/api/v1/wallets/top-up") String walletTopUp(){return "ok";}
+        @DeleteMapping("/api/v1/admin/products/{id}/permanent") String purge(){return "ok";}
     }
     @Test void sessionAndBrowsingRemainPublic() throws Exception {
         mvc.perform(get("/api/v1/admin/auth/session")).andExpect(status().isOk()).andExpect(jsonPath("$.data.authenticated").value(false)).andExpect(jsonPath("$.data.csrfToken").isNotEmpty());
@@ -45,6 +46,13 @@ class AdminSecurityTest {
         mvc.perform(get("/api/v1/admin/probe")).andExpect(status().isUnauthorized());
         mvc.perform(get("/api/v1/admin/probe").with(user("customer").roles("CUSTOMER"))).andExpect(status().isForbidden());
         mvc.perform(get("/api/v1/admin/probe").with(user("admin").roles("ADMIN"))).andExpect(status().isOk());
+    }
+    @Test void permanentDeleteRequiresAdminAndCsrf() throws Exception {
+        String endpoint="/api/v1/admin/products/123/permanent";
+        mvc.perform(delete(endpoint).with(csrf())).andExpect(status().isUnauthorized());
+        mvc.perform(delete(endpoint).with(user("customer").roles("CUSTOMER")).with(csrf())).andExpect(status().isForbidden());
+        mvc.perform(delete(endpoint).with(user("admin").roles("ADMIN"))).andExpect(status().isForbidden());
+        mvc.perform(delete(endpoint).with(user("admin").roles("ADMIN")).with(csrf())).andExpect(status().isOk());
     }
     @Test void walletTopUpRequiresAdminAndCsrf() throws Exception {
         String endpoint = "/api/v1/wallets/top-up";

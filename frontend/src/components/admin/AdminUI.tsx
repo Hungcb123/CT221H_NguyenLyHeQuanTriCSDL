@@ -81,17 +81,24 @@ export function Confirm({
   pending,
   onConfirm,
   onCancel,
+  confirmLabel = "Xác nhận",
+  confirmDisabled = false,
+  children,
 }: {
   title: string;
   description: string;
   pending: boolean;
   onConfirm: () => void;
   onCancel: () => void;
+  confirmLabel?: string;
+  confirmDisabled?: boolean;
+  children?: React.ReactNode;
 }) {
   return (
     <div className="ad-confirm" role="region" aria-label={title}>
       <h2>{title}</h2>
       <p>{description}</p>
+      {children}
       <div className="ad-actions">
         <button
           autoFocus
@@ -103,10 +110,10 @@ export function Confirm({
         </button>
         <button
           className="ad-btn danger"
-          disabled={pending}
+          disabled={pending || confirmDisabled}
           onClick={onConfirm}
         >
-          {pending ? "Đang xử lý…" : "Xác nhận"}
+          {pending ? "Đang xử lý…" : confirmLabel}
         </button>
       </div>
     </div>

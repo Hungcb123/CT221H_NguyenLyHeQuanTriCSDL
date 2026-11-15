@@ -88,6 +88,18 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
+    -- Only the dedicated purge procedure enables physical deletion for this family on this connection.
+    DECLARE @PurgeRoot INT = TRY_CONVERT(INT, SESSION_CONTEXT(N'DailyMartPurgeProductId'));
+    IF @PurgeRoot IS NOT NULL
+    BEGIN
+        IF NOT EXISTS (SELECT 1 FROM dbo.SanPham WHERE MaSP = @PurgeRoot AND MaSPCha IS NULL AND TrangThaiXoa = 1)
+            THROW 50011, N'Chỉ được xóa vĩnh viễn sản phẩm đã xóa mềm.', 1;
+        IF EXISTS (SELECT 1 FROM deleted WHERE MaSP <> @PurgeRoot AND ISNULL(MaSPCha, -1) <> @PurgeRoot)
+            THROW 50011, N'Phạm vi xóa vĩnh viễn không hợp lệ.', 1;
+        DELETE sp FROM dbo.SanPham sp JOIN deleted d ON d.MaSP = sp.MaSP;
+        RETURN;
+    END;
+
     -- 2.1. Tự động chuyển đổi hành vi thành cập nhật cờ xóa mềm TrangThaiXoa = 1
     UPDATE sp
     SET sp.TrangThaiXoa = 1,

@@ -13,6 +13,19 @@ import java.util.*;
 public class ProductTypeService {
     private final JdbcTemplate jdbc;
 
+    public record TypeStock(int maSP, String tenLoai, int soLuongTon, boolean trangThaiXoa) {}
+
+    public Map<Integer, List<TypeStock>> stockByParent(Collection<Integer> parentIds) {
+        if (parentIds.isEmpty()) return Collections.emptyMap();
+        var placeholders = String.join(",", Collections.nCopies(parentIds.size(), "?"));
+        var rows = jdbc.queryForList("SELECT MaSP, MaSPCha, TenLoai, SoLuongTon, TrangThaiXoa FROM SanPham WHERE MaSPCha IN (" + placeholders + ") ORDER BY MaSP", parentIds.toArray());
+        Map<Integer, List<TypeStock>> result = new HashMap<>();
+        rows.forEach(row -> result.computeIfAbsent((Integer) row.get("MaSPCha"), ignored -> new ArrayList<>())
+                .add(new TypeStock((Integer) row.get("MaSP"), (String) row.get("TenLoai"),
+                        (Integer) row.get("SoLuongTon"), Boolean.TRUE.equals(row.get("TrangThaiXoa")))));
+        return result;
+    }
+
     public List<Integer> childIds(int parent, boolean includeHidden) {
         return jdbc.queryForList("SELECT MaSP FROM SanPham WHERE MaSPCha = ?" +
                 (includeHidden ? "" : " AND TrangThaiXoa = 0") + " ORDER BY MaSP", Integer.class, parent);

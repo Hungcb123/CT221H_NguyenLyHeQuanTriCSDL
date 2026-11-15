@@ -46,6 +46,9 @@ public class ForecastResponse {
     @Schema(description = "Mô hình và kiến trúc thực thi", example = "PyTorch-MLP-ONNX")
     private String thuatToan;
 
+    @Schema(description = "Phương pháp và giới hạn của dự báo; không phải xác suất tin cậy")
+    private String ghiChuDuBao;
+
     @Schema(description = "Mức độ rủi ro hư hỏng / ế hàng (THAP, TRUNG_BINH, CAO)", example = "THAP")
     private String ruiRoHuHong;
 

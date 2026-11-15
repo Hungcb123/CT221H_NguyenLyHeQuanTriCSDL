@@ -39,6 +39,8 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -60,6 +62,8 @@ public class DemandForecastServiceImpl implements DemandForecastService {
     private float[] scalerScale;
     private List<String> featureNames;
     private Map<String, Object> evaluationMetrics = Collections.emptyMap();
+    private Set<Integer> trainingProductIds = Set.of();
+    private double minimumTrainingDailySales = Double.POSITIVE_INFINITY;
 
     @PostConstruct
     public void init() {
@@ -78,6 +82,11 @@ public class DemandForecastServiceImpl implements DemandForecastService {
             JsonNode scaleNode = root.get("scale");
             JsonNode featuresNode = root.get("features");
             JsonNode evalNode = root.get("evaluation");
+            JsonNode domain = root.path("trainingDomain");
+            Set<Integer> trainedProducts = new HashSet<>();
+            domain.path("productIds").forEach(id -> trainedProducts.add(id.asInt()));
+            this.trainingProductIds = Set.copyOf(trainedProducts);
+            this.minimumTrainingDailySales = domain.path("minimumDailySales").asDouble(Double.POSITIVE_INFINITY);
 
             int numFeatures = meanNode.size();
             this.scalerMean = new float[numFeatures];
@@ -273,6 +282,7 @@ public class DemandForecastServiceImpl implements DemandForecastService {
                 .soLuongDeXuatNhap(f.getSoLuongDeXuatNhap())
                 .doTinCay(null)
                 .thuatToan(f.getThuatToan())
+                .ghiChuDuBao(forecastNote(f.getThuatToan()))
                 .ruiRoHuHong(f.getRuiRoHuHong())
                 .doTreInferenceMs(null)
                 .canhBaoLienKet(null)
@@ -318,6 +328,10 @@ public class DemandForecastServiceImpl implements DemandForecastService {
                 (float) rollingStd7
         };
 
+        // This model learned numeric IDs 1-12 from synthetic data. Do not extrapolate
+        // unknown identifiers or sparse sales into an unbounded restock recommendation.
+        String thuatToan = forecastMethod(productId, rawFeatures, rollingMean7, rollingStd7);
+
         // 2. Chuẩn hóa đặc trưng bằng vector StandardScaler
         float[] scaledFeatures = new float[rawFeatures.length];
         for (int i = 0; i < rawFeatures.length; i++) {
@@ -325,20 +339,22 @@ public class DemandForecastServiceImpl implements DemandForecastService {
         }
 
         // 3. Thực thi suy luận bằng ONNX Runtime
-        float predictedDemandFloat = 0.0f;
-        try {
+        double demand;
+        if (!"PyTorch-MLP-ONNX".equals(thuatToan)) {
+            demand = rollingMean7;
+        } else try {
             float[][] inputData = new float[][]{scaledFeatures};
             try (OnnxTensor inputTensor = OnnxTensor.createTensor(env, inputData);
                  OrtSession.Result result = session.run(Collections.singletonMap("float_input", inputTensor))) {
                 Object outObj = result.get(0).getValue();
                 if (outObj instanceof float[] arr) {
-                    predictedDemandFloat = arr[0];
+                    demand = arr[0];
                 } else if (outObj instanceof float[][] mat) {
-                    predictedDemandFloat = mat[0][0];
+                    demand = mat[0][0];
                 } else {
                     throw new IllegalStateException("Unsupported forecast model output");
                 }
-                if (!Float.isFinite(predictedDemandFloat)) throw new IllegalStateException("Non-finite forecast model output");
+                if (!Double.isFinite(demand)) throw new IllegalStateException("Non-finite forecast model output");
             }
         } catch (Exception e) {
             log.error("Lỗi suy luận ONNX: ", e);
@@ -349,7 +365,7 @@ public class DemandForecastServiceImpl implements DemandForecastService {
 
         // 4. Nghiệp vụ thực phẩm tươi sống:
         // Demand cannot be negative.
-        double predictedDemand = Math.max(0.0, Math.round(predictedDemandFloat * 100.0) / 100.0);
+        double predictedDemand = Math.max(0.0, Math.round(demand * 100.0) / 100.0);
 
         // Lượng nhập = max(0, ceil(predicted * 1.10) - currentStock) (Buffer 10% an toàn chống đứt gãy nguồn cung)
         int recommendedRestock = Math.max(0, (int) Math.ceil(predictedDemand * 1.10) - currentStock);
@@ -365,7 +381,6 @@ public class DemandForecastServiceImpl implements DemandForecastService {
         }
 
         Double doTinCay = null; // Regression output is not a calibrated confidence probability.
-        String thuatToan = "PyTorch-MLP-ONNX";
 
         // 5. Lưu kết quả vào CSDL thông qua Stored Procedure sp_LuuKetQuaDuBaoNhapHang
         Long maDuBao = null;
@@ -409,6 +424,7 @@ public class DemandForecastServiceImpl implements DemandForecastService {
                 .soLuongDeXuatNhap(recommendedRestock)
                 .doTinCay(doTinCay)
                 .thuatToan(thuatToan)
+                .ghiChuDuBao(forecastNote(thuatToan))
                 .ruiRoHuHong(ruiRo)
                 .doTreInferenceMs(latencyMs)
                 .canhBaoLienKet(canhBaoLienKet)
@@ -419,12 +435,36 @@ public class DemandForecastServiceImpl implements DemandForecastService {
     public Map<String, Object> getModelStatus() {
         Map<String, Object> status = new LinkedHashMap<>();
         status.put("ready", session != null);
-        status.put("name", "PyTorch-MLP-ONNX");
+        status.put("name", "PyTorch-MLP-ONNX / SMA-7");
         status.put("features", featureNames == null ? List.of() : List.copyOf(featureNames));
         status.put("historySource", "SQL_SALES_7_DAYS");
         status.put("confidenceCalibrated", false);
         status.put("evaluation", evaluationMetrics == null ? Collections.emptyMap() : Collections.unmodifiableMap(evaluationMetrics));
         return status;
+    }
+
+    private String forecastMethod(int productId, float[] features, double mean, double std) {
+        if (!trainingProductIds.contains(productId)) return "SMA7_NEW_PRODUCT";
+        if (mean < minimumTrainingDailySales) return "SMA7_SPARSE_HISTORY";
+        if (std > mean) return "SMA7_INTERMITTENT_HISTORY";
+        // A conservative deployment guard (3 standard deviations), not an accuracy score.
+        // Calendar features recur naturally; validate price and sales against training scale.
+        for (int i : new int[]{1, 6, 7, 8, 9}) {
+            if (Math.abs((features[i] - scalerMean[i]) / scalerScale[i]) > 3)
+                return "SMA7_OUT_OF_RANGE";
+        }
+        return "PyTorch-MLP-ONNX";
+    }
+
+    private static String forecastNote(String method) {
+        if (method == null) return "";
+        return switch (method) {
+            case "SMA7_NEW_PRODUCT" -> "Sản phẩm ngoài danh mục huấn luyện ONNX. Dùng trung bình bán 7 ngày, tính ngày không bán là 0; chưa kiểm chứng độ chính xác cho sản phẩm này.";
+            case "SMA7_SPARSE_HISTORY" -> "Lịch sử bán ít hoặc chưa có đơn hợp lệ. Dùng trung bình bán 7 ngày; số 0 không có nghĩa chắc chắn không có nhu cầu.";
+            case "SMA7_INTERMITTENT_HISTORY" -> "Bán hàng không đều. Dùng trung bình bán 7 ngày để tránh ngoại suy ONNX ngoài dữ liệu huấn luyện.";
+            case "SMA7_OUT_OF_RANGE" -> "Giá hoặc lịch sử bán ngoài phạm vi áp dụng ONNX. Dùng trung bình bán 7 ngày; cần thêm dữ liệu để đánh giá.";
+            default -> "Mô hình ONNX huấn luyện trên 12 sản phẩm giả lập; chưa có độ tin cậy hiệu chỉnh cho từng dự báo. Kết quả cũ có thể được tạo trước khi bổ sung kiểm tra phạm vi đầu vào.";
+        };
     }
 
     private double[] estimateHistoryFeatures(Integer productId, LocalDate targetDate) {

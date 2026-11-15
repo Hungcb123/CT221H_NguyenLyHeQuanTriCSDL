@@ -13,6 +13,8 @@ public class AdminSchemaMigration implements ApplicationRunner {
     @Override public void run(ApplicationArguments args) throws Exception {
         jdbc.execute(new org.springframework.core.io.ClassPathResource("product-types.sql")
                 .getContentAsString(java.nio.charset.StandardCharsets.UTF_8));
+        jdbc.execute(new org.springframework.core.io.ClassPathResource("db/product-permanent-delete.sql")
+                .getContentAsString(java.nio.charset.StandardCharsets.UTF_8));
         jdbc.execute(new org.springframework.core.io.ClassPathResource("db/promotion-clearance.sql")
                 .getContentAsString(java.nio.charset.StandardCharsets.UTF_8));
         jdbc.execute("""

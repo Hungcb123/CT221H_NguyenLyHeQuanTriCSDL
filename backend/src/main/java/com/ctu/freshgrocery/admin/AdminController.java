@@ -23,6 +23,7 @@ import java.util.*;
 public class AdminController {
     private final JdbcTemplate jdbc;
     private final ProductRepository products;
+    private final ProductPermanentDeleteService permanentDelete;
     private final com.ctu.freshgrocery.service.ProductTypeService productTypes;
     private final CategoryRepository categories;
     private final PromotionRepository promotions;
@@ -57,9 +58,7 @@ public class AdminController {
     public ApiResponse<?> products(@RequestParam(defaultValue="") String query, @RequestParam(defaultValue="false") boolean deleted,
                                   @RequestParam(defaultValue="1") int page, @RequestParam(defaultValue="20") int size) {
         var catalog = products.findAll().stream().filter(p -> Boolean.TRUE.equals(p.getTrangThaiXoa()) == deleted && p.getMaSPCha() == null).toList();
-        var scores = ProductBm25.score(catalog, query);
-        var list = catalog.stream().filter(p -> query.isBlank() || scores.containsKey(p.getMaSP()) || query.equals(p.getMaSP().toString()))
-                .sorted(Comparator.comparing(Product::getMaSP).reversed()).map(p -> {
+        var list = AdminProductSearch.find(catalog, query).stream().map(p -> {
                     Map<String,Object> row = new LinkedHashMap<>();
                     row.put("hinhAnh",p.getHinhAnh());
                     row.putAll(productTypes.metadata(p.getMaSP()));
@@ -69,7 +68,10 @@ public class AdminController {
                     return row;
                 }).toList();
         int current=Math.max(1,page), limit=Math.clamp(size,1,100), start=(int)Math.min((long)(current-1)*limit,list.size());
-        return ApiResponse.ok("Danh sách quản trị", Map.of("items",list.subList(start,Math.min(start+limit,list.size())),"page",current,"size",limit,
+        var items = list.subList(start,Math.min(start+limit,list.size()));
+        var stocks = productTypes.stockByParent(items.stream().map(row -> (Integer) row.get("maSP")).toList());
+        items.forEach(row -> row.put("tonKhoCacLoai", stocks.getOrDefault((Integer) row.get("maSP"), List.of())));
+        return ApiResponse.ok("Danh sách quản trị", Map.of("items",items,"page",current,"size",limit,
                 "totalElements",list.size(),"totalPages",(list.size()+limit-1)/limit));
     }
 
@@ -79,6 +81,15 @@ public class AdminController {
         var product=products.findById(id).orElseThrow(()->new AppException(HttpStatus.NOT_FOUND,"Không tìm thấy sản phẩm."));
         product.setTrangThaiXoa(false); product.setNgayCapNhat(LocalDateTime.now()); products.saveAndFlush(product); semantic.syncProduct(product);
         return ApiResponse.ok("Đã khôi phục sản phẩm", true);
+    }
+
+    public record PermanentDeleteInput(@NotNull Integer confirmationId) {}
+    @DeleteMapping("/products/{id}/permanent")
+    public ApiResponse<?> permanentDelete(@PathVariable int id, @Valid @RequestBody PermanentDeleteInput body, Authentication auth) {
+        if (body.confirmationId() != id)
+            throw new AppException(HttpStatus.BAD_REQUEST, "Mã sản phẩm xác nhận không khớp.");
+        int count = permanentDelete.delete(id, auth.getName());
+        return ApiResponse.ok("Đã xóa vĩnh viễn sản phẩm và các phân loại liên quan.", Map.of("deletedCount", count));
     }
 
     public record CategoryInput(@NotBlank @Size(max=100) String tenDanhMuc, @Size(max=255) String moTa) {}

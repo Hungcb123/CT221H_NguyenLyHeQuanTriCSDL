@@ -33,7 +33,8 @@ import {
 const AuthContext = createContext<{
   session: AdminSession | null;
   refresh: () => Promise<void>;
-}>({ session: null, refresh: async () => {} });
+  navigationKey: number;
+}>({ session: null, refresh: async () => {}, navigationKey: 0 });
 export const useAdminAuth = () => useContext(AuthContext);
 const links = [
   ["/admin", "Tổng quan", LayoutDashboard],
@@ -53,6 +54,12 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<AdminSession | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [navigationKey, setNavigationKey] = useState(0);
+  useEffect(() => {
+    const navigate = () => setNavigationKey((current) => current + 1);
+    window.addEventListener("popstate", navigate);
+    return () => window.removeEventListener("popstate", navigate);
+  }, []);
   const refresh = useCallback(async () => {
     setError("");
     try {
@@ -103,7 +110,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   }, [loading, session?.authenticated, pathname]);
   if (pathname === "/admin/login")
     return (
-      <AuthContext.Provider value={{ session, refresh }}>
+      <AuthContext.Provider value={{ session, refresh, navigationKey }}>
         {children}
       </AuthContext.Provider>
     );
@@ -125,7 +132,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       </main>
     );
   return (
-    <AuthContext.Provider value={{ session, refresh }}>
+    <AuthContext.Provider value={{ session, refresh, navigationKey }}>
       <div className="admin-shell">
         <aside className="admin-sidebar">
           <Link href="/" className="admin-brand" aria-label="DailyMart, mở cửa hàng">
@@ -141,6 +148,10 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                 href={href}
                 className={pathname === href ? "active" : ""}
                 aria-current={pathname === href ? "page" : undefined}
+                onClick={(event) => {
+                  if (!event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey && event.button === 0)
+                    setNavigationKey((current) => current + 1);
+                }}
               >
                 <Icon size={18} aria-hidden="true" />
                 {label}

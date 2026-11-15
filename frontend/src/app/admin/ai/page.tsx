@@ -59,6 +59,7 @@ function ForecastRows({ rows }: { rows: ForecastResult[] }) {
             <th>Tồn kho</th>
             <th>Đề xuất nhập</th>
             <th>Rủi ro</th>
+            <th>Phương pháp</th>
             <th>Suy luận</th>
           </tr>
         </thead>
@@ -79,7 +80,11 @@ function ForecastRows({ rows }: { rows: ForecastResult[] }) {
                   {r.ruiRoHuHong}
                 </span>
               </td>
-              <td>{r.doTreInferenceMs ?? "—"} ms</td>
+              <td className="min-w-48 max-w-xs">
+                <strong>{r.thuatToan?.startsWith("SMA7_") ? "Trung bình bán 7 ngày" : r.thuatToan || "—"}</strong>
+                {r.ghiChuDuBao && <p className="mt-1 text-sm text-stone-600">{r.ghiChuDuBao}</p>}
+              </td>
+              <td>{r.doTreInferenceMs == null ? "—" : `${r.doTreInferenceMs} ms`}</td>
             </tr>
           ))}
         </tbody>
@@ -132,6 +137,13 @@ export default function AIPage() {
     } finally {
       setPending("");
     }
+  }
+  function searchProducts(refresh = false) {
+    if (pending || !query.trim()) return;
+    void run(refresh ? "refresh-search" : "search", async () => {
+      setSearch(null);
+      setSearch(await adminApi.search(query.trim()));
+    });
   }
   return (
     <>
@@ -191,7 +203,7 @@ export default function AIPage() {
             </dl>
             {status.data.forecast.evaluation && (
               <>
-                <h3>Chỉ số thực nghiệm mô hình dự báo (Temporal Holdout 80/20 · {status.data.forecast.evaluation.catalogSize} sản phẩm)</h3>
+                <h3>Chỉ số ONNX trên dữ liệu giả lập (Temporal Holdout 80/20 · {status.data.forecast.evaluation.catalogSize} sản phẩm)</h3>
                 <dl className="ad-stats" style={{ marginBottom: 16 }}>
                   <div>
                     <dt>F1 quyết định nhập hàng</dt>
@@ -265,10 +277,7 @@ export default function AIPage() {
           style={{ marginTop: 16 }}
           onSubmit={(e) => {
             e.preventDefault();
-            void run("search", async () => {
-              setSearch(null);
-              setSearch(await adminApi.search(query.trim()));
-            });
+            searchProducts();
           }}
         >
           <input
@@ -282,6 +291,10 @@ export default function AIPage() {
           />
           <button className="ad-btn" disabled={!!pending || !query.trim()}>
             {pending === "search" ? "Đang tìm…" : "Thử tìm kiếm"}
+          </button>
+          <button type="button" className="ad-btn secondary"
+            disabled={!!pending || !query.trim()} onClick={() => searchProducts(true)}>
+            {pending === "refresh-search" ? "Đang tải…" : "Tải lại"}
           </button>
         </form>
         {search && (
@@ -378,7 +391,7 @@ export default function AIPage() {
           </div>
           <div className="ad-guide">
             <dt>Độ tin cậy</dt>
-            <dd>Dữ liệu ít có thể làm dự báo kém tin cậy. Mô hình chưa hiệu chỉnh độ tin cậy cho từng dự báo.</dd>
+            <dd>Sản phẩm mới, bán ít hoặc đầu vào ngoài phạm vi ONNX dùng trung bình bán 7 ngày. Phương pháp và lý do hiển thị ở từng kết quả; chưa có độ tin cậy hiệu chỉnh.</dd>
           </div>
         </dl>
         <div className="ad-toolbar">

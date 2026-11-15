@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Plus, RotateCw, Upload } from "lucide-react";
+import { Plus, RotateCw, Trash2, Upload } from "lucide-react";
 import { Category, ProductResponse } from "@/types";
 import {
   adminError,
@@ -19,6 +19,7 @@ import {
   ProductTypeFormItem,
 } from "@/components/admin/ProductTypeEditor";
 import { useAdminResource } from "@/components/admin/useAdminResource";
+import { useAdminAuth } from "@/components/admin/AdminShell";
 import {
   AdminTitle,
   Confirm,
@@ -64,10 +65,14 @@ const fresh = (category: number): ProductFormDraft => ({
 type Confirmation = {
   title: string;
   description: string;
+  permanentId?: number;
+  successMessage?: string;
   run: () => Promise<unknown>;
 };
 
 export default function ProductAdminPage() {
+  const { navigationKey } = useAdminAuth();
+  const [formNavigationKey, setFormNavigationKey] = useState(-1);
   const [query, setQuery] = useState("");
   const [deleted, setDeleted] = useState(false);
   const [page, setPage] = useState(1);
@@ -79,22 +84,15 @@ export default function ProductAdminPage() {
   const [typesError, setTypesError] = useState("");
   const [typesUploading, setTypesUploading] = useState(false);
   const loadVersion = useRef(0);
-  const [draft, setDraft] = useState<ProductFormDraft | null>(() => {
-    if (typeof window === "undefined") return null;
-    try {
-      const saved = window.sessionStorage.getItem(DRAFT_STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved) as ProductFormDraft;
-        if (parsed && typeof parsed.tenSP === "string") return parsed;
-      }
-    } catch {}
-    return null;
-  });
+  const editReturnTarget = useRef<HTMLElement | null>(null);
+  const listToolbar = useRef<HTMLDivElement>(null);
+  const [draft, setDraft] = useState<ProductFormDraft | null>(null);
   const [editing, setEditing] = useState<number | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
+  const [confirmationCode, setConfirmationCode] = useState("");
   const categoryName = (id: number) =>
     categories.data?.find((c) => c.maDanhMuc === id)?.tenDanhMuc ?? `#${id}`;
 
@@ -102,8 +100,6 @@ export default function ProductAdminPage() {
     try {
       if (draft && editing === null) {
         window.sessionStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
-      } else if (!draft && editing === null) {
-        window.sessionStorage.removeItem(DRAFT_STORAGE_KEY);
       }
     } catch {}
   }, [draft, editing]);
@@ -125,10 +121,20 @@ export default function ProductAdminPage() {
           className="ad-btn"
           disabled={!categories.data?.length || pending || typesUploading}
           onClick={() => {
+            editReturnTarget.current = null;
             loadVersion.current++;
             setTypesLoading(false);
             setTypesError("");
-            setDraft(fresh(categories.data![0].maDanhMuc));
+            let nextDraft = fresh(categories.data![0].maDanhMuc);
+            try {
+              const saved = window.sessionStorage.getItem(DRAFT_STORAGE_KEY);
+              if (saved) {
+                const parsed = JSON.parse(saved) as ProductFormDraft;
+                if (parsed && typeof parsed.tenSP === "string") nextDraft = parsed;
+              }
+            } catch {}
+            setDraft(nextDraft);
+            setFormNavigationKey(navigationKey);
             setEditing(null);
             setMessage("");
             setError("");
@@ -147,6 +153,8 @@ export default function ProductAdminPage() {
         <Confirm
           title={confirmation.title}
           description={confirmation.description}
+          confirmLabel={confirmation.permanentId ? "Xóa vĩnh viễn" : "Xác nhận"}
+          confirmDisabled={!!confirmation.permanentId && confirmationCode !== String(confirmation.permanentId)}
           pending={pending}
           onCancel={() => setConfirmation(null)}
           onConfirm={async () => {
@@ -156,17 +164,34 @@ export default function ProductAdminPage() {
             try {
               await confirmation.run();
               setConfirmation(null);
-              setMessage("Đã cập nhật sản phẩm.");
-              list.refresh();
+              setMessage(confirmation.successMessage || "Đã cập nhật sản phẩm.");
+              if (confirmation.permanentId && list.data?.items.length === 1 && page > 1) setPage(page - 1);
+              else list.refresh();
             } catch (e) {
               setError(adminError(e));
             } finally {
               setPending(false);
             }
           }}
-        />
+        >
+          {confirmation.permanentId && (
+            <label className="ad-field ad-permanent-confirm">
+              Nhập mã {confirmation.permanentId} để xác nhận xóa
+              <input
+                className="ad-input"
+                value={confirmationCode}
+                onChange={(event) => setConfirmationCode(event.target.value)}
+                disabled={pending}
+                inputMode="numeric"
+                autoComplete="off"
+                maxLength={10}
+                placeholder={String(confirmation.permanentId)}
+              />
+            </label>
+          )}
+        </Confirm>
       )}
-      {draft && (
+      {draft && formNavigationKey === navigationKey && (
         <section className="ad-panel">
           <h2>
             {editing ? `Sửa sản phẩm #${editing}` : "Thông tin sản phẩm mới"}
@@ -428,6 +453,13 @@ export default function ProductAdminPage() {
                   setDraft(null);
                   setEditing(null);
                   setTypesError("");
+                  setTypesLoading(false);
+                  requestAnimationFrame(() => {
+                    const row = editReturnTarget.current;
+                    const target = row?.isConnected ? row : listToolbar.current;
+                    target?.scrollIntoView({ behavior: "instant", block: row?.isConnected ? "center" : "start" });
+                    target?.querySelector<HTMLElement>(row?.isConnected ? "button" : "input")?.focus({ preventScroll: true });
+                  });
                 }}
               >
                 Hủy chỉnh sửa
@@ -436,7 +468,7 @@ export default function ProductAdminPage() {
           </form>
         </section>
       )}
-      <div className="ad-toolbar">
+      <div className="ad-toolbar" ref={listToolbar}>
         <input
           aria-label="Tìm sản phẩm quản trị"
           className="ad-input"
@@ -479,7 +511,7 @@ export default function ProductAdminPage() {
               <th>Mặt hàng</th>
               <th>Danh mục</th>
               <th>Giá niêm yết</th>
-              <th>Tồn</th>
+              <th>Tồn kho</th>
               <th>Hạn dùng</th>
               <th>Thao tác</th>
             </tr>
@@ -504,9 +536,25 @@ export default function ProductAdminPage() {
                 <td>{categoryName(p.maDanhMuc)}</td>
                 <td className="number">{money(p.gia)}</td>
                 <td>
-                  <span className={`ad-tag ${p.soLuongTon <= 5 ? "bad" : ""}`}>
-                    {p.soLuongTon}
-                  </span>
+                  {p.tonKhoCacLoai?.length ? (
+                    <ul className="ad-stock-types" aria-label={`Tồn kho các loại của ${p.tenSP}`}>
+                      {p.tonKhoCacLoai.map((type) => (
+                        <li key={type.maSP} className={type.trangThaiXoa ? "is-hidden" : ""}>
+                          <span className="ad-stock-type-name">
+                            {type.tenLoai}
+                            {type.trangThaiXoa && <small>Đã ẩn</small>}
+                          </span>
+                          <span className={`ad-tag ${type.soLuongTon <= 5 ? "bad" : ""}`} aria-label={`Tồn kho ${type.tenLoai}`}>
+                            {type.soLuongTon}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <span className={`ad-tag ${p.soLuongTon <= 5 ? "bad" : ""}`}>
+                      {p.soLuongTon}
+                    </span>
+                  )}
                 </td>
                 <td>
                   {datetime(p.hanSuDung)}
@@ -519,11 +567,13 @@ export default function ProductAdminPage() {
                     {!deleted && (
                       <button
                         disabled={pending || typesUploading}
-                        onClick={async () => {
+                        onClick={async (event) => {
+                          editReturnTarget.current = event.currentTarget.closest("tr");
                           const version = ++loadVersion.current;
                           setTypesLoading(true);
                           setTypesError("");
                           setEditing(p.maSP);
+                          setFormNavigationKey(navigationKey);
                           setDraft({
                             tenSP: p.tenSP,
                             hinhAnh: p.hinhAnh ?? "",
@@ -578,6 +628,8 @@ export default function ProductAdminPage() {
                       </button>
                     )}
                     <button
+                      type="button"
+                      disabled={pending || typesUploading}
                       onClick={() =>
                         setConfirmation({
                           title: deleted
@@ -598,6 +650,38 @@ export default function ProductAdminPage() {
                     >
                       {deleted ? "Khôi phục" : "Xóa"}
                     </button>
+                    {deleted && (
+                      <button
+                        type="button"
+                        className="ad-permanent-delete"
+                        disabled={pending || typesUploading}
+                        onClick={() => {
+                          setConfirmationCode("");
+                          setError("");
+                          setConfirmation({
+                            title: `Xóa vĩnh viễn ${p.tenSP} (#${p.maSP})?`,
+                            description: "Không thể khôi phục sau thao tác này. Sản phẩm, các phân loại và liên kết giỏ hàng/khuyến mãi sẽ bị xóa. Nhật ký được giữ lại. Hệ thống sẽ từ chối nếu sản phẩm còn liên kết với đơn hàng, lịch sử dự báo hoặc công thức món ăn.",
+                            permanentId: p.maSP,
+                            successMessage: `Đã xóa vĩnh viễn sản phẩm #${p.maSP}.`,
+                            run: async () => {
+                              await adminRequest(`/api/v1/admin/products/${p.maSP}/permanent`, {
+                                method: "DELETE",
+                                body: JSON.stringify({ confirmationId: p.maSP }),
+                              });
+                              if (editing === p.maSP) {
+                                loadVersion.current++;
+                                setDraft(null);
+                                setEditing(null);
+                                setTypesError("");
+                              }
+                            },
+                          });
+                        }}
+                      >
+                        <Trash2 size={16} aria-hidden="true" />
+                        Xóa vĩnh viễn
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>

@@ -51,9 +51,28 @@ test('COD checkout sends delivery fields and accepts no wallet balance', async (
   });
   assert.deepEqual(await api.checkout(' Cần Thơ ', ' Gọi trước ', 1), result);
 });
+test('wallet checkout sends WALLET with CSRF and accepts a zero remaining balance', async () => {
+  const result = { maDH: 43, statusCode: 1, tongTien: 60000, soDuConLai: 0 };
+  const api = service(async (url, init) => {
+    assert.equal(url, '/api/v1/orders/checkout');
+    assert.equal(init.headers.get('X-Customer-CSRF'), 'test-token');
+    assert.deepEqual(JSON.parse(init.body), { maKH: 1, diaChiGiaoHang: 'Cần Thơ', ghiChu: '', phuongThucThanhToan: 'WALLET' });
+    return ok(result);
+  });
+  assert.deepEqual(await api.checkout(' Cần Thơ ', '', 1, 'WALLET'), result);
+});
+
+test('wallet reads accept zero, reject invalid balances and malformed history', async () => {
+  assert.equal((await service(async () => ok({ soDuVi: 0 })).getWallet(1)).soDuVi, 0);
+  for (const soDuVi of [null, undefined, '100000']) {
+    await assert.rejects(service(async () => ok({ soDuVi })).getWallet(1), /Không đọc được số dư ví/);
+  }
+  await assert.rejects(service(async () => ok({})).getWalletTransactions(1), /Không đọc được lịch sử ví/);
+});
+
 test('HTTP 200 with a rejected transaction never becomes a successful order', async () => {
   const api = service(async () => ok({ statusCode: -2, message: 'Số dư ví không đủ' }));
-  await assert.rejects(api.checkout('Cần Thơ', '', 1), /Số dư ví không đủ/);
+  await assert.rejects(api.checkout('Cần Thơ', '', 1, 'WALLET'), /Số dư ví không đủ/);
 });
 test('API errors never become mock carts, orders, categories, products or bot replies', async () => {
   const api = service(async () => ({ ok: false, json: async () => ({ success: false, message: 'Hệ thống đang bận' }) }));

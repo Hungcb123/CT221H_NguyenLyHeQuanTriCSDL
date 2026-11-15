@@ -155,10 +155,12 @@ export const apiService = {
   },
 
   async getWalletTransactions(customerId: number): Promise<WalletTransaction[]> {
-    return request<WalletTransaction[]>(`/api/v1/wallets/${customerId}/transactions`);
+    const data = await request<WalletTransaction[]>(`/api/v1/wallets/${customerId}/transactions`);
+    if (!Array.isArray(data)) throw new Error("Không đọc được lịch sử ví. Vui lòng thử lại.");
+    return data;
   },
 
-  async checkout(address: string, note: string, customerId: number, method: "COD" = "COD"): Promise<CheckoutResponse> {
+  async checkout(address: string, note: string, customerId: number, method: "COD" | "WALLET" = "COD"): Promise<CheckoutResponse> {
     const data = await request<CheckoutResponse>("/api/v1/orders/checkout", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ maKH: customerId, diaChiGiaoHang: address.trim(), ghiChu: note.trim(), phuongThucThanhToan: method }),

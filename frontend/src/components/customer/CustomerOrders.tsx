@@ -189,6 +189,19 @@ export function CustomerOrders({ orderId }: { orderId?: string }) {
                   </p>
                 </div>
               )}
+              {order.phuongThucThanhToan === "WALLET" && (
+                <div className="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-900">
+                  <strong>Thanh toán bằng ví DailyMart</strong>
+                  <p>
+                    {order.trangThai === "CANCELLED" || order.trangThai === "REFUNDED"
+                      ? "Xem lịch sử ví để kiểm tra khoản hoàn tiền của đơn hàng."
+                      : "Đơn hàng đã được thanh toán bằng số dư ví."}
+                  </p>
+                  <Link href="/wallet" className="mt-2 inline-block font-semibold underline">
+                    Xem ví và lịch sử giao dịch
+                  </Link>
+                </div>
+              )}
               {order.phuongThucThanhToan === "SEPAY" && (
                 <div className="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-900">
                   <strong>SePay · Chuyển khoản ngân hàng</strong>

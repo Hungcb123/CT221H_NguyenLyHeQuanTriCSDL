@@ -35,6 +35,11 @@
     25.908004515085413,
     5.7537053157560845
   ],
+  "trainingDomain": {
+    "productIds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    "minimumDailySales": 4,
+    "source": "SYNTHETIC_12_PRODUCTS"
+  },
   "evaluation": {
     "catalogSize": 12,
     "trainSamples": 3436,

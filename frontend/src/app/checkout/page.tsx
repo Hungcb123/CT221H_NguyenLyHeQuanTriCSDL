@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCustomer } from "@/components/customer/CustomerProvider";
 import { CartItemThumbnail } from "@/components/cart/CartItemThumbnail";
-import { ArrowLeft, MapPin, ShoppingBag } from "lucide-react";
+import { ArrowLeft, MapPin, ShoppingBag, Wallet } from "lucide-react";
 import { apiService } from "@/services/api";
 import { sepayApi, type SePayConfig } from "@/services/sepay-api";
 import type { CartResponse } from "@/types";
@@ -23,7 +23,12 @@ function CheckoutFormView({ visitKey }: { visitKey: string }) {
   const [error, setError] = useState<string | null>(null);
   const [retry, setRetry] = useState(0);
   const submittingRef = useRef(false);
-  const [method, setMethod] = useState<"COD" | "SEPAY">("COD");
+  const [method, setMethod] = useState<"COD" | "WALLET" | "SEPAY">("COD");
+  const [wallet, setWallet] = useState<{
+    customerId: number;
+    balance: number | null;
+    error: string | null;
+  } | null>(null);
   const [sepay, setSepay] = useState<SePayConfig | null>(null);
   const sepayKey = useRef<string | null>(null);
 
@@ -35,7 +40,8 @@ function CheckoutFormView({ visitKey }: { visitKey: string }) {
         if (!cancelled) setSepay(value);
       })
       .catch(() => {
-        if (!cancelled) setSepay({ available: false, message: "Chưa kết nối được SePay." });
+        if (!cancelled)
+          setSepay({ available: false, message: "Chưa kết nối được SePay." });
       });
     return () => {
       cancelled = true;
@@ -58,7 +64,9 @@ function CheckoutFormView({ visitKey }: { visitKey: string }) {
         .catch((cause) => {
           if (!cancelled)
             setError(
-              cause instanceof Error ? cause.message : "Không tải được thông tin thanh toán.",
+              cause instanceof Error
+                ? cause.message
+                : "Không tải được thông tin thanh toán.",
             );
         })
         .finally(() => {
@@ -74,16 +82,61 @@ function CheckoutFormView({ visitKey }: { visitKey: string }) {
     };
   }, [visitKey, retry, customer, authLoading, router]);
 
-  const unavailable = cart?.danhSachMon.some((item) => item.conDuHang === false);
+  useEffect(() => {
+    if (authLoading || !customer) return;
+    let cancelled = false;
+    let latestRequest = 0;
+    const fetchWallet = async () => {
+      const requestId = ++latestRequest;
+      try {
+        const next = await apiService.getWallet(customer.maKH);
+        if (!cancelled && requestId === latestRequest)
+          setWallet({
+            customerId: customer.maKH,
+            balance: next.soDuVi,
+            error: null,
+          });
+      } catch (cause) {
+        if (!cancelled && requestId === latestRequest)
+          setWallet({
+            customerId: customer.maKH,
+            balance: null,
+            error:
+              cause instanceof Error
+                ? cause.message
+                : "Không tải được số dư ví.",
+          });
+      }
+    };
+    void fetchWallet();
+    window.addEventListener("focus", fetchWallet);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("focus", fetchWallet);
+    };
+  }, [visitKey, retry, customer, authLoading]);
+
+  const currentWallet = wallet?.customerId === customer?.maKH ? wallet : null;
+  const walletBalance = currentWallet?.balance ?? null;
+  const walletEnough =
+    walletBalance !== null && !!cart && walletBalance >= cart.tongTien;
+  const unavailable = cart?.danhSachMon.some(
+    (item) => item.conDuHang === false,
+  );
   const canPay =
     !loading &&
     !!cart?.danhSachMon.length &&
     !unavailable &&
-    (method === "SEPAY" ? !!sepay?.available && cart.tongTien >= 1000 : true);
+    (method === "SEPAY"
+      ? !!sepay?.available && cart.tongTien >= 1000
+      : method === "WALLET"
+        ? walletEnough
+        : true);
 
   async function checkout(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (submittingRef.current || !canPay || !address.trim() || !customer) return;
+    if (submittingRef.current || !canPay || !address.trim() || !customer)
+      return;
     submittingRef.current = true;
     setSubmitting(true);
     setError(null);
@@ -91,25 +144,38 @@ function CheckoutFormView({ visitKey }: { visitKey: string }) {
       if (method === "SEPAY") {
         const storageKey = `sepay-checkout:${customer.maKH}`;
         if (!sepayKey.current) {
-          sepayKey.current = sessionStorage.getItem(storageKey) || crypto.randomUUID();
+          sepayKey.current =
+            sessionStorage.getItem(storageKey) || crypto.randomUUID();
           sessionStorage.setItem(storageKey, sepayKey.current);
         }
-        const payment = await sepayApi.create(address.trim(), note.trim(), sepayKey.current);
+        const payment = await sepayApi.create(
+          address.trim(),
+          note.trim(),
+          sepayKey.current,
+        );
         sessionStorage.removeItem(storageKey);
         sepayKey.current = null;
-        router.push(`/payments/sepay/return?orderId=${encodeURIComponent(payment.paymentId)}`);
+        router.push(
+          `/payments/sepay/return?orderId=${encodeURIComponent(payment.paymentId)}`,
+        );
         return;
       }
-      const createdOrder = await apiService.checkout(address, note, customer.maKH, "COD");
-      router.replace(`/orders/${encodeURIComponent(String(createdOrder.maDH))}?justPlaced=1`);
+      const createdOrder = await apiService.checkout(
+        address,
+        note,
+        customer.maKH,
+        method,
+      );
+      router.replace(
+        `/orders/${encodeURIComponent(String(createdOrder.maDH))}?justPlaced=1`,
+      );
     } catch (cause) {
       setError(
         cause instanceof Error
           ? cause.message
           : "Chưa xác nhận được thanh toán. Vui lòng kiểm tra đơn hàng trước khi thử lại.",
       );
-      const refreshed = await Promise.allSettled([apiService.getCart(customer.maKH)]);
-      if (refreshed[0].status === "fulfilled") setCart(refreshed[0].value);
+      setRetry((value) => value + 1);
     } finally {
       submittingRef.current = false;
       setSubmitting(false);
@@ -119,10 +185,16 @@ function CheckoutFormView({ visitKey }: { visitKey: string }) {
   return (
     <main className="min-h-screen bg-stone-50 px-4 py-8 text-stone-900 sm:px-6">
       <div className="mx-auto max-w-4xl">
-        <Link href="/" className="customer-action mb-6">
-          <ArrowLeft aria-hidden="true" />
-          Tiếp tục mua sắm
-        </Link>
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+          <Link href="/" className="customer-action">
+            <ArrowLeft aria-hidden="true" />
+            Tiếp tục mua sắm
+          </Link>
+          <Link href="/wallet" className="customer-action">
+            <Wallet aria-hidden="true" />
+            Ví của tôi
+          </Link>
+        </div>
         <h1 className="mb-6 text-2xl font-bold">Thanh toán đơn hàng</h1>
         {error && (
           <div
@@ -156,7 +228,10 @@ function CheckoutFormView({ visitKey }: { visitKey: string }) {
                   Thông tin giao hàng
                 </h2>
                 <div>
-                  <label htmlFor="delivery-address" className="mb-2 block font-medium">
+                  <label
+                    htmlFor="delivery-address"
+                    className="mb-2 block font-medium"
+                  >
                     Địa chỉ nhận hàng <span className="text-red-700">*</span>
                   </label>
                   <input
@@ -172,7 +247,10 @@ function CheckoutFormView({ visitKey }: { visitKey: string }) {
                   />
                 </div>
                 <div>
-                  <label htmlFor="delivery-note" className="mb-2 block font-medium">
+                  <label
+                    htmlFor="delivery-note"
+                    className="mb-2 block font-medium"
+                  >
                     Ghi chú giao hàng
                   </label>
                   <textarea
@@ -189,10 +267,14 @@ function CheckoutFormView({ visitKey }: { visitKey: string }) {
               </section>
               <section className="rounded-xl border border-stone-200 bg-white p-5 sm:p-6">
                 <fieldset disabled={submitting} className="mb-5 space-y-3">
-                  <legend className="mb-3 text-lg font-bold">Phương thức thanh toán</legend>
+                  <legend className="mb-3 text-lg font-bold">
+                    Phương thức thanh toán
+                  </legend>
                   <label
                     className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 ${
-                      method === "COD" ? "border-emerald-700 bg-emerald-50" : "border-stone-200"
+                      method === "COD"
+                        ? "border-emerald-700 bg-emerald-50"
+                        : "border-stone-200"
                     }`}
                   >
                     <input
@@ -203,15 +285,44 @@ function CheckoutFormView({ visitKey }: { visitKey: string }) {
                       className="mt-1"
                     />
                     <span>
-                      <strong className="block">Thanh toán khi nhận hàng (COD)</strong>
+                      <strong className="block">
+                        Thanh toán khi nhận hàng (COD)
+                      </strong>
                       <span className="text-sm text-stone-600">
                         Trả tiền cho người giao hàng khi nhận được đơn.
                       </span>
                     </span>
                   </label>
                   <label
+                    className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 ${
+                      method === "WALLET"
+                        ? "border-emerald-700 bg-emerald-50"
+                        : "border-stone-200"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="payment-method"
+                      checked={method === "WALLET"}
+                      onChange={() => setMethod("WALLET")}
+                      className="mt-1"
+                    />
+                    <span>
+                      <strong className="flex items-center gap-2">
+                        <Wallet size={18} aria-hidden="true" /> Ví DailyMart
+                      </strong>
+                      <span className="block text-sm text-stone-600">
+                        {walletBalance !== null
+                          ? `Số dư khả dụng: ${money(walletBalance)}`
+                          : currentWallet?.error || "Đang tải số dư ví…"}
+                      </span>
+                    </span>
+                  </label>
+                  <label
                     className={`flex items-start gap-3 rounded-lg border p-3 ${
-                      method === "SEPAY" ? "border-emerald-700 bg-emerald-50" : "border-stone-200"
+                      method === "SEPAY"
+                        ? "border-emerald-700 bg-emerald-50"
+                        : "border-stone-200"
                     } ${sepay?.available ? "cursor-pointer" : "opacity-60"}`}
                   >
                     <input
@@ -223,7 +334,9 @@ function CheckoutFormView({ visitKey }: { visitKey: string }) {
                       className="mt-1"
                     />
                     <span>
-                      <strong className="block text-emerald-800">SePay · Chuyển khoản QR</strong>
+                      <strong className="block text-emerald-800">
+                        SePay · Chuyển khoản QR
+                      </strong>
                       <span className="text-sm text-stone-600">
                         {sepay?.message || "Đang kiểm tra kết nối SePay…"}
                       </span>
@@ -233,12 +346,37 @@ function CheckoutFormView({ visitKey }: { visitKey: string }) {
                 <p className="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-900">
                   {method === "COD"
                     ? "Bạn chưa cần thanh toán lúc đặt hàng. Vui lòng chuẩn bị đủ số tiền để thanh toán khi nhận hàng."
-                    : "Nhập địa chỉ nhận hàng rồi bấm “Tạo đơn & hiện mã QR”. Mã QR sẽ xuất hiện ở bước tiếp theo, kèm số tài khoản, số tiền và nội dung chuyển khoản. Đơn giữ hàng trong 30 phút."}
+                    : method === "WALLET"
+                      ? "Tiền sẽ được trừ từ ví ngay khi đặt hàng thành công. Bạn có thể xem giao dịch và khoản hoàn tiền trong Ví của tôi."
+                      : "Nhập địa chỉ nhận hàng rồi bấm “Tạo đơn & hiện mã QR”. Mã QR sẽ xuất hiện ở bước tiếp theo, kèm số tài khoản, số tiền và nội dung chuyển khoản. Đơn giữ hàng trong 30 phút."}
                 </p>
+                {method === "WALLET" && currentWallet?.error && (
+                  <div role="alert" className="mt-3 text-sm text-red-800">
+                    <p>{currentWallet.error}</p>
+                    <button
+                      type="button"
+                      className="min-h-11 font-semibold underline"
+                      disabled={submitting}
+                      onClick={() => setRetry((value) => value + 1)}
+                    >
+                      Tải lại số dư ví
+                    </button>
+                  </div>
+                )}
+                {method === "WALLET" &&
+                  walletBalance !== null &&
+                  cart &&
+                  !walletEnough && (
+                    <p role="alert" className="mt-3 text-sm text-red-800">
+                      Ví còn thiếu {money(cart.tongTien - walletBalance)}. Vui
+                      lòng bổ sung số dư ví hoặc chọn phương thức thanh toán
+                      khác.
+                    </p>
+                  )}
                 {method === "SEPAY" && !!cart && cart.tongTien < 1000 && (
                   <p role="alert" className="mt-3 text-sm text-red-800">
-                    SePay yêu cầu tổng đơn từ 1.000đ. Hãy chọn thêm sản phẩm hoặc thanh toán khi nhận
-                    hàng.
+                    SePay yêu cầu tổng đơn từ 1.000đ. Hãy chọn thêm sản phẩm
+                    hoặc thanh toán khi nhận hàng.
                   </p>
                 )}
               </section>
@@ -255,10 +393,15 @@ function CheckoutFormView({ visitKey }: { visitKey: string }) {
               ) : (
                 <ul className="max-h-80 space-y-4 overflow-y-auto">
                   {cart.danhSachMon.map((item) => (
-                    <li key={item.maSP} className="flex items-start gap-3 text-sm">
+                    <li
+                      key={item.maSP}
+                      className="flex items-start gap-3 text-sm"
+                    >
                       <CartItemThumbnail item={item} />
                       <div className="min-w-0 flex-1">
-                        <p className="break-words font-semibold">{item.tenSP}</p>
+                        <p className="break-words font-semibold">
+                          {item.tenSP}
+                        </p>
                         <div className="mt-1 flex flex-wrap justify-between gap-x-3 text-stone-600">
                           <span>
                             {item.soLuong} × {item.donViTinh}
@@ -277,7 +420,9 @@ function CheckoutFormView({ visitKey }: { visitKey: string }) {
               )}
               <div className="my-5 flex flex-wrap justify-between gap-2 border-t border-stone-200 pt-4 font-bold">
                 <span>Tổng thanh toán</span>
-                <span className="text-red-800">{money(cart?.tongTien ?? 0)}</span>
+                <span className="text-red-800">
+                  {money(cart?.tongTien ?? 0)}
+                </span>
               </div>
               <button
                 type="submit"
@@ -288,10 +433,14 @@ function CheckoutFormView({ visitKey }: { visitKey: string }) {
                   ? "Đang xử lý…"
                   : method === "SEPAY"
                     ? "Tạo đơn & hiện mã QR"
-                    : "Đặt hàng · trả tiền khi nhận"}
+                    : method === "WALLET"
+                      ? "Thanh toán bằng ví"
+                      : "Đặt hàng · trả tiền khi nhận"}
               </button>
               {!address.trim() && (
-                <p className="mt-3 text-sm text-stone-600">Nhập địa chỉ nhận hàng để tiếp tục.</p>
+                <p className="mt-3 text-sm text-stone-600">
+                  Nhập địa chỉ nhận hàng để tiếp tục.
+                </p>
               )}
             </section>
           </form>

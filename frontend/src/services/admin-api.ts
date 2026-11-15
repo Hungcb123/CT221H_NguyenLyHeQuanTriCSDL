@@ -13,6 +13,7 @@ export interface AdminSession {
 export interface AdminProduct extends ProductCreateRequest {
   maSP: number;
   trangThaiXoa: boolean;
+  tonKhoCacLoai?: { maSP: number; tenLoai: string; soLuongTon: number; trangThaiXoa: boolean }[];
 }
 export interface AdminPage<T> {
   items: T[];
@@ -61,6 +62,8 @@ export interface ForecastResult {
   soLuongDeXuatNhap: number;
   ruiRoHuHong: string;
   doTreInferenceMs: number | null;
+  thuatToan?: string;
+  ghiChuDuBao?: string;
   featuresUsed: Record<string, number | string>;
 }
 export interface ForecastEvaluation {

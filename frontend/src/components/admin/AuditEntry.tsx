@@ -7,6 +7,7 @@ export const alertLabels: Record<string, string> = {
   CANH_BAO_RUI_RO_THUC_PHAM: "Rủi ro hư hỏng",
   CAP_NHAT_SAN_PHAM: "Cập nhật sản phẩm",
   XOA_MEM_SAN_PHAM: "Xóa mềm sản phẩm",
+  XOA_VINH_VIEN_SAN_PHAM: "Xóa vĩnh viễn sản phẩm",
   ADMIN_ORDER_STATUS: "Đổi trạng thái đơn hàng",
 };
 

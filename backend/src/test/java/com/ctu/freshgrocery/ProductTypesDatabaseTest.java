@@ -29,6 +29,7 @@ class ProductTypesDatabaseTest {
     @Autowired JdbcTemplate jdbc;
     @Autowired ProductServiceImpl service;
     @Autowired ProductTypeController controller;
+    @Autowired ProductTypeService typeStocks;
     @Autowired OrderSpRepository cart;
     @Autowired PlatformTransactionManager transactions;
     @MockBean ProductRepository repository;
@@ -55,6 +56,19 @@ class ProductTypesDatabaseTest {
         return ProductTypeRequest.builder().maSP(p.getMaSP()).tenLoai(p.getTenLoai())
                 .gia(p.getGiaGoc()).donViTinh(p.getDonViTinh()).soLuongTon(p.getSoLuongTon())
                 .hanSuDung(p.getHanSuDung()).build();
+    }
+
+    @Test void adminStockSummarySeparatesParentsAndIncludesIndividuallyHiddenTypes() {
+        var a = service.createProduct(product("QA Stock A", List.of(type("Small", 30000, 3), type("Large", 50000, 2)))).getData();
+        var b = service.createProduct(product("QA Stock B", List.of(type("Other", 70000, 8)))).getData();
+        var child = controller.adminTypes(a.getMaSP()).getData().getFirst();
+        jdbc.update("UPDATE SanPham SET TrangThaiXoa=1 WHERE MaSP=?", child.getMaSP());
+        var result = typeStocks.stockByParent(List.of(a.getMaSP(), b.getMaSP()));
+        assertEquals(List.of(3,2), result.get(a.getMaSP()).stream().map(ProductTypeService.TypeStock::soLuongTon).toList());
+        assertEquals(List.of("Small","Large"), result.get(a.getMaSP()).stream().map(ProductTypeService.TypeStock::tenLoai).toList());
+        assertTrue(result.get(a.getMaSP()).getFirst().trangThaiXoa());
+        assertEquals(8,result.get(b.getMaSP()).getFirst().soLuongTon());
+        assertTrue(typeStocks.stockByParent(List.of()).isEmpty());
     }
 
     @Test void createProductWithMultipleTypesInOneRequestAndKeepOtherProductsSeparate() {

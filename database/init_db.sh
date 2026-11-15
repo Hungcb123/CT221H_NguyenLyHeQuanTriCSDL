@@ -31,6 +31,7 @@ sqlcmd -i /database/02_stored_procedures.sql
 
 echo "3/5: Đang tạo Triggers kiểm soát (03_triggers.sql)..."
 sqlcmd -i /database/03_triggers.sql
+sqlcmd -i /database/20_permanent_product_delete.sql
 
 echo "4/5: Đang nạp dữ liệu mẫu ban đầu (04_seed_data.sql)..."
 sqlcmd -i /database/04_seed_data.sql
