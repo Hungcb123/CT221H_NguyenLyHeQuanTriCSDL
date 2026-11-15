@@ -1,0 +1,131 @@
+{
+  "document": "BaoCao_DailyMart_CT221H_7Chuong.docx",
+  "snapshotCommit": "8596219",
+  "snapshotDate": "2026-11-15",
+  "verifiedDate": "2026-11-16",
+  "pages": 43,
+  "chapters": [
+    "Chương 1. Tổng quan bài toán và Kiến trúc hệ thống",
+    "Chương 2. Thiết kế Cơ sở dữ liệu Quan hệ",
+    "Chương 3. Hiện thực Stored Procedure, Transaction và Trigger",
+    "Chương 4. Tối ưu truy vấn với Index và Đánh giá hiệu năng",
+    "Chương 5. Tìm kiếm ngữ nghĩa Hybrid và Chatbot điều phối công cụ",
+    "Chương 6. AI Dự báo nhu cầu và Đề xuất nhập hàng",
+    "Chương 7. Kiểm thử tích hợp và Kết luận"
+  ],
+  "tables": 18,
+  "figures": 9,
+  "sections": 3,
+  "tocUpdatedBy": "Microsoft Word",
+  "renderedAndInspectedPages": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43
+  ],
+  "imageCaptionHashes": [
+    {
+      "caption": "Hình 1.1. Kiến trúc các thành phần DailyMart",
+      "source": "CT221H_assets/architecture.png",
+      "sha256": "2a0614fafc07d5af297f74f07bf51529f1c08ef12eb75e6e7e9f768ed197ef2c",
+      "matched": true
+    },
+    {
+      "caption": "Hình 2.1. Quan hệ khách hàng giỏ hàng đơn hàng và ví",
+      "source": "CT221H_assets/erd_core.png",
+      "sha256": "6d5b1d11fb586ac939b136ffbbd43ce8bd172b2a10189bb37b7fd125813b4b6c",
+      "matched": true
+    },
+    {
+      "caption": "Hình 2.2. Quan hệ khuyến mãi công thức dự báo và thanh toán",
+      "source": "CT221H_assets/erd_extended.png",
+      "sha256": "dcc6b6e57f26544e8d97008918574dc2db7f1956968ee9697403fb629c7b7c32",
+      "matched": true
+    },
+    {
+      "caption": "Hình 3.1. Ranh giới giao dịch thanh toán và xử lý lỗi",
+      "source": "CT221H_7Chuong_assets/transaction.png",
+      "sha256": "6bb822a011f1b95169a2cee5b6cbb80dbb16107679ef78077969c73a09885b73",
+      "matched": true
+    },
+    {
+      "caption": "Hình 3.2. Các nhánh xử lý trong trigger cập nhật sản phẩm",
+      "source": "CT221H_7Chuong_assets/trigger.png",
+      "sha256": "d0a0e5c814733af4964bf47277b09b70034f3d38716a298dfcda0d63295eb146",
+      "matched": true
+    },
+    {
+      "caption": "Hình 4.1. Cột khóa và cột bao phủ của chỉ mục báo cáo",
+      "source": "CT221H_7Chuong_assets/index.png",
+      "sha256": "9f539a5eaa5ac53bb3a61f9fc9961272008c1b85f5b1d09a4b6a330b63961a46",
+      "matched": true
+    },
+    {
+      "caption": "Hình 4.2. So sánh logical reads CPU và elapsed trong bộ minh chứng",
+      "source": "CT221H_assets/benchmark.png",
+      "sha256": "4bf909271f0c72141c9026f9000c3e8261d05227f8e4d009d2599411438734dc",
+      "matched": true
+    },
+    {
+      "caption": "Hình 5.1. Chatbot gọi công cụ và đưa nguyên liệu tới checkout",
+      "source": "CT221H_assets/chatbot_flow.png",
+      "sha256": "0a934576d9f54e0d5e42c062ab57b68b4b08e8ac6a3fbd5a2607484c1e2b5247",
+      "matched": true
+    },
+    {
+      "caption": "Hình 6.1. Chọn ONNX hoặc SMA-7 trước khi tính đề xuất nhập",
+      "source": "CT221H_7Chuong_assets/forecast.png",
+      "sha256": "edb2d0ee332db7eb26f7d8da258075c1164cdb8592c10b01e82f56916895f075",
+      "matched": true
+    }
+  ],
+  "templateSha256": "7b438de51021c87f132fff9c5ba0bd5655a69e72d81c9d77ef7f04993569a9ae",
+  "documentSha256": "9a1edaeabe87cdefe630c13b9f519543bca4ec8bd5eda2a0226cb9f360f84056",
+  "originalPartsChanged": [
+    "word/_rels/document.xml.rels",
+    "word/document.xml",
+    "word/settings.xml"
+  ],
+  "stylesNumberingHeadersFootersPreserved": true,
+  "fieldErrors": 0,
+  "trackedChanges": 0
+}
