@@ -2,6 +2,12 @@
 
 Tệp chính: BaoCao_DailyMart_CT221H_TiengViet.docx. Mục lục được cập nhật bằng Microsoft Word; bản PDF cùng tên được xuất bằng LibreOffice để kiểm tra bố cục.
 
+Bản bổ sung use case: BaoCao_DailyMart_CT221H_TiengViet_UseCase.docx và PDF cùng tên. Bản này thêm mục 1.7 với 16 use case, 2 sơ đồ và đặc tả luồng chính/ngoại lệ; được xuất riêng vì Word đang khóa tệp gốc. Nguồn Markdown cùng tên đã chứa phần bổ sung. Dựng lại bản riêng bằng `python3 report/scripts/build_ct221h_docx.py --output report/BaoCao_DailyMart_CT221H_TiengViet_UseCase.docx`.
+
+Bản rà soát mới nhất ngày 15/11/2026: BaoCao_DailyMart_CT221H_TiengViet_DaRasoat.docx và PDF cùng tên. Đã bỏ tích hợp thanh toán cũ khỏi nội dung/phụ lục, sửa các mô tả không khớp mã nguồn và giữ nguồn, giới hạn số liệu. Chi tiết: KIEM_TRA_DO_TIN_CAY_CT221H.md; số kiểm tra: CT221H_assets/reliability_audit.json. Bản _UseCase đang mở tại thời điểm xuất nên không được ghi đè.
+
+Bản sơ đồ đầy đủ: BaoCao_DailyMart_CT221H_TiengViet_SoDoDayDu.docx và PDF cùng tên. Hai hình 3.1–3.2 dùng đầu bảng đen, thân trắng, thể hiện 18 bảng/124 thuộc tính; có PNG và SVG tại CT221H_assets/erd_core và erd_extended. Tái dựng riêng hai hình: `python3 report/scripts/build_ct221h_erd.py` (cần Graphviz/dot). erd_schema_manifest.json lưu danh sách thuộc tính trích từ schema và các cột ALTER ADD.
+
 Giảng viên: TS. Cù Vĩnh Lộc.
 Sinh viên theo thứ tự: Cao Tường Hưng (B2303873), Trang Minh Chánh (B2303864), Nguyễn Châu Nhựt Cần (B2303863).
 

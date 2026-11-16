@@ -2,7 +2,7 @@
 Requires python-docx and Pillow. Word can update the TOC and export a PDF.
 """
 from pathlib import Path
-import re,json
+import re,json,argparse
 from docx import Document
 from docx.shared import Cm,Pt,Inches,RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
@@ -12,7 +12,10 @@ from docx.oxml.ns import qn
 from docx.enum.table import WD_TABLE_ALIGNMENT,WD_CELL_VERTICAL_ALIGNMENT
 from PIL import Image
 ROOT=Path(__file__).resolve().parents[2];REPORT=ROOT/'report';ASSETS=REPORT/'CT221H_assets'
-SRC=REPORT/'BaoCao_DailyMart_CT221H_TiengViet.md';OUT=REPORT/'BaoCao_DailyMart_CT221H_TiengViet.docx'
+SRC=REPORT/'BaoCao_DailyMart_CT221H_TiengViet.md'
+parser=argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--output',type=Path,default=REPORT/'BaoCao_DailyMart_CT221H_TiengViet.docx')
+OUT=parser.parse_args().output
 doc=Document()
 styles=doc.styles
 for name in ['Normal','Body Text','List Bullet','List Number','Caption','TOC Heading','Header','Footer']:
@@ -113,7 +116,8 @@ def figure(path,label):
  path=REPORT/path
  if not path.exists():raise FileNotFoundError(path)
  w,h=Image.open(path).size
- width=min(16,15.2*w/h);height=width*h/w
+ max_height=22 if path.stem in {'erd_core','erd_extended'} else 15.2
+ width=min(16,max_height*w/h);height=width*h/w
  p=doc.add_paragraph();p.alignment=WD_ALIGN_PARAGRAPH.CENTER;p.paragraph_format.first_line_indent=Cm(0);p.paragraph_format.keep_with_next=True;p.paragraph_format.space_after=Pt(0)
  p.add_run().add_picture(str(path),width=Cm(width),height=Cm(height));caption(label,'figure')
 
@@ -145,6 +149,7 @@ def parse(md):
   while i<len(lines) and lines[i].strip() and not lines[i].startswith(('#','|','```','![','@Table ','- ')):
    group.append(lines[i].strip());i+=1
   p=para(' '.join(group))
+  if re.match(r'^\*\*UC\d{2}\.',group[0]):p.paragraph_format.keep_with_next=True
   if group[0].startswith('['):p.paragraph_format.first_line_indent=Cm(0);p.paragraph_format.line_spacing=1.1;p.paragraph_format.space_after=Pt(9)
 
 # Cover follows the institution and team of the previous report, with current course data.
@@ -198,6 +203,7 @@ def tables_in(text):
    i+=1
   yield m.group(1),text[start:i-1]
 def columns(body):
+ body=re.sub(r'--[^\n]*','',body)
  chunks=[];start=0;depth=0;quote=False
  for i,ch in enumerate(body):
   if ch=="'":quote=not quote
@@ -221,18 +227,20 @@ def columns(body):
   if 'REFERENCES' in rest:rules.append('Có tham chiếu FK')
   result.append((name,typ.upper(),'; '.join(rules) or 'Xem khóa/ràng buộc cấp bảng'))
  return result
-sources=[ROOT/'database/01_init_schema.sql',ROOT/'backend/src/main/java/com/ctu/freshgrocery/customer/CustomerAuthController.java',ROOT/'backend/src/main/resources/db/momo.sql',ROOT/'backend/src/main/resources/db/sepay.sql']
+sources=[ROOT/'database/01_init_schema.sql',ROOT/'backend/src/main/java/com/ctu/freshgrocery/customer/CustomerAuthController.java',ROOT/'backend/src/main/resources/db/sepay.sql']
 doc.add_heading('PHỤ LỤC B. TỪ ĐIỂN DỮ LIỆU RÚT TỪ KHAI BÁO BẢNG',1)
 para('Phụ lục được trích từ các câu CREATE TABLE của schema và thành phần bổ sung. Khóa ngoại, khóa ghép và chỉ mục khai báo ở cấp bảng cần đọc cùng script gốc; các dòng dưới không thay thế toàn bộ DDL. Cột PhuongThucThanhToan của DonHang được bổ sung bằng migration thanh toán; các cột bổ sung bằng ALTER và phiên bản migration cần đối chiếu ở từng môi trường.')
 count=0
 for source in sources:
  for name,body_sql in tables_in(source.read_text()):
   rows=columns(body_sql)
+  if name=='DonHang':rows.append(('PhuongThucThanhToan','VARCHAR(20)','Không NULL; mặc định WALLET; bổ sung bởi migration SePay'))
+  if name=='LichSuGiaoDichVi':rows.append(('MaYeuCauNap','UNIQUEIDENTIFIER','Cho phép NULL; chỉ mục duy nhất ghép MaKH khi không NULL; bổ sung bằng ALTER'))
   if not rows:continue
   count+=1;doc.add_heading(f'B.{count}. {name}',2)
   p=para('Nguồn: '+str(source.relative_to(ROOT)));p.paragraph_format.first_line_indent=Cm(0);p.paragraph_format.keep_with_next=True
   for r in p.runs:r.font.size=Pt(10)
-  caption(f'Bảng B.{count}. Các cột của {name} theo khai báo gốc','table');table(['Cột','Kiểu dữ liệu','Ràng buộc khai báo trên cột'],rows,small=True)
+  caption(f'Bảng B.{count}. Các cột của {name} theo schema và migration','table');table(['Cột','Kiểu dữ liệu','Ràng buộc khai báo trên cột'],rows,small=True)
 
 doc.add_heading('PHỤ LỤC C. SQL THIẾT KẾ VIEW BỔ SUNG',1)
 para('Trạng thái: thiết kế kèm báo cáo, chưa tích hợp khởi tạo và chưa thực thi kiểm thử SQL Server. Cần chạy trên QA, kiểm tra kết quả và quyền truy cập trước khi sử dụng. View không tự bảo đảm tăng tốc, cập nhật dữ liệu hay sổ doanh thu kế toán.')
@@ -253,7 +261,7 @@ table(['Bước','Thao tác trình diễn','Điểm cần giải thích'],[
  ('11','Mở luồng SePay ở môi trường test nếu đã cấu hình','Webhook xác thực; duplicate, expiry, late payment và đối soát')])
 para('Khi kết thúc, nhóm cần nêu giới hạn hiện tại: view mới ở thiết kế; dữ liệu AI mô phỏng; bộ tìm kiếm nhỏ và đã biết; kiểm thử ngân hàng thật chưa thực hiện. Việc nêu đúng giới hạn giúp phân biệt nội dung đã xây dựng, minh chứng đã thu thập và hướng phát triển tiếp theo.')
 
-props=doc.core_properties;props.title='DailyMart – Báo cáo đồ án CT221H';props.subject='Nguyên lý hệ quản trị cơ sở dữ liệu';props.author='Cao Tường Hưng; Trang Minh Chánh; Nguyễn Châu Nhựt Cần';props.keywords='CT221H, SQL Server, view, stored procedure, trigger, semantic search, ONNX, chatbot';props.comments='Bản tiếng Việt; cập nhật 14/11/2026. View là thiết kế bổ sung chưa triển khai. Số liệu đánh giá được phân loại theo nguồn.'
+props=doc.core_properties;props.title='DailyMart – Báo cáo đồ án CT221H';props.subject='Nguyên lý hệ quản trị cơ sở dữ liệu';props.author='Cao Tường Hưng; Trang Minh Chánh; Nguyễn Châu Nhựt Cần';props.keywords='CT221H, SQL Server, view, stored procedure, trigger, semantic search, ONNX, chatbot';props.comments='Bản tiếng Việt; rà soát 15/11/2026. View là thiết kế bổ sung chưa triển khai. Số liệu đánh giá được phân loại theo nguồn.'
 settings=doc.settings.element;update=OxmlElement('w:updateFields');update.set(qn('w:val'),'true');settings.append(update)
 doc.save(OUT)
 print(json.dumps({'docx':str(OUT),'dictionary_tables':count,'paragraphs':len(doc.paragraphs),'tables':len(doc.tables),'images':len(doc.inline_shapes),'words_markdown':len(md.split())},ensure_ascii=False))

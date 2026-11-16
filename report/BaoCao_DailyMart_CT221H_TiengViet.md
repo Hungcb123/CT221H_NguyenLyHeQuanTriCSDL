@@ -24,15 +24,13 @@ Các mục tiêu cụ thể gồm: thiết kế bảng và quan hệ cho sản p
 
 ## 1.3. Tác nhân và phạm vi sử dụng
 
-Bảng 1.1 xác định các tác nhân chính và giới hạn trách nhiệm. Khách hàng thao tác qua phiên đăng nhập của mình; quản trị viên có quyền quản lý nhưng không được bỏ qua quy tắc thanh toán để tùy ý tạo trạng thái đã trả tiền.
+Bảng 1.1 xác định các tác nhân chính và giới hạn trách nhiệm. Người dùng thao tác qua phiên đăng nhập của mình; Admin có quyền quản lý nhưng không được bỏ qua quy tắc thanh toán để tùy ý tạo trạng thái đã trả tiền.
 
 @Table Bảng 1.1. Tác nhân và trách nhiệm
 | Tác nhân | Nghiệp vụ chính | Giới hạn |
 | --- | --- | --- |
-| Khách hàng | Tra cứu hàng, quản lý giỏ, xem công thức, thanh toán, xem đơn và ví | Chỉ truy cập giỏ, ví và đơn thuộc tài khoản |
-| Quản trị viên | Quản lý danh mục, sản phẩm, khuyến mãi, cảnh báo và dự báo | Yêu cầu vai trò ADMIN; thao tác ghi phải có CSRF |
-| SePay | Gửi thông báo giao dịch ngân hàng về backend | Chỉ webhook có khóa hợp lệ mới được xử lý |
-| Dịch vụ ONNX và Qdrant | Sinh biểu diễn vector, xếp hạng ứng viên, suy luận nhu cầu | Không có quyền tự xác nhận thanh toán |
+| Người dùng | Tra cứu hàng, quản lý giỏ, xem công thức, thanh toán, xem đơn và ví | Chỉ truy cập giỏ, ví và đơn thuộc tài khoản |
+| Admin | Quản lý danh mục, sản phẩm, khuyến mãi, cảnh báo và dự báo | Yêu cầu vai trò ADMIN; thao tác ghi phải có CSRF |
 
 Phạm vi hiện tại là bản đồ án minh họa cho một cửa hàng, không mô hình hóa đầy đủ chuỗi cung ứng, nhiều chi nhánh, nhiều lô hàng hay quy trình kế toán. Ví DailyMart là ví nội bộ phục vụ mô phỏng nghiệp vụ. Luồng SePay bổ sung khả năng nhận thông báo chuyển khoản nhưng cần cấu hình tài khoản, khóa và endpoint công khai trước khi sử dụng.
 
@@ -43,7 +41,7 @@ Các nhóm yêu cầu trong Bảng 1.2 được rút từ SRS và đối chiếu
 @Table Bảng 1.2. Ma trận yêu cầu và hiện thực
 | Mã | Nhóm yêu cầu | Hiện thực hoặc vị trí minh chứng |
 | --- | --- | --- |
-| FR01 | Quản lý sản phẩm và loại sản phẩm | ProductController, ProductServiceImpl, ProductTypeService; thủ tục CRUD |
+| FR01 | Thêm, sửa sản phẩm và thiết lập loại sản phẩm | ProductController, ProductServiceImpl, ProductTypeService; thủ tục CRUD |
 | FR02 | Xóa mềm và khôi phục | sp_XoaSanPham; trigger INSTEAD OF DELETE; API quản trị khôi phục |
 | FR03 | Giỏ hàng, thanh toán ví và lịch sử | Thủ tục giỏ hàng, sp_ThanhToanDonHang và LichSuGiaoDichVi |
 | FR04 | Khuyến mãi theo thời gian và số lượng | ChuongTrinhKhuyenMai, ChiTietKhuyenMai; kiểm tra suất khi thanh toán |
@@ -67,7 +65,223 @@ Các mục tiêu hiệu năng trong SRS là tiêu chí cần kiểm chứng, kh�
 
 Báo cáo được xây dựng bằng cách đối chiếu tài liệu yêu cầu với script SQL, lớp Java, mã giao diện, notebook và các báo cáo JSON/CSV đã lưu. Số liệu benchmark được tính từ measurements.csv; số liệu mô hình triển khai lấy từ scaler_params.json; kết quả tìm kiếm lấy từ hybrid-main-report.json. Nguồn bằng chứng được liệt kê cụ thể ở phụ lục A.
 
-Mốc rà soát là ngày 14/11/2026. Những số liệu ghi ngày 07/11 hoặc 10/11 được giữ như kết quả lịch sử, không được mô tả thành phép đo mới. Các ảnh giao diện SePay và xóa mềm được chụp với dữ liệu kiểm thử giả lập nhằm minh họa cách sử dụng, không chứng minh kết nối ngân hàng hay database vận hành đã thành công.
+Nội dung được rà soát lại ngày 15/11/2026; các số liệu đã lưu giữ nguyên ngày và phạm vi của lần đo gốc. Những số liệu ghi ngày 07/11 hoặc 10/11 được giữ như kết quả lịch sử, không được mô tả thành phép đo mới. Các ảnh giao diện SePay và xóa mềm được chụp với dữ liệu kiểm thử giả lập nhằm minh họa cách sử dụng, không chứng minh kết nối ngân hàng hay database vận hành đã thành công.
+
+## 1.7. Các use case nghiệp vụ chính
+
+Phần này đặc tả các mục tiêu thao tác chính của người dùng trên DailyMart. Tên use case được đặt bằng hành động cụ thể; thêm, sửa, xóa và khôi phục sản phẩm là các use case riêng. Các tác vụ kỹ thuật như tạo vector, ghi nhật ký hoặc khóa dữ liệu nằm trong xử lý nội bộ, không được tách thành mục tiêu sử dụng của người dùng.
+
+### 1.7.1. Danh sách use case
+
+Người dùng chưa đăng nhập có thể tìm kiếm và xem chi tiết sản phẩm. Các thao tác ghi giỏ, đặt hàng và xem đơn cá nhân yêu cầu phiên người dùng. Admin phải có quyền ADMIN; yêu cầu ghi được kiểm tra CSRF. Mô hình use case gồm hai tác nhân: Người dùng và Admin. SePay là dịch vụ tích hợp phục vụ thanh toán, không biểu diễn thành tác nhân trong mô hình này. SQL Server, ONNX và Qdrant cũng không được biểu diễn thành tác nhân.
+
+@Table Bảng 1.3. Danh sách use case chính
+| Mã | Tên use case | Tác nhân |
+| --- | --- | --- |
+| UC01 | Đăng nhập | Người dùng |
+| UC02 | Tìm kiếm sản phẩm | Người dùng |
+| UC03 | Xem chi tiết sản phẩm | Người dùng |
+| UC04 | Thêm sản phẩm vào giỏ hàng | Người dùng |
+| UC05 | Thay đổi số lượng trong giỏ hàng | Người dùng |
+| UC06 | Xóa sản phẩm khỏi giỏ hàng | Người dùng |
+| UC07 | Thanh toán đơn hàng bằng ví | Người dùng |
+| UC08 | Đặt hàng thanh toán khi nhận hàng | Người dùng |
+| UC09 | Thanh toán đơn hàng bằng chuyển khoản QR | Người dùng |
+| UC10 | Xem lịch sử và chi tiết đơn hàng | Người dùng |
+| UC11 | Tra cứu món ăn và thêm nguyên liệu vào giỏ | Người dùng |
+| UC12 | Thêm sản phẩm | Admin |
+| UC13 | Sửa thông tin sản phẩm | Admin |
+| UC14 | Xóa sản phẩm | Admin |
+| UC15 | Khôi phục sản phẩm đã xóa | Admin |
+| UC16 | Tạo chương trình khuyến mãi | Admin |
+
+### 1.7.2. Sơ đồ use case
+
+![Hình 1.1. Các use case mua hàng và tra cứu của Người dùng.](CT221H_assets/usecase_customer.png)
+
+Đường nối thể hiện tác nhân tham gia use case, không thể hiện thứ tự thực hiện. Trong sơ đồ Người dùng, UC02 và UC03 cũng cho phép truy cập khi chưa đăng nhập. UC11 chỉ yêu cầu đăng nhập ở nhánh thêm nguyên liệu. Đăng nhập là tiền điều kiện của các thao tác cần xác thực; không phải thao tác được thực hiện lại bắt buộc trong mỗi use case.
+
+![Hình 1.2. Các use case thêm, sửa, xóa, khôi phục sản phẩm và tạo khuyến mãi của Admin.](CT221H_assets/usecase_admin.png)
+
+### 1.7.3. Đặc tả use case
+
+Các luồng dưới đây mô tả hành vi theo mã nguồn đã đối chiếu, không thay thế minh chứng kiểm thử. Phần thanh toán SePay vẫn giữ giới hạn kiểm chứng đã nêu tại mục 1.6. Mỗi use case gồm điều kiện trước, sự kiện bắt đầu, luồng chính, ngoại lệ và điều kiện sau để xác định rõ khi nào mục tiêu đã đạt.
+
+**UC01. Đăng nhập**
+
+| Thành phần | Đặc tả |
+| --- | --- |
+| Tác nhân | Người dùng |
+| Điều kiện trước | Đã có tài khoản hợp lệ. |
+| Sự kiện bắt đầu | Chọn Đăng nhập và nhập email, mật khẩu. |
+| Luồng chính | 1. Mở biểu mẫu đăng nhập. 2. Nhập thông tin và gửi yêu cầu. 3. Hệ thống kiểm tra thông tin xác thực. 4. Tạo phiên đăng nhập và hiển thị tài khoản. |
+| Luồng thay thế / ngoại lệ | Sai thông tin: báo lỗi, không tạo phiên. Phiên hết hạn khi thao tác tiếp: yêu cầu đăng nhập lại. |
+| Điều kiện sau | Phiên gắn với đúng người dùng; không làm thay đổi giỏ hoặc số dư. |
+
+**UC02. Tìm kiếm sản phẩm**
+
+| Thành phần | Đặc tả |
+| --- | --- |
+| Tác nhân | Người dùng |
+| Điều kiện trước | Có danh mục sản phẩm đang kinh doanh. |
+| Sự kiện bắt đầu | Nhập tên hàng hoặc nhu cầu nấu ăn. |
+| Luồng chính | 1. Nhập câu tìm kiếm. 2. Hệ thống truy vấn danh mục và xếp hạng bằng từ khóa kết hợp vector khi khả dụng. 3. Hiển thị kết quả chính và gợi ý liên quan tách biệt. 4. Người dùng chọn mặt hàng để xem. |
+| Luồng thay thế / ngoại lệ | Không có kết quả phù hợp: hiển thị trạng thái rỗng. ONNX/Qdrant lỗi: chuyển sang tìm từ khóa và trả KEYWORD_FALLBACK. Lỗi SQL: báo lỗi truy vấn. |
+| Điều kiện sau | Trả sản phẩm từ dữ liệu hệ thống, kèm giá hiện tại; tìm kiếm không tạo đơn hoặc thay đổi kho. |
+
+**UC03. Xem chi tiết sản phẩm**
+
+| Thành phần | Đặc tả |
+| --- | --- |
+| Tác nhân | Người dùng |
+| Điều kiện trước | Sản phẩm tồn tại và được phép hiển thị. |
+| Sự kiện bắt đầu | Chọn một sản phẩm từ danh sách. |
+| Luồng chính | 1. Gửi mã sản phẩm. 2. Hệ thống đọc thông tin sản phẩm và loại hàng. 3. Hiển thị mô tả, đơn vị tính, giá, khuyến mãi và tình trạng bán. |
+| Luồng thay thế / ngoại lệ | Mã không tồn tại hoặc sản phẩm đã xóa mềm: báo không tìm thấy. Hết hàng hoặc không đủ điều kiện bán: hiển thị tình trạng và không cho mua loại đó. |
+| Điều kiện sau | Người dùng xem được thông tin để quyết định mua; không giữ hoặc trừ hàng. |
+
+**UC04. Thêm sản phẩm vào giỏ hàng**
+
+| Thành phần | Đặc tả |
+| --- | --- |
+| Tác nhân | Người dùng |
+| Điều kiện trước | Đã đăng nhập; sản phẩm/loại hàng còn bán; số lượng yêu cầu lớn hơn 0. |
+| Sự kiện bắt đầu | Chọn loại, số lượng và bấm Thêm vào giỏ. |
+| Luồng chính | 1. Gửi sản phẩm và số lượng. 2. Hệ thống xác minh chủ giỏ. 3. Kiểm tra điều kiện bán, hạn dùng và tồn kho. 4. Thêm dòng mới hoặc cộng dồn dòng đã có. 5. Hiển thị giỏ sau cập nhật. |
+| Luồng thay thế / ngoại lệ | Chưa đăng nhập: yêu cầu đăng nhập. Vượt tồn, hàng hết hạn hoặc đã ngừng bán: từ chối và thông báo. Sai chủ giỏ: từ chối truy cập. |
+| Điều kiện sau | Giỏ được cập nhật đúng người dùng; chưa trừ kho hoặc ví. |
+
+**UC05. Thay đổi số lượng trong giỏ hàng**
+
+| Thành phần | Đặc tả |
+| --- | --- |
+| Tác nhân | Người dùng |
+| Điều kiện trước | Đã đăng nhập; giỏ có sản phẩm cần thay đổi. |
+| Sự kiện bắt đầu | Tăng, giảm hoặc nhập lại số lượng. |
+| Luồng chính | 1. Chọn dòng hàng và số lượng mới. 2. Hệ thống kiểm tra chủ giỏ và tính hợp lệ. 3. Cập nhật số lượng. 4. Đọc lại giỏ và tính lại thành tiền. |
+| Luồng thay thế / ngoại lệ | Số lượng không hợp lệ, vượt tồn hoặc hàng không còn bán: báo lỗi và không ghi số lượng mới. Muốn bỏ dòng hàng: thực hiện UC06. |
+| Điều kiện sau | Giỏ lưu số lượng hợp lệ; tổng tiền được tính lại từ dữ liệu server. |
+
+**UC06. Xóa sản phẩm khỏi giỏ hàng**
+
+| Thành phần | Đặc tả |
+| --- | --- |
+| Tác nhân | Người dùng |
+| Điều kiện trước | Đã đăng nhập và truy cập giỏ của mình. |
+| Sự kiện bắt đầu | Chọn Xóa tại dòng hàng. |
+| Luồng chính | 1. Gửi mã sản phẩm cần bỏ. 2. Hệ thống xác minh chủ giỏ. 3. Gỡ dòng hàng khỏi giỏ. 4. Hiển thị lại giỏ và tổng tiền. |
+| Luồng thay thế / ngoại lệ | Dòng hàng không còn trong giỏ: tải lại giỏ, không tạo dòng mới. Sai chủ giỏ hoặc phiên hết hạn: từ chối. |
+| Điều kiện sau | Dòng hàng được bỏ khỏi giỏ; không xóa sản phẩm khỏi danh mục. |
+
+**UC07. Thanh toán đơn hàng bằng ví**
+
+| Thành phần | Đặc tả |
+| --- | --- |
+| Tác nhân | Người dùng |
+| Điều kiện trước | Đã đăng nhập; giỏ không rỗng; có địa chỉ nhận hàng; ví đủ tiền và hàng đủ điều kiện tại lúc thanh toán. |
+| Sự kiện bắt đầu | Chọn phương thức WALLET và xác nhận đặt hàng. |
+| Luồng chính | 1. Gửi yêu cầu thanh toán. 2. Hệ thống xác minh người dùng và khóa dữ liệu liên quan trong giao dịch. 3. Kiểm tra giỏ, tồn, hạn dùng, giá, suất khuyến mãi và số dư. 4. Trừ kho, trừ ví, tạo đơn và chi tiết, ghi lịch sử ví, xóa giỏ. 5. Commit và trả hóa đơn. |
+| Luồng thay thế / ngoại lệ | Thiếu tiền, thiếu hàng, hết hạn hoặc lỗi SQL: rollback toàn bộ giao dịch; trả lý do để khách điều chỉnh và thử lại. |
+| Điều kiện sau | Đơn được ghi nhận đã thanh toán; kho, ví và lịch sử nhất quán; không lưu giao dịch dở dang. |
+
+**UC08. Đặt hàng thanh toán khi nhận hàng**
+
+| Thành phần | Đặc tả |
+| --- | --- |
+| Tác nhân | Người dùng |
+| Điều kiện trước | Đã đăng nhập; giỏ hợp lệ và có địa chỉ nhận hàng. |
+| Sự kiện bắt đầu | Chọn COD và xác nhận đặt hàng. |
+| Luồng chính | 1. Gửi yêu cầu COD. 2. Hệ thống kiểm tra người dùng và dữ liệu giỏ. 3. Kiểm tra hàng, giá và khuyến mãi tại server. 4. Tạo đơn COD, ghi chi tiết, trừ kho và xóa giỏ trong giao dịch. 5. Trả thông tin đơn. |
+| Luồng thay thế / ngoại lệ | Không đủ hàng, giỏ không hợp lệ hoặc lỗi ghi dữ liệu: rollback và thông báo. |
+| Điều kiện sau | Đơn COD được tạo; không trừ ví và không tự coi là đã thu tiền. |
+
+**UC09. Thanh toán đơn hàng bằng chuyển khoản QR**
+
+| Thành phần | Đặc tả |
+| --- | --- |
+| Tác nhân | Người dùng |
+| Điều kiện trước | Đã đăng nhập; giỏ hợp lệ; cấu hình SePay được bật và có thông tin tài khoản nhận. |
+| Sự kiện bắt đầu | Chọn chuyển khoản và tạo mã QR thanh toán. |
+| Luồng chính | 1. Hệ thống tạo yêu cầu thanh toán cùng nội dung chuyển khoản và thời hạn. 2. Khách xem QR và chuyển tiền qua ngân hàng. 3. SePay gửi webhook. 4. Backend xác thực webhook, đối chiếu giao dịch và số tiền. 5. Cập nhật thanh toán hợp lệ và trả trạng thái cho khách. |
+| Luồng thay thế / ngoại lệ | SePay chưa cấu hình: thông báo không khả dụng. Chưa có xác nhận: giữ trạng thái chờ, không tự báo thành công. Webhook không hợp lệ hoặc không khớp: không xác nhận trả tiền. Thông báo trùng: không ghi nhận hai lần. Hết hạn: xử lý hết hạn giữ hàng. |
+| Điều kiện sau | Chỉ xác nhận thanh toán sau đối chiếu hợp lệ; có thể tra lại trạng thái. Luồng cần kiểm thử ngân hàng thực trước vận hành. |
+
+**UC10. Xem lịch sử và chi tiết đơn hàng**
+
+| Thành phần | Đặc tả |
+| --- | --- |
+| Tác nhân | Người dùng |
+| Điều kiện trước | Đã đăng nhập. |
+| Sự kiện bắt đầu | Mở Đơn hàng và chọn một đơn. |
+| Luồng chính | 1. Hệ thống lấy danh sách đơn bán hàng thuộc khách. 2. Hiển thị danh sách theo thời gian và phân trang. 3. Khách chọn đơn. 4. Hệ thống kiểm tra quyền sở hữu và hiển thị mặt hàng, giá tại lúc mua, tổng tiền và trạng thái. |
+| Luồng thay thế / ngoại lệ | Chưa có đơn: hiển thị danh sách rỗng. Mã đơn không tồn tại, không phải đơn bán hàng hoặc thuộc tài khoản khác: từ chối hiển thị. |
+| Điều kiện sau | Khách xem được đơn của mình; không thay đổi dữ liệu đơn. |
+
+**UC11. Tra cứu món ăn và thêm nguyên liệu vào giỏ**
+
+| Thành phần | Đặc tả |
+| --- | --- |
+| Tác nhân | Người dùng |
+| Điều kiện trước | Có công thức trong hệ thống; phải đăng nhập khi thêm nguyên liệu. |
+| Sự kiện bắt đầu | Nhập nhu cầu món ăn hoặc chọn công thức và khẩu phần. |
+| Luồng chính | 1. Khách gửi yêu cầu món ăn. 2. Chatbot tra công thức và đối chiếu nguyên liệu, tồn và giá. 3. Hiển thị món, định lượng và nguyên liệu có thể mua. 4. Khách chọn thêm nguyên liệu. 5. Hệ thống kiểm tra quyền và điều kiện giỏ rồi thực hiện thêm theo khẩu phần. |
+| Luồng thay thế / ngoại lệ | Không tìm thấy công thức: thông báo để đổi yêu cầu. Khẩu phần không hợp lệ hoặc thiếu nguyên liệu: thông báo kết quả kiểm tra. Chưa đăng nhập: yêu cầu đăng nhập trước khi ghi giỏ. |
+| Điều kiện sau | Trả thông tin dựa trên công thức và dữ liệu thực; chỉ ghi giỏ khi khách yêu cầu, không tự thanh toán. |
+
+**UC12. Thêm sản phẩm**
+
+| Thành phần | Đặc tả |
+| --- | --- |
+| Tác nhân | Admin |
+| Điều kiện trước | Đã đăng nhập với quyền ADMIN; có danh mục phù hợp. |
+| Sự kiện bắt đầu | Chọn Thêm sản phẩm. |
+| Luồng chính | 1. Nhập tên, danh mục, mô tả, giá, tồn, hạn dùng và loại hàng. 2. Gửi biểu mẫu. 3. Hệ thống xác thực quyền, CSRF và dữ liệu. 4. Gọi thủ tục thêm sản phẩm và lưu loại hàng. 5. Thực hiện đồng bộ chỉ mục tìm kiếm và trả mã sản phẩm. |
+| Luồng thay thế / ngoại lệ | Thiếu dữ liệu, giá hoặc tồn vi phạm ràng buộc, danh mục không hợp lệ: từ chối lưu và báo lỗi. Lỗi đồng bộ vector được xử lý riêng, không được suy diễn là chỉ mục đã cập nhật thành công. |
+| Điều kiện sau | Sản phẩm hợp lệ được tạo trong SQL Server; trả thông tin vừa tạo. |
+
+**UC13. Sửa thông tin sản phẩm**
+
+| Thành phần | Đặc tả |
+| --- | --- |
+| Tác nhân | Admin |
+| Điều kiện trước | Đã đăng nhập ADMIN; sản phẩm tồn tại. |
+| Sự kiện bắt đầu | Chọn Sửa ở sản phẩm cần cập nhật. |
+| Luồng chính | 1. Mở dữ liệu hiện tại. 2. Thay đổi thông tin hoặc loại hàng. 3. Gửi biểu mẫu. 4. Hệ thống kiểm tra quyền và ràng buộc, gọi thủ tục cập nhật. 5. Đọc lại sản phẩm và thực hiện đồng bộ chỉ mục tìm kiếm. |
+| Luồng thay thế / ngoại lệ | Sản phẩm không tồn tại hoặc dữ liệu mới vi phạm ràng buộc: trả lỗi, không ghi cập nhật không hợp lệ. Lỗi vector không được mô tả thành đồng bộ thành công. |
+| Điều kiện sau | Thông tin mới được lưu hợp lệ; giá trên chi tiết đơn đã mua không bị thay thế bằng giá hiện tại. |
+
+**UC14. Xóa sản phẩm**
+
+| Thành phần | Đặc tả |
+| --- | --- |
+| Tác nhân | Admin |
+| Điều kiện trước | Đã đăng nhập ADMIN; sản phẩm chưa bị xóa mềm. |
+| Sự kiện bắt đầu | Chọn Xóa và xác nhận thao tác. |
+| Luồng chính | 1. Gửi mã sản phẩm cần xóa. 2. Hệ thống kiểm tra quyền và sự tồn tại. 3. Gọi thủ tục xóa; trigger thực hiện xóa mềm và ghi nhật ký. 4. Thực hiện gỡ sản phẩm cùng loại hàng liên quan khỏi chỉ mục tìm kiếm. 5. Tải lại danh sách. |
+| Luồng thay thế / ngoại lệ | Sản phẩm không tồn tại hoặc đã xóa mềm: báo lỗi. Người dùng hủy xác nhận: không gửi yêu cầu xóa. |
+| Điều kiện sau | Sản phẩm ngừng xuất hiện ở danh mục bán; bản ghi và tham chiếu lịch sử đơn vẫn được giữ. |
+
+**UC15. Khôi phục sản phẩm đã xóa**
+
+| Thành phần | Đặc tả |
+| --- | --- |
+| Tác nhân | Admin |
+| Điều kiện trước | Đã đăng nhập ADMIN; bản ghi sản phẩm đã xóa mềm còn tồn tại. |
+| Sự kiện bắt đầu | Mở danh sách đã xóa và chọn Khôi phục. |
+| Luồng chính | 1. Gửi mã sản phẩm. 2. Hệ thống kiểm tra quyền và bản ghi. 3. Đặt lại cờ xóa của sản phẩm. 4. Thực hiện đồng bộ lại chỉ mục tìm kiếm. 5. Hiển thị kết quả khôi phục. |
+| Luồng thay thế / ngoại lệ | Không tìm thấy bản ghi: báo lỗi. Khôi phục không đồng nghĩa đủ điều kiện bán; hàng hết hạn, hết tồn hoặc loại hàng còn bị ẩn vẫn chịu kiểm tra nghiệp vụ. |
+| Điều kiện sau | Sản phẩm được bỏ cờ xóa mềm; lịch sử cũ được giữ nguyên. |
+
+**UC16. Tạo chương trình khuyến mãi**
+
+| Thành phần | Đặc tả |
+| --- | --- |
+| Tác nhân | Admin |
+| Điều kiện trước | Đã đăng nhập ADMIN; có sản phẩm cần áp dụng. |
+| Sự kiện bắt đầu | Chọn tạo chương trình mới. |
+| Luồng chính | 1. Nhập tên, loại và thời gian chương trình. 2. Hệ thống kiểm tra dữ liệu và tạo chương trình. 3. Chọn sản phẩm, mức ưu đãi và số lượng áp dụng. 4. Hệ thống lưu chi tiết hợp lệ. 5. Hiển thị chương trình và mặt hàng được áp dụng. |
+| Luồng thay thế / ngoại lệ | Thông tin chương trình hoặc mức ưu đãi vi phạm điều kiện: từ chối yêu cầu tương ứng. Nếu đã tạo chương trình nhưng thêm mặt hàng thất bại: báo lỗi để sửa chi tiết, không khẳng định cả hai bước là một giao dịch. |
+| Điều kiện sau | Chương trình và các chi tiết hợp lệ được lưu; giá ưu đãi chỉ áp dụng khi thỏa điều kiện hiệu lực và được kiểm tra lại lúc thanh toán. |
 
 # CHƯƠNG 2. CƠ SỞ KỸ THUẬT VÀ KIẾN TRÚC HỆ THỐNG
 
@@ -124,13 +338,15 @@ Webhook SePay là điểm nhận thông báo server–server nên không dựa v
 
 ## 3.1. Nhóm thực thể và quan hệ
 
-Schema khởi tạo định nghĩa 15 bảng nghiệp vụ chính. Các thành phần Java bổ sung bảng đăng nhập khách hàng, bảng thanh toán MoMo lịch sử và hai bảng SePay. Vì vậy không sử dụng nguyên số lượng “13 bảng” trong mô tả SRS cũ làm số lượng hiện tại. Các hình dưới trình bày quan hệ theo nhóm, còn phụ lục B liệt kê trường dữ liệu từ script.
+Script database/01_init_schema.sql định nghĩa 15 bảng nghiệp vụ. Phần xác thực bổ sung KhachHangDangNhap; phần chuyển khoản bổ sung ThanhToanSePay và SePayWebhook. Phụ lục B trình bày 18 bảng thuộc phạm vi báo cáo này, không phải kết quả kiểm kê toàn bộ bảng trong database đang chạy. Các hình dưới trình bày những nhóm quan hệ được phân tích trong báo cáo.
 
-![Hình 3.1. Quan hệ nhóm khách hàng, giỏ hàng, đơn hàng và ví.](CT221H_assets/erd_core.png)
+![Hình 3.1. Đầy đủ thuộc tính nhóm sản phẩm, người dùng, giỏ hàng, đơn hàng và ví.](CT221H_assets/erd_core.png)
 
 DanhMuc liên kết một–nhiều với SanPham. KhachHang liên kết tối đa một giỏ hàng thông qua MaKH UNIQUE trong GioHang, nhưng có thể có nhiều đơn hàng và nhiều giao dịch ví. Các bảng ChiTietGioHang, ChiTietDonHang và NguyenLieuMonAn biểu diễn quan hệ nhiều–nhiều bằng khóa ghép. SanPham có MaSPCha để biểu diễn các loại của cùng một sản phẩm.
 
-![Hình 3.2. Quan hệ nhóm khuyến mãi, công thức, dự báo và thanh toán.](CT221H_assets/erd_extended.png)
+![Hình 3.2. Đầy đủ thuộc tính nhóm khuyến mãi, công thức, dự báo, thanh toán và nhật ký.](CT221H_assets/erd_extended.png)
+
+Hai hình thể hiện đầy đủ 124 thuộc tính của 18 bảng trong phạm vi báo cáo, gồm các cột bổ sung bằng ALTER TABLE. PK là khóa chính, FK là khóa ngoại, unique là thuộc tính duy nhất và NULL là cột được phép không có giá trị. Đường nối biểu diễn FK giữa các bảng cùng hình; FK sang nhóm ở hình còn lại vẫn được ghi tại thuộc tính. Riêng MaSP của NhatKyCanhBao và MaKH của ThongBaoKhachHang không được gắn nhãn FK vì script không khai báo khóa ngoại cho chúng.
 
 ThanhToanSePay có một mã thanh toán và một MaDH duy nhất. SePayWebhook lưu thông báo theo TransactionId; quan hệ với thanh toán được suy ra từ payload và mã nội dung chuyển khoản, không có khóa ngoại trực tiếp. NhatKyCanhBao lưu MaSP phục vụ truy vết nhưng cột này trong script gốc không được khai báo thành khóa ngoại.
 
@@ -144,7 +360,7 @@ Bảng 3.1 tóm tắt các thực thể thường xuyên tham gia giao dịch. C
 | DanhMuc | MaDanhMuc; TenDanhMuc | Tên danh mục duy nhất |
 | SanPham | MaSP; MaSPCha; Gia; SoLuongTon; HanSuDung | Gia > 0; tồn không âm; xóa mềm bằng TrangThaiXoa |
 | KhachHang | MaKH; Email; SoDienThoai; SoDuVi | Email và số điện thoại duy nhất; số dư không âm |
-| GioHang | MaGioHang; MaKH | Một giỏ cho mỗi khách hàng |
+| GioHang | MaGioHang; MaKH | Tối đa một giỏ cho mỗi người dùng |
 | ChiTietGioHang | (MaGioHang, MaSP); SoLuong | Số lượng > 0; liên kết sản phẩm và giỏ |
 | DonHang | MaDH; MaKH; TongTien; TrangThai; NguonDon | Tổng không âm; trạng thái thuộc miền quy định |
 | ChiTietDonHang | (MaDH, MaSP); DonGia; GiaGoc; TienGiam; MaKM | Lưu giá và ưu đãi tại thời điểm giao dịch |
@@ -159,7 +375,7 @@ Thiết kế tách danh mục, sản phẩm, khách hàng, đơn và các dòng 
 
 Các thuộc tính DonGia, GiaGoc và TienGiam trong chi tiết đơn là ảnh chụp nghiệp vụ tại thời điểm bán. Chúng có thể trùng với một giá trị hiện tại trong SanPham nhưng không có nghĩa là phải suy ngược giá đơn từ bảng sản phẩm. Nếu giá niêm yết đổi sau đó, lịch sử tài chính của đơn cũ vẫn cần giữ giá đã thanh toán.
 
-Việc giữ SoDuVi song song với sổ cái giao dịch hỗ trợ truy cập số dư nhanh nhưng tạo thêm yêu cầu đối soát. Hai phần phải được cập nhật trong cùng giao dịch; trường hợp thao tác trực tiếp database ngoài luồng ứng dụng có thể phá vỡ bất biến này. Báo cáo không xem sự tồn tại của bảng lịch sử là bằng chứng tự động rằng mọi cập nhật đều đã được kiểm soát.
+Không có bảng Vi riêng trong schema. Số dư ví được lưu tại KhachHang.SoDuVi; LichSuGiaoDichVi ghi các lần biến động và MaDH cho phép NULL khi giao dịch không gắn đơn, chẳng hạn nạp ví. Việc giữ SoDuVi song song với sổ cái giao dịch hỗ trợ truy cập số dư nhanh nhưng tạo thêm yêu cầu đối soát. Hai phần phải được cập nhật trong cùng giao dịch; trường hợp thao tác trực tiếp database ngoài luồng ứng dụng có thể phá vỡ bất biến này. Báo cáo không xem sự tồn tại của bảng lịch sử là bằng chứng tự động rằng mọi cập nhật đều đã được kiểm soát.
 
 ## 3.4. Ràng buộc toàn vẹn
 
@@ -171,7 +387,7 @@ Một số điều kiện phụ thuộc nhiều bảng và thời điểm không
 
 SanPham biểu diễn cả sản phẩm gốc và các loại thông qua MaSPCha. Tên loại đang hoạt động được bảo vệ bằng chỉ mục duy nhất có bộ lọc trên (MaSPCha, TenLoai). Cách thiết kế này hỗ trợ quản lý nhiều quy cách nhưng cần thống nhất cách chọn sản phẩm mua được giữa danh mục, tìm kiếm, giỏ hàng và dự báo.
 
-Khi quản trị viên xóa mềm sản phẩm cha, ProductServiceImpl gọi thủ tục xóa cho bản ghi cha và các loại đang hoạt động, đồng thời yêu cầu gỡ các mục tương ứng khỏi chỉ mục tìm kiếm. Thao tác này giữ lại các bản ghi để các dòng đơn cũ tiếp tục truy vết được. Bộ lọc “Đã xóa mềm” và thao tác “Khôi phục” giúp quản trị viên phục hồi khi cần; trước bán lại vẫn phải kiểm tra tồn kho và hạn dùng.
+Khi Admin xóa mềm sản phẩm cha, ProductServiceImpl gọi thủ tục xóa cho bản ghi cha và yêu cầu gỡ chỉ mục của sản phẩm cùng các loại liên quan. Cờ xóa riêng của từng loại không bị tự đổi theo thao tác này; điều kiện bán vẫn kiểm tra trạng thái sản phẩm cha. Thao tác này giữ lại các bản ghi để các dòng đơn cũ tiếp tục truy vết được. Bộ lọc “Đã xóa mềm” và thao tác “Khôi phục” giúp quản trị viên phục hồi khi cần; trước bán lại vẫn phải kiểm tra tồn kho và hạn dùng.
 
 ## 3.6. Thiết kế view phục vụ khai thác dữ liệu
 
@@ -272,7 +488,7 @@ Các cơ chế trên không chứng minh hệ thống không có deadlock ở m�
 
 trg_SanPham_CanhBaoBienDong chạy AFTER UPDATE. Trigger dùng tập inserted và deleted để so sánh nhiều dòng theo MaSP; vì vậy phần xử lý chính không giả định một lệnh UPDATE chỉ tác động một sản phẩm. Bản ghi cập nhật lưu nội dung trước và sau ở dạng JSON để quản trị viên đối chiếu các trường nghiệp vụ.
 
-Các cảnh báo chuyên biệt gồm hết hàng khi tồn cũ dương và tồn mới không còn dương; giá mới nhỏ hơn một nửa hoặc lớn hơn hai lần giá cũ; và hạn dùng còn không quá một ngày trong khi vẫn có tồn. Điều kiện giá “lớn hơn hai lần” tương đương giá mới vượt 200% giá cũ, không được diễn đạt nhầm thành “mức tăng trên 200%”.
+Các cảnh báo chuyên biệt gồm hết hàng khi tồn cũ dương và tồn mới không còn dương; giá mới nhỏ hơn một nửa hoặc lớn hơn hai lần giá cũ; và sản phẩm còn tồn thỏa DATEDIFF(day, GETDATE(), HanSuDung) <= 1. Điều kiện hạn dùng tính theo mốc ngày, không phải cửa sổ 24 giờ, và bao gồm cả hàng đã hết hạn. Điều kiện giá “lớn hơn hai lần” tương đương giá mới vượt 200% giá cũ, không được diễn đạt nhầm thành “mức tăng trên 200%”.
 
 Điều kiện cận hạn dựa trên thời điểm có UPDATE. Trigger này không phải tác vụ định kỳ tự chạy khi đồng hồ chuyển ngày; một sản phẩm không được cập nhật có thể không sinh cảnh báo chỉ vì ngày hết hạn đến gần. Muốn cảnh báo theo thời gian cần bổ sung lịch quét hoặc cơ chế tác vụ nền.
 
@@ -293,13 +509,13 @@ Việc đặt quy tắc ở trigger giúp các đường ghi khác nhau cùng b�
 
 ## 4.7. Chỉ mục và thiết kế phép đo
 
-Chỉ mục IX_DonHang_NgayTao_TrangThai_Covering có khóa (NgayTao, TrangThai) và INCLUDE (MaKH, TongTien). Các cột bao phủ cung cấp thông tin cần cho phép tổng hợp mà không yêu cầu đọc bổ sung toàn bộ dòng đơn. Một chỉ mục lọc khác phục vụ trạng thái trả tiền cũng có trong script, nhưng không được nhập nhằng với chỉ mục dùng trong phép đo 500.000 dòng.
+Chỉ mục IX_DonHang_NgayTao_TrangThai_Covering có khóa (NgayTao, TrangThai) và INCLUDE (MaKH, TongTien, NguonDon). Các cột bao phủ cung cấp thông tin cần cho phép tổng hợp mà không yêu cầu đọc bổ sung toàn bộ dòng đơn. Một chỉ mục lọc khác phục vụ trạng thái trả tiền cũng có trong script, nhưng không được nhập nhằng với chỉ mục dùng trong phép đo 500.000 dòng.
 
 Phép đo lịch sử đối chiếu một truy vấn ép quét bằng INDEX(0) với một truy vấn ép dùng chỉ mục bao phủ; cả hai tính cùng kết quả theo cùng mốc thời gian và trạng thái. Đã làm nóng bộ đệm, cập nhật thống kê FULLSCAN, chạy luân phiên năm lượt mỗi cách, dùng MAXDOP 1 và RECOMPILE [3]. Kết quả là bằng chứng có kiểm soát của hai kế hoạch, không phải chứng minh optimizer sẽ chọn giống vậy cho mọi dữ liệu.
 
 ## 4.8. Thanh toán SePay và ranh giới giao dịch ngoài hệ thống
 
-SePay mới thay vị trí MoMo trong checkout bằng QR chuyển khoản. Khi tạo thanh toán, backend giữ hàng, tạo đơn PENDING và lưu mã yêu cầu lặp an toàn. Mã thanh toán riêng được đưa vào nội dung chuyển khoản cùng số tiền do server tính. Mỗi khách có thanh toán đang chờ sẽ được trả lại bản ghi phù hợp để hạn chế tạo và trừ kho lặp.
+Thanh toán chuyển khoản SePay sử dụng QR trong checkout. Khi tạo thanh toán, backend giữ hàng, tạo đơn PENDING và lưu mã yêu cầu lặp an toàn. Mã thanh toán riêng được đưa vào nội dung chuyển khoản cùng số tiền do server tính. Mỗi khách có thanh toán đang chờ sẽ được trả lại bản ghi phù hợp để hạn chế tạo và trừ kho lặp.
 
 Webhook được xác thực qua Authorization: Apikey và so khớp khóa trên backend. Chỉ giao dịch tiền vào đúng tài khoản, có một mã thanh toán xác định và đúng số tiền mới chuyển đơn sang đã trả. SePayWebhook dùng TransactionId làm khóa chính và lưu payload, kết quả xử lý để chống xử lý trùng và phục vụ đối chiếu. Định dạng webhook tuân theo tài liệu SePay [13].
 
@@ -333,17 +549,17 @@ Nhánh này thích hợp với danh mục nhỏ vì dễ kiểm tra và không c
 
 ## 5.4. Gộp thứ hạng bằng RRF
 
-Hình 5.1 mô tả pipeline hiện tại. Sau khi có điểm, mỗi nhánh lấy tối đa 50 vị trí xếp hạng; các ứng viên được gộp theo Reciprocal Rank Fusion (RRF), không cộng trực tiếp BM25 với cosine vì hai thang điểm khác nhau. Công thức hiện thực là Score(d) = 0,5/(60+rankBM25(d)) + 0,5/(60+rankVector(d)); nhánh không có tài liệu đóng góp 0.
+Pipeline hiện tại còn lọc sản phẩm kiểm thử nội bộ theo ngữ cảnh truy vấn, hiệu chỉnh một số lỗi gõ qua VietnameseFoodSemantics, nhận diện khái niệm món ăn và tra nguyên liệu công thức. Các quy tắc này là xử lý nghiệp vụ bổ sung, không phải năng lực tự học mới của mô hình MiniLM. Hình 5.1 mô tả các nhánh xử lý chính. Sau khi có điểm, mỗi nhánh lấy tối đa 80 vị trí xếp hạng; các ứng viên được gộp theo Reciprocal Rank Fusion (RRF), không cộng trực tiếp BM25 với cosine vì hai thang điểm khác nhau. Công thức hiện thực là Score(d) = 0,5/(60+rankBM25(d)) + 0,5/(60+rankVector(d)); nhánh không có tài liệu đóng góp 0.
 
 ![Hình 5.1. Pipeline tìm kiếm hybrid và tách kết quả chính, tham khảo.](CT221H_assets/search_flow.png)
 
-Kết quả còn ưu tiên tên chứa nguyên cụm truy vấn, sau đó theo điểm RRF và mã sản phẩm để giữ thứ tự xác định. Khi dịch vụ vector lỗi, trọng số BM25 thành 1 và vector thành 0. Việc chuyển chế độ được phản ánh bằng mode=KEYWORD_FALLBACK để giao diện có thể thông báo cho người dùng.
+Kết quả ưu tiên tên chứa nguyên cụm truy vấn đã chuẩn hóa, tiếp theo là sản phẩm khớp nguyên liệu công thức, rồi điểm RRF và mã sản phẩm để giữ thứ tự xác định. Khi dịch vụ vector lỗi, trọng số BM25 thành 1 và vector thành 0. Việc chuyển chế độ được phản ánh bằng mode=KEYWORD_FALLBACK để giao diện có thể thông báo cho người dùng.
 
 Endpoint /api/v1/search/semantic là luồng tìm kiếm hybrid chính trên giao diện. Endpoint /api/v1/products khi có keyword cũng dùng BM25, còn khi duyệt không có keyword vẫn sử dụng stored procedure. Tên endpoint “semantic” không có nghĩa response chỉ gồm kết quả vector thuần.
 
 ## 5.5. Kết quả chính, gợi ý và từ chối thận trọng
 
-ProductQueryIntent sử dụng từ vựng loại hàng để phân biệt các yêu cầu như thịt gà, trứng gà, cá hồi hoặc thịt dê. Nếu catalog không có loại được chỉ rõ, ứng viên loại khác không được đưa vào kết quả chính chỉ vì gần nghĩa. ProductSearchEvidence tiếp tục kiểm tra bằng chứng từ các trường văn bản của sản phẩm.
+ProductQueryIntent sử dụng từ vựng loại hàng để phân biệt các yêu cầu như thịt gà, trứng gà, cá hồi hoặc thịt dê. Nếu catalog không có loại được chỉ rõ, ứng viên loại khác không được đưa vào kết quả chính chỉ vì gần nghĩa. ProductSearchEvidence kiểm tra bằng chứng từ các trường văn bản của sản phẩm. Mã hiện tại còn có nhánh cho danh sách nhiều mặt hàng và bằng chứng từ khái niệm ẩm thực hoặc công thức trước khi xét ứng viên chỉ khớp vector.
 
 Đối với nhu cầu chế biến, một ứng viên vector dẫn đầu có thể được chấp nhận nếu không vi phạm loại hàng, cosine đạt ít nhất 0,60 và hơn ứng viên vector kế tiếp ít nhất 0,05; đồng thời vẫn phải qua ngưỡng lấy ứng viên của request. Đây là heuristic có thể cấu hình, không phải độ tin cậy đã được hiệu chuẩn.
 
@@ -506,14 +722,14 @@ Dữ liệu demo có hạn dùng nên một bản cài sau nhiều ngày có th�
 
 Kiểm thử được chia thành kiểm tra logic thành phần, kiểm thử API/phân quyền, kiểm thử SQL Server có dữ liệu kiểm soát, kiểm tra giao diện trình duyệt và đánh giá định lượng các phân hệ tìm kiếm, dự báo, chỉ mục. Mỗi loại có phạm vi khác nhau: mock có thể kiểm tra điều phối và từ chối lỗi, nhưng không thay thế phép chạy giao dịch trên SQL Server.
 
-Bảng 8.1 phân biệt các mốc bằng chứng. Không cộng 74 ca lịch sử với 35 ca đợt mới thành một tổng vì có test lặp và phạm vi khác nhau. Tương tự, kết quả dựng frontend không chứng minh một webhook có thể gọi qua mạng công khai.
+Bảng 8.1 phân biệt các mốc bằng chứng. Không cộng các ca lịch sử với kết quả từng suite đã lưu thành một tổng chung vì có thể trùng test và khác phạm vi. Tương tự, kết quả dựng frontend không chứng minh một webhook có thể gọi qua mạng công khai.
 
 @Table Bảng 8.1. Phạm vi các kết quả kiểm thử được sử dụng
 | Mốc hoặc nguồn | Kết quả đã ghi nhận | Cách diễn giải |
 | --- | --- | --- |
 | Báo cáo QA 10/11/2026 | 74/74 ca Java và SQL Server; 22/22 ca frontend | Kết quả lịch sử theo tài liệu QA; không phải chạy lại toàn bộ ngày 14/11 |
-| Đợt cập nhật SePay 14/11/2026 | 35 ca Java được chọn đều đạt | 11 SePay, 10 MoMo, 8 nghiệp vụ đơn quản trị, 6 bảo mật quản trị |
-| Đợt cập nhật SePay 14/11/2026 | 8 ca SePayDatabaseTest bị bỏ qua | Chưa có RUN_DB_INTEGRATION_TESTS=true và môi trường SQL Server phù hợp |
+| Báo cáo Surefire đã lưu | SePaySecurityTest: 11/11; AdminSecurityTest: 6/6 đạt | Đối chiếu XML/txt trong backend/target/surefire-reports; không phải lượt chạy mới ngày 15/11 |
+| Báo cáo Surefire lưu từ lượt 14/11/2026 | SePayDatabaseTest: 10 ca, 0 lỗi, 0 thất bại, 0 bỏ qua | Kiểm thử tích hợp SQL theo artifact đã lưu; không chứng minh kết nối ngân hàng thật hoặc webhook qua Internet |
 | Frontend đợt cập nhật | Build, kiểm tra kiểu đạt; lint không có lỗi | Có hai cảnh báo ảnh ở trang sản phẩm quản trị hiện có |
 | Trình duyệt đợt cập nhật | Luồng QR, đọc PAID và xóa mềm ở 1440/390 px đạt | API giả lập; có kiểm tra ảnh QR tải được; không xác minh ngân hàng thật |
 | View bổ sung | Có thiết kế và SQL trong phụ lục | Chưa triển khai và chưa thực thi kiểm thử database |
@@ -540,7 +756,7 @@ Bảng 8.2 mô tả mục tiêu kiểm tra của những đường dữ liệu q
 | TC13 | Tiền đến sau hết hạn giữ hàng | REVIEW, không tự giao từ tồn đã trả |
 | TC14 | Hủy đơn SePay bằng thao tác hoàn ví | Bị chặn; không cộng tiền ngân hàng vào ví nội bộ |
 
-Trong nhóm SePay, unit test kiểm tra khóa, định dạng giao dịch, khớp số tiền/tài khoản, mã nhập nhằng, truy cập khác chủ và ghi nhận chuyển tiền thêm. Các test SQL cho đặt giữ hàng, thanh toán lặp, hết hạn, tiền đến muộn và xóa mềm đã được viết nhưng chưa chạy trong môi trường hiện tại. Báo cáo không thay đổi trạng thái các test bị bỏ qua thành đã đạt.
+Trong nhóm SePay, unit test kiểm tra khóa, định dạng giao dịch, khớp số tiền/tài khoản, mã nhập nhằng, truy cập khác chủ và ghi nhận chuyển tiền thêm. Artifact SePayDatabaseTest đã lưu ghi nhận 10 ca đạt, không có ca bị bỏ qua, cho các tình huống SQL như giữ hàng, thanh toán lặp, hết hạn và tiền đến muộn. Đợt rà soát này đọc lại artifact và mã test, không chạy lại giao dịch trên database; kết quả đó cũng không thay thế kiểm thử ngân hàng thật.
 
 ## 8.3. Đánh giá chỉ mục trên 500.000 đơn hàng
 
@@ -587,7 +803,7 @@ Giới hạn lớn hơn là dữ liệu thật và sản phẩm mới. Mô hình
 
 Phép đo khởi đầu trên 10 câu ghi MRR@5 toàn bộ lần lượt 0,5000 với LIKE, 0,8333 với BM25, 0,8833 với vector và 0,9333 với hybrid. Riêng bốn câu theo nhu cầu, vector đạt MRR@5 0,8750 còn hybrid là 0,8333 [7]. Kết quả này cho thấy không nên chỉ báo chỉ số chung thuận lợi cho hybrid và bỏ qua nhóm mà vector riêng xếp tốt hơn.
 
-Bảng 8.5 dùng summary trong hybrid-main-report.json để mô tả chính sách hiện tại trên 50 truy vấn đã có. Nhóm mang tên “holdout” trong file được ghi rõ là nhóm cũ đã được xem ở các lượt phát triển chính sách. Không dùng tên đó để khẳng định đây là phép kiểm định độc lập mới.
+Bảng 8.5 dùng summary trong hybrid-main-report.json để mô tả chính sách tại thời điểm đo trên 50 truy vấn đã có. Các thay đổi từ vựng, công thức và hiệu chỉnh lỗi gõ trong mã hiện nay chưa được đánh giá lại bằng bảng số liệu này. Nhóm mang tên “holdout” trong file được ghi rõ là nhóm cũ đã được xem ở các lượt phát triển chính sách. Không dùng tên đó để khẳng định đây là phép kiểm định độc lập mới.
 
 @Table Bảng 8.5. Đo hồi quy chính sách kết quả trên 50 truy vấn đã biết
 | Nhóm câu | Chỉ số | Trước chính sách | Sau chính sách |
@@ -615,7 +831,7 @@ Tài liệu huấn luyện cũ tính thêm Accuracy, Precision, Recall và F1 t�
 | Semantic search | Có pipeline hybrid, fallback và từ chối | Duyệt nhãn, tạo bộ kiểm định mới, đánh giá tiếng Việt |
 | Dự báo AI | Có model ONNX và metadata | Dữ liệu thực, chia tập độc lập, xử lý mã ngoài miền |
 | Chatbot | Có điều phối kịch bản và công cụ | Chưa có LLM hội thoại; chưa xác minh MCP chuẩn đầy đủ |
-| SePay | Có mã nguồn và test thành phần | Chạy SQL integration, webhook công khai, Test Mode/Live |
+| SePay | Có mã nguồn, test thành phần và artifact 10 ca SQL đạt | Chạy lại trên môi trường nghiệm thu; kiểm thử webhook công khai và ngân hàng thật |
 | Outbox thông báo | Có bảng ThongBaoKhachHang | Chưa có bằng chứng worker gửi email/realtime hoàn chỉnh |
 
 ## 8.7. Những đe dọa đối với tính hợp lệ của đánh giá
@@ -630,7 +846,7 @@ Về tái lập, dependency, mô hình ONNX và scaler cần được cố đị
 
 ## 9.1. Kết quả đạt được
 
-DailyMart đã hình thành một ứng dụng thương mại điện tử minh họa với cơ sở dữ liệu quan hệ giữ vai trò trung tâm. Các đường quản lý sản phẩm, giỏ và thanh toán thể hiện cách kết hợp stored procedure, trigger, ràng buộc và transaction. Xóa mềm cho phép ngừng kinh doanh mà vẫn giữ tham chiếu lịch sử; nhật ký hỗ trợ đối chiếu thay đổi; việc tách nguồn đơn giúp giảm nhầm lẫn giữa doanh số và dữ liệu thử.
+DailyMart đã hình thành một ứng dụng thương mại điện tử minh họa với cơ sở dữ liệu quan hệ giữ vai trò trung tâm. Các luồng thêm, sửa, xóa sản phẩm, thao tác giỏ hàng và thanh toán thể hiện cách kết hợp stored procedure, trigger, ràng buộc và transaction. Xóa mềm cho phép ngừng kinh doanh mà vẫn giữ tham chiếu lịch sử; nhật ký hỗ trợ đối chiếu thay đổi; việc tách nguồn đơn giúp giảm nhầm lẫn giữa doanh số và dữ liệu thử.
 
 Phần mở rộng AI đã có đường suy luận thật bằng ONNX Runtime Java, chỉ mục vector Qdrant, gộp tìm kiếm từ khóa/vector và chatbot dùng dữ liệu nghiệp vụ. Các thành phần này tạo được một luồng từ nhu cầu nấu ăn đến lựa chọn nguyên liệu và checkout mà vẫn giữ kiểm tra cuối ở server/database.
 
@@ -638,7 +854,7 @@ Phần mở rộng AI đã có đường suy luận thật bằng ONNX Runtime J
 
 ## 9.2. Hạn chế
 
-Phần view chưa hiện diện trong tập khởi tạo được rà soát; báo cáo cung cấp thiết kế để hoàn thiện thay vì ghi nhận đã triển khai. Benchmark mới có bằng chứng 500.000 dòng và chưa đạt hoàn toàn ngưỡng SRS. Luồng SePay chưa được kiểm thử end-to-end với database và ngân hàng trong đợt cập nhật này.
+Phần view chưa hiện diện trong tập khởi tạo được rà soát; báo cáo cung cấp thiết kế để hoàn thiện thay vì ghi nhận đã triển khai. Benchmark mới có bằng chứng 500.000 dòng và chưa đạt hoàn toàn ngưỡng SRS. Luồng SePay có kết quả kiểm thử tích hợp SQL đã lưu, nhưng chưa có bằng chứng end-to-end với ngân hàng thật và webhook công khai trong phạm vi tài liệu đã rà soát.
 
 Dữ liệu dự báo là mô phỏng, tập đánh giá có tham gia chọn cấu hình và mô hình chưa được kiểm chứng cho catalog mở rộng. Tìm kiếm tiếng Việt còn phụ thuộc tokenizer, từ vựng và heuristic; nhãn truy vấn chưa được người hiểu nghiệp vụ duyệt. Chatbot hiện theo kịch bản, không phải trợ lý tạo sinh tổng quát; cơ chế đồng bộ vector và xử lý thông báo cũng chưa có bằng chứng phục hồi đầy đủ khi lỗi kéo dài.
 
@@ -664,7 +880,7 @@ Dữ liệu dự báo là mô phỏng, tập đánh giá có tham gia chọn c�
 
 [4] Nhóm phát triển DailyMart. fresh_grocery_demand_forecasting.ipynb và backend/src/main/resources/models/scaler_params.json; đối chiếu BAO_CAO_TRAIN_MODEL_VA_HOAN_THIEN.md. Nguồn mô hình, đặc trưng và metadata đánh giá.
 
-[5] Nhóm phát triển DailyMart. backend/evaluation/HYBRID_SEARCH.md và NEXT_EXPERIMENT.md. Mô tả pipeline hiện tại và các thử nghiệm trước; đối chiếu ngày 14/11/2026.
+[5] Nhóm phát triển DailyMart. backend/evaluation/HYBRID_SEARCH.md và NEXT_EXPERIMENT.md. Tài liệu thiết kế và các thử nghiệm đã lưu; mô tả hiện thực trong chương 5 được đối chiếu thêm với mã Java ngày 15/11/2026.
 
 [6] Nhóm phát triển DailyMart. backend/evaluation/hybrid-main-report.json. Báo cáo hồi quy chính sách trên 50 truy vấn, nhãn chưa được người hiểu nghiệp vụ duyệt.
 
@@ -711,7 +927,7 @@ Các lệnh là hướng dẫn tái lập, không có nghĩa mọi môi trườn
 
 ```bash
 mvn -f backend/pom.xml \
-  -Dtest=SePaySecurityTest,MoMoSecurityTest,AdminOrderServiceTest,AdminSecurityTest test
+  -Dtest=SePaySecurityTest,AdminOrderServiceTest,AdminSecurityTest test
 
 RUN_DB_INTEGRATION_TESTS=true mvn -f backend/pom.xml \
   -Dtest=SePayDatabaseTest test

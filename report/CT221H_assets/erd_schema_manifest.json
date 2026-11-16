@@ -1,0 +1,813 @@
+{
+  "sources": [
+    "database/01_init_schema.sql",
+    "backend/src/main/java/com/ctu/freshgrocery/customer/CustomerAuthController.java",
+    "backend/src/main/resources/db/sepay.sql"
+  ],
+  "table_count": 18,
+  "column_count": 124,
+  "tables": {
+    "DanhMuc": [
+      {
+        "name": "MaDanhMuc",
+        "type": "INT",
+        "flags": [
+          "PK"
+        ]
+      },
+      {
+        "name": "TenDanhMuc",
+        "type": "NVARCHAR(100)",
+        "flags": [
+          "unique"
+        ]
+      },
+      {
+        "name": "MoTa",
+        "type": "NVARCHAR(255)",
+        "flags": [
+          "NULL"
+        ]
+      }
+    ],
+    "SanPham": [
+      {
+        "name": "MaSP",
+        "type": "INT",
+        "flags": [
+          "PK"
+        ]
+      },
+      {
+        "name": "MaSPCha",
+        "type": "INT",
+        "flags": [
+          "FK",
+          "NULL"
+        ]
+      },
+      {
+        "name": "TenLoai",
+        "type": "NVARCHAR(80)",
+        "flags": [
+          "NULL"
+        ]
+      },
+      {
+        "name": "TenSP",
+        "type": "NVARCHAR(200)",
+        "flags": []
+      },
+      {
+        "name": "MoTa",
+        "type": "NVARCHAR(MAX)",
+        "flags": [
+          "NULL"
+        ]
+      },
+      {
+        "name": "HinhAnh",
+        "type": "NVARCHAR(1000)",
+        "flags": [
+          "NULL"
+        ]
+      },
+      {
+        "name": "Gia",
+        "type": "DECIMAL(18,2)",
+        "flags": []
+      },
+      {
+        "name": "DonViTinh",
+        "type": "NVARCHAR(20)",
+        "flags": []
+      },
+      {
+        "name": "SoLuongTon",
+        "type": "INT",
+        "flags": []
+      },
+      {
+        "name": "HanSuDung",
+        "type": "DATETIME2",
+        "flags": []
+      },
+      {
+        "name": "NhietDoBaoQuan",
+        "type": "NVARCHAR(50)",
+        "flags": [
+          "NULL"
+        ]
+      },
+      {
+        "name": "MaDanhMuc",
+        "type": "INT",
+        "flags": [
+          "FK"
+        ]
+      },
+      {
+        "name": "TrangThaiXoa",
+        "type": "BIT",
+        "flags": []
+      },
+      {
+        "name": "NgayTao",
+        "type": "DATETIME2",
+        "flags": []
+      },
+      {
+        "name": "NgayCapNhat",
+        "type": "DATETIME2",
+        "flags": []
+      }
+    ],
+    "KhachHang": [
+      {
+        "name": "MaKH",
+        "type": "INT",
+        "flags": [
+          "PK"
+        ]
+      },
+      {
+        "name": "HoTen",
+        "type": "NVARCHAR(100)",
+        "flags": []
+      },
+      {
+        "name": "Email",
+        "type": "VARCHAR(100)",
+        "flags": [
+          "unique"
+        ]
+      },
+      {
+        "name": "SoDienThoai",
+        "type": "VARCHAR(15)",
+        "flags": [
+          "unique"
+        ]
+      },
+      {
+        "name": "DiaChi",
+        "type": "NVARCHAR(255)",
+        "flags": [
+          "NULL"
+        ]
+      },
+      {
+        "name": "SoDuVi",
+        "type": "DECIMAL(18,2)",
+        "flags": []
+      },
+      {
+        "name": "NgayTao",
+        "type": "DATETIME2",
+        "flags": []
+      }
+    ],
+    "GioHang": [
+      {
+        "name": "MaGioHang",
+        "type": "INT",
+        "flags": [
+          "PK"
+        ]
+      },
+      {
+        "name": "MaKH",
+        "type": "INT",
+        "flags": [
+          "FK",
+          "unique"
+        ]
+      },
+      {
+        "name": "NgayCapNhat",
+        "type": "DATETIME2",
+        "flags": []
+      }
+    ],
+    "ChiTietGioHang": [
+      {
+        "name": "MaGioHang",
+        "type": "INT",
+        "flags": [
+          "PK",
+          "FK"
+        ]
+      },
+      {
+        "name": "MaSP",
+        "type": "INT",
+        "flags": [
+          "PK",
+          "FK"
+        ]
+      },
+      {
+        "name": "SoLuong",
+        "type": "INT",
+        "flags": []
+      }
+    ],
+    "DonHang": [
+      {
+        "name": "MaDH",
+        "type": "INT",
+        "flags": [
+          "PK"
+        ]
+      },
+      {
+        "name": "MaKH",
+        "type": "INT",
+        "flags": [
+          "FK"
+        ]
+      },
+      {
+        "name": "NgayTao",
+        "type": "DATETIME2",
+        "flags": []
+      },
+      {
+        "name": "TongTien",
+        "type": "DECIMAL(18,2)",
+        "flags": []
+      },
+      {
+        "name": "DiaChiGiaoHang",
+        "type": "NVARCHAR(255)",
+        "flags": [
+          "NULL"
+        ]
+      },
+      {
+        "name": "GhiChu",
+        "type": "NVARCHAR(255)",
+        "flags": [
+          "NULL"
+        ]
+      },
+      {
+        "name": "TrangThai",
+        "type": "VARCHAR(20)",
+        "flags": []
+      },
+      {
+        "name": "NguonDon",
+        "type": "VARCHAR(20)",
+        "flags": []
+      },
+      {
+        "name": "PhuongThucThanhToan",
+        "type": "VARCHAR(20)",
+        "flags": []
+      }
+    ],
+    "ChiTietDonHang": [
+      {
+        "name": "MaDH",
+        "type": "INT",
+        "flags": [
+          "PK",
+          "FK"
+        ]
+      },
+      {
+        "name": "MaSP",
+        "type": "INT",
+        "flags": [
+          "PK",
+          "FK"
+        ]
+      },
+      {
+        "name": "SoLuong",
+        "type": "INT",
+        "flags": []
+      },
+      {
+        "name": "DonGia",
+        "type": "DECIMAL(18,2)",
+        "flags": []
+      },
+      {
+        "name": "GiaGoc",
+        "type": "DECIMAL(18,2)",
+        "flags": []
+      },
+      {
+        "name": "TienGiam",
+        "type": "DECIMAL(18,2)",
+        "flags": []
+      },
+      {
+        "name": "MaKM",
+        "type": "INT",
+        "flags": [
+          "FK",
+          "NULL"
+        ]
+      }
+    ],
+    "LichSuGiaoDichVi": [
+      {
+        "name": "MaGiaoDich",
+        "type": "BIGINT",
+        "flags": [
+          "PK"
+        ]
+      },
+      {
+        "name": "MaKH",
+        "type": "INT",
+        "flags": [
+          "FK"
+        ]
+      },
+      {
+        "name": "MaDH",
+        "type": "INT",
+        "flags": [
+          "FK",
+          "NULL"
+        ]
+      },
+      {
+        "name": "LoaiGiaoDich",
+        "type": "VARCHAR(20)",
+        "flags": []
+      },
+      {
+        "name": "SoDuTruoc",
+        "type": "DECIMAL(18,2)",
+        "flags": []
+      },
+      {
+        "name": "SoTienThayDoi",
+        "type": "DECIMAL(18,2)",
+        "flags": []
+      },
+      {
+        "name": "SoDuSau",
+        "type": "DECIMAL(18,2)",
+        "flags": []
+      },
+      {
+        "name": "NgayGiaoDich",
+        "type": "DATETIME2",
+        "flags": []
+      },
+      {
+        "name": "NoiDung",
+        "type": "NVARCHAR(255)",
+        "flags": []
+      },
+      {
+        "name": "MaYeuCauNap",
+        "type": "UNIQUEIDENTIFIER",
+        "flags": [
+          "NULL"
+        ]
+      }
+    ],
+    "NhatKyCanhBao": [
+      {
+        "name": "MaLog",
+        "type": "BIGINT",
+        "flags": [
+          "PK"
+        ]
+      },
+      {
+        "name": "LoaiSuKien",
+        "type": "VARCHAR(50)",
+        "flags": []
+      },
+      {
+        "name": "NoiDung",
+        "type": "NVARCHAR(MAX)",
+        "flags": []
+      },
+      {
+        "name": "MaSP",
+        "type": "INT",
+        "flags": [
+          "NULL"
+        ]
+      },
+      {
+        "name": "NguoiThucHien",
+        "type": "NVARCHAR(100)",
+        "flags": []
+      },
+      {
+        "name": "NgayGhi",
+        "type": "DATETIME2",
+        "flags": []
+      }
+    ],
+    "ThongBaoKhachHang": [
+      {
+        "name": "MaThongBao",
+        "type": "BIGINT",
+        "flags": [
+          "PK"
+        ]
+      },
+      {
+        "name": "MaKH",
+        "type": "INT",
+        "flags": [
+          "NULL"
+        ]
+      },
+      {
+        "name": "TieuDe",
+        "type": "NVARCHAR(200)",
+        "flags": []
+      },
+      {
+        "name": "NoiDung",
+        "type": "NVARCHAR(MAX)",
+        "flags": []
+      },
+      {
+        "name": "TrangThaiGui",
+        "type": "VARCHAR(20)",
+        "flags": []
+      },
+      {
+        "name": "NgayTao",
+        "type": "DATETIME2",
+        "flags": []
+      }
+    ],
+    "DuBaoNhapHang": [
+      {
+        "name": "MaDuBao",
+        "type": "BIGINT",
+        "flags": [
+          "PK"
+        ]
+      },
+      {
+        "name": "MaSP",
+        "type": "INT",
+        "flags": [
+          "FK"
+        ]
+      },
+      {
+        "name": "NgayDuBao",
+        "type": "DATE",
+        "flags": []
+      },
+      {
+        "name": "SoLuongDuBaoTieuThu",
+        "type": "DECIMAL(10,2)",
+        "flags": []
+      },
+      {
+        "name": "SoLuongTonHienTai",
+        "type": "INT",
+        "flags": []
+      },
+      {
+        "name": "SoLuongDeXuatNhap",
+        "type": "INT",
+        "flags": []
+      },
+      {
+        "name": "DoTinCay",
+        "type": "DECIMAL(5,2)",
+        "flags": [
+          "NULL"
+        ]
+      },
+      {
+        "name": "ThuatToan",
+        "type": "VARCHAR(50)",
+        "flags": []
+      },
+      {
+        "name": "RuiRoHuHong",
+        "type": "VARCHAR(20)",
+        "flags": []
+      },
+      {
+        "name": "NgayTao",
+        "type": "DATETIME2",
+        "flags": []
+      }
+    ],
+    "CongThucMonAn": [
+      {
+        "name": "MaCongThuc",
+        "type": "INT",
+        "flags": [
+          "PK"
+        ]
+      },
+      {
+        "name": "TenMonAn",
+        "type": "NVARCHAR(150)",
+        "flags": [
+          "unique"
+        ]
+      },
+      {
+        "name": "MoTa",
+        "type": "NVARCHAR(500)",
+        "flags": [
+          "NULL"
+        ]
+      },
+      {
+        "name": "KhauPhanMacDinh",
+        "type": "INT",
+        "flags": []
+      },
+      {
+        "name": "HuongDanNau",
+        "type": "NVARCHAR(MAX)",
+        "flags": [
+          "NULL"
+        ]
+      },
+      {
+        "name": "NgayTao",
+        "type": "DATETIME2",
+        "flags": []
+      }
+    ],
+    "NguyenLieuMonAn": [
+      {
+        "name": "MaCongThuc",
+        "type": "INT",
+        "flags": [
+          "PK",
+          "FK"
+        ]
+      },
+      {
+        "name": "MaSP",
+        "type": "INT",
+        "flags": [
+          "PK",
+          "FK"
+        ]
+      },
+      {
+        "name": "SoLuongDinhLuong",
+        "type": "DECIMAL(10,2)",
+        "flags": []
+      },
+      {
+        "name": "DonViTinh",
+        "type": "NVARCHAR(20)",
+        "flags": []
+      },
+      {
+        "name": "BatBuoc",
+        "type": "BIT",
+        "flags": []
+      }
+    ],
+    "ChuongTrinhKhuyenMai": [
+      {
+        "name": "MaKM",
+        "type": "INT",
+        "flags": [
+          "PK"
+        ]
+      },
+      {
+        "name": "TenKM",
+        "type": "NVARCHAR(150)",
+        "flags": []
+      },
+      {
+        "name": "MoTa",
+        "type": "NVARCHAR(500)",
+        "flags": [
+          "NULL"
+        ]
+      },
+      {
+        "name": "LoaiKM",
+        "type": "VARCHAR(30)",
+        "flags": []
+      },
+      {
+        "name": "NgayBatDau",
+        "type": "DATETIME2",
+        "flags": []
+      },
+      {
+        "name": "NgayKetThuc",
+        "type": "DATETIME2",
+        "flags": []
+      },
+      {
+        "name": "TrangThai",
+        "type": "BIT",
+        "flags": []
+      },
+      {
+        "name": "NgayTao",
+        "type": "DATETIME2",
+        "flags": []
+      },
+      {
+        "name": "NgayCapNhat",
+        "type": "DATETIME2",
+        "flags": []
+      }
+    ],
+    "ChiTietKhuyenMai": [
+      {
+        "name": "MaKM",
+        "type": "INT",
+        "flags": [
+          "PK",
+          "FK"
+        ]
+      },
+      {
+        "name": "MaSP",
+        "type": "INT",
+        "flags": [
+          "PK",
+          "FK"
+        ]
+      },
+      {
+        "name": "GiaKhuyenMai",
+        "type": "DECIMAL(18,2)",
+        "flags": []
+      },
+      {
+        "name": "PhanTramGiam",
+        "type": "DECIMAL(5,2)",
+        "flags": [
+          "NULL"
+        ]
+      },
+      {
+        "name": "SoLuongKhuyenMai",
+        "type": "INT",
+        "flags": [
+          "NULL"
+        ]
+      },
+      {
+        "name": "SoLuongDaBan",
+        "type": "INT",
+        "flags": []
+      }
+    ],
+    "KhachHangDangNhap": [
+      {
+        "name": "MaKH",
+        "type": "INT",
+        "flags": [
+          "PK",
+          "FK"
+        ]
+      },
+      {
+        "name": "MatKhauHash",
+        "type": "VARCHAR(100)",
+        "flags": []
+      }
+    ],
+    "ThanhToanSePay": [
+      {
+        "name": "PaymentId",
+        "type": "VARCHAR(50)",
+        "flags": [
+          "PK"
+        ]
+      },
+      {
+        "name": "MaDH",
+        "type": "INT",
+        "flags": [
+          "FK",
+          "unique"
+        ]
+      },
+      {
+        "name": "MaKH",
+        "type": "INT",
+        "flags": [
+          "FK"
+        ]
+      },
+      {
+        "name": "IdempotencyKey",
+        "type": "VARCHAR(64)",
+        "flags": []
+      },
+      {
+        "name": "AccountNumber",
+        "type": "VARCHAR(100)",
+        "flags": []
+      },
+      {
+        "name": "BankCode",
+        "type": "VARCHAR(50)",
+        "flags": []
+      },
+      {
+        "name": "AccountName",
+        "type": "NVARCHAR(150)",
+        "flags": []
+      },
+      {
+        "name": "Amount",
+        "type": "BIGINT",
+        "flags": []
+      },
+      {
+        "name": "Status",
+        "type": "VARCHAR(20)",
+        "flags": []
+      },
+      {
+        "name": "TransId",
+        "type": "VARCHAR(100)",
+        "flags": [
+          "NULL"
+        ]
+      },
+      {
+        "name": "CreatedAt",
+        "type": "DATETIME2",
+        "flags": []
+      },
+      {
+        "name": "UpdatedAt",
+        "type": "DATETIME2",
+        "flags": []
+      },
+      {
+        "name": "ExpiresAt",
+        "type": "DATETIME2",
+        "flags": []
+      }
+    ],
+    "SePayWebhook": [
+      {
+        "name": "TransactionId",
+        "type": "VARCHAR(100)",
+        "flags": [
+          "PK"
+        ]
+      },
+      {
+        "name": "Payload",
+        "type": "NVARCHAR(MAX)",
+        "flags": []
+      },
+      {
+        "name": "Outcome",
+        "type": "VARCHAR(30)",
+        "flags": []
+      },
+      {
+        "name": "CreatedAt",
+        "type": "DATETIME2",
+        "flags": []
+      }
+    ]
+  },
+  "groups": {
+    "erd_core": [
+      "DanhMuc",
+      "SanPham",
+      "ChiTietGioHang",
+      "KhachHangDangNhap",
+      "KhachHang",
+      "GioHang",
+      "LichSuGiaoDichVi",
+      "DonHang",
+      "ChiTietDonHang"
+    ],
+    "erd_extended": [
+      "CongThucMonAn",
+      "NguyenLieuMonAn",
+      "DuBaoNhapHang",
+      "ChuongTrinhKhuyenMai",
+      "ChiTietKhuyenMai",
+      "ThanhToanSePay",
+      "NhatKyCanhBao",
+      "ThongBaoKhachHang",
+      "SePayWebhook"
+    ]
+  }
+}

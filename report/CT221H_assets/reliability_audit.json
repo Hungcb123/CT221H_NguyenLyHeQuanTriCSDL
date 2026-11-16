@@ -1,0 +1,42 @@
+{
+  "review_date": "2026-11-15",
+  "base_table_count": 15,
+  "appendix_scope_count": 18,
+  "sepay_saved_integration": {
+    "tests": "10",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0"
+  },
+  "benchmark_saved_medians": {
+    "SCAN": {
+      "logical_reads": 13942.0,
+      "elapsed_ms": 195.0
+    },
+    "COVERING": {
+      "logical_reads": 1401.0,
+      "elapsed_ms": 103.0
+    }
+  },
+  "forecast_saved_metadata": {
+    "catalogSize": 12,
+    "trainSamples": 3436,
+    "testSamples": 860,
+    "splitMethod": "TEMPORAL_80_20",
+    "mae": 3.2161,
+    "rmse": 4.3157,
+    "r2": 0.9741,
+    "wapePercent": 5.34,
+    "volumeAccuracyPercent": 94.66,
+    "restockAccuracyPercent": 94.77,
+    "restockPrecisionPercent": 94.84,
+    "restockRecallPercent": 94.61,
+    "restockF1Percent": 94.72,
+    "spoilageRiskAccuracyPercent": 92.44,
+    "spoilageRiskMacroF1Percent": 92.38,
+    "spoilageRiskWeightedF1Percent": 92.46
+  },
+  "new_database_execution": false,
+  "new_model_training": false,
+  "bank_end_to_end_verified": false
+}

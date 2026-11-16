@@ -1,5 +1,5 @@
 digraph G { graph [rankdir=TB, bgcolor="white", pad="0.25", nodesep="0.35", ranksep="0.5"]; node [shape=box,style="rounded,filled",fillcolor="#F1F5F8",color="#334155",fontname="DejaVu Sans",fontsize=11,margin="0.16,0.12"]; edge [color="#64748B",fontname="DejaVu Sans",fontsize=9,arrowsize=0.65];
- user [label="Khách hàng / Quản trị viên"];
+ user [label="Người dùng / Admin"];
  web [label="Next.js + React
 Giao diện web"];
  api [label="Spring Boot REST API

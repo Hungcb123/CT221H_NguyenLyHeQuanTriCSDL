@@ -10,7 +10,7 @@ def graph(name,body,landscape=True):
  (OUT/(name+'.dot')).write_text(source)
  subprocess.run(['dot','-Tpng','-Gdpi=180',str(OUT/(name+'.dot')),'-o',str(OUT/(name+'.png'))],check=True)
 graph('architecture','''
- user [label="Khách hàng / Quản trị viên"];
+ user [label="Người dùng / Admin"];
  web [label="Next.js + React\nGiao diện web"];
  api [label="Spring Boot REST API\nXác thực · Nghiệp vụ · JDBC/JPA"];
  sql [label="SQL Server 2022\nBảng · SP · Trigger · Chỉ mục"];
@@ -20,32 +20,8 @@ graph('architecture','''
  user -> web;web -> api [label="HTTP / JSON"];
  api -> sql;api -> vector;api -> onnx;sepay -> api [label="Webhook có xác thực"];
 ''',False)
-graph('erd_core','''
- node [shape=record,style="filled",fillcolor="#F8FAFC"];
- cat [label="{DanhMuc|PK MaDanhMuc}"];
- sp [label="{SanPham|PK MaSP|FK MaDanhMuc|FK MaSPCha}"];
- kh [label="{KhachHang|PK MaKH}"];
- gh [label="{GioHang|PK MaGioHang|FK MaKH UNIQUE}"];
- ctgh [label="{ChiTietGioHang|PK/FK MaGioHang|PK/FK MaSP}"];
- dh [label="{DonHang|PK MaDH|FK MaKH}"];
- ctdh [label="{ChiTietDonHang|PK/FK MaDH|PK/FK MaSP|FK MaKM}"];
- vi [label="{LichSuGiaoDichVi|PK MaGiaoDich|FK MaKH, MaDH}"];
- cat->sp [label="1–N"];kh->gh [label="1–0..1"];gh->ctgh [label="1–N"];sp->ctgh [label="1–N"];
- kh->dh [label="1–N"];dh->ctdh [label="1–N"];sp->ctdh [label="1–N"];kh->vi [label="1–N"];dh->vi [label="1–N"];
-''',False)
-graph('erd_extended','''
- node [shape=record,style="filled",fillcolor="#F8FAFC"];
- sp [label="{SanPham|PK MaSP}"];
- km [label="{ChuongTrinhKhuyenMai|PK MaKM}"];
- ctkm [label="{ChiTietKhuyenMai|PK, FK MaKM + MaSP}"];
- recipe [label="{CongThucMonAn|PK MaCongThuc}"];
- ing [label="{NguyenLieuMonAn|PK, FK MaCongThuc + MaSP}"];
- forecast [label="{DuBaoNhapHang|PK MaDuBao · FK MaSP}"];
- dh [label="{DonHang|PK MaDH}"];
- pay [label="{ThanhToanSePay|PK PaymentId · FK MaDH UNIQUE|FK MaKH · IdempotencyKey}"];
- evt [label="{SePayWebhook|PK TransactionId|Không có FK thanh toán}"];
- km->ctkm [label="1–N"];sp->ctkm [label="1–N"];recipe->ing [label="1–N"];sp->ing [label="1–N"];sp->forecast [label="1–N"];dh->pay [label="1–0..1"];evt->pay [style=dashed,label="không có FK trực tiếp",constraint=false];forecast->dh [style=invis];ing->evt [style=invis];
-''',False)
+from build_ct221h_erd import build_erd
+build_erd(OUT)
 graph('wallet_flow','''
  a [label="Xác thực khách hàng\nKiểm tra CSRF / chủ sở hữu"];
  b [label="BEGIN TRANSACTION\nKhóa ví + sản phẩm + suất ưu đãi"];
@@ -57,14 +33,16 @@ graph('wallet_flow','''
 ''',False)
 graph('search_flow','''
  q [label="Truy vấn tiếng Việt"];
+ prep [label="Lọc hàng test · hiệu chỉnh lỗi gõ"];
+ food [label="Khái niệm ẩm thực + nguyên liệu công thức"];
  bm [label="BM25 tên + mô tả\nk1 = 1,2; b = 0,75"];
  emb [label="ONNX MiniLM\nWordPiece → pooling → L2"];
  vec [label="Qdrant cosine\nXếp hạng vector"];
  rrf [label="RRF (k = 60)\nTrọng số 0,5 / 0,5"];
- policy [label="Đối chiếu loại hàng + bằng chứng\nNgưỡng 0,60 / chênh lệch 0,05"];
+ policy [label="Loại hàng + văn bản / công thức\nVector thuần: ≥ 0,60 / chênh ≥ 0,05"];
  out [label="products: kết quả chính\nrelatedProducts: tham khảo"];
  fall [label="KEYWORD_FALLBACK\nBM25 trọng số 1"];
- q->bm;q->emb;emb->vec;bm->rrf;vec->rrf;rrf->policy->out;emb->fall [label="lỗi ONNX/Qdrant"];fall->policy;
+ q->prep;prep->bm;prep->emb;prep->food;food->policy;emb->vec;bm->rrf;vec->rrf;rrf->policy->out;emb->fall [label="lỗi ONNX/Qdrant"];fall->policy;
 ''',False)
 graph('forecast_flow','''
  history [label="Lịch sử đơn / chi tiết\nCác ngày trước ngày dự báo"];

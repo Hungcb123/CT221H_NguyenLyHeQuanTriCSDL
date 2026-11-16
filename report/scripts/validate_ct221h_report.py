@@ -17,7 +17,8 @@ with ZipFile(docx) as z:
  captions=root.xpath('//w:p[w:pPr/w:pStyle[@w:val="FigureCaption"]]//w:t/text()',namespaces=ns)
  instructions=root.xpath('//w:instrText/text()',namespaces=ns)
  assert len([x for x in instructions if x.strip().startswith('TOC')])==3
- assert len(captions)==10
+ expected_figures=len(re.findall(r'^!\[', (R/'BaoCao_DailyMart_CT221H_TiengViet.md').read_text(), re.MULTILINE))
+ assert len(captions)==expected_figures
 result={'docx_bytes':docx.stat().st_size,'chapters':len([h for h in headings if h.startswith('CHƯƠNG')]),'figures':len(captions),'team_order':names,'placeholders':0}
 pdf=R/'BaoCao_DailyMart_CT221H_TiengViet.pdf'
 if pdf.exists():

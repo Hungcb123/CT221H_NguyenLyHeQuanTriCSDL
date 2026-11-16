@@ -1,13 +1,36 @@
-digraph G { graph [rankdir=TB, bgcolor="white", pad="0.25", nodesep="0.35", ranksep="0.5"]; node [shape=box,style="rounded,filled",fillcolor="#F1F5F8",color="#334155",fontname="DejaVu Sans",fontsize=11,margin="0.16,0.12"]; edge [color="#64748B",fontname="DejaVu Sans",fontsize=9,arrowsize=0.65];
- node [shape=record,style="filled",fillcolor="#F8FAFC"];
- cat [label="{DanhMuc|PK MaDanhMuc}"];
- sp [label="{SanPham|PK MaSP|FK MaDanhMuc|FK MaSPCha}"];
- kh [label="{KhachHang|PK MaKH}"];
- gh [label="{GioHang|PK MaGioHang|FK MaKH UNIQUE}"];
- ctgh [label="{ChiTietGioHang|PK/FK MaGioHang|PK/FK MaSP}"];
- dh [label="{DonHang|PK MaDH|FK MaKH}"];
- ctdh [label="{ChiTietDonHang|PK/FK MaDH|PK/FK MaSP|FK MaKM}"];
- vi [label="{LichSuGiaoDichVi|PK MaGiaoDich|FK MaKH, MaDH}"];
- cat->sp [label="1–N"];kh->gh [label="1–0..1"];gh->ctgh [label="1–N"];sp->ctgh [label="1–N"];
- kh->dh [label="1–N"];dh->ctdh [label="1–N"];sp->ctdh [label="1–N"];kh->vi [label="1–N"];dh->vi [label="1–N"];
+digraph G {
+graph [rankdir=LR, bgcolor="white", pad="0.25", nodesep="0.5", ranksep="0.65", splines=polyline, outputorder=edgesfirst];
+node [shape=plain, fontname="Arial", fontsize=12];
+edge [color="black", penwidth=0.75, fontname="Arial", fontsize=10, arrowsize=0.6];
+DanhMuc [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="3"><TR><TD WIDTH="160" ALIGN="CENTER" BGCOLOR="black"><FONT COLOR="white"><B>DanhMuc</B></FONT></TD></TR><TR><TD WIDTH="160" PORT="MaDanhMuc" ALIGN="LEFT">MaDanhMuc (PK)</TD></TR><TR><TD WIDTH="160" PORT="TenDanhMuc" ALIGN="LEFT">TenDanhMuc (unique)</TD></TR><TR><TD WIDTH="160" PORT="MoTa" ALIGN="LEFT">MoTa (NULL)</TD></TR></TABLE>>];
+SanPham [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="3"><TR><TD WIDTH="160" ALIGN="CENTER" BGCOLOR="black"><FONT COLOR="white"><B>SanPham</B></FONT></TD></TR><TR><TD WIDTH="160" PORT="MaSP" ALIGN="LEFT">MaSP (PK)</TD></TR><TR><TD WIDTH="160" PORT="MaSPCha" ALIGN="LEFT">MaSPCha (FK, NULL)</TD></TR><TR><TD WIDTH="160" PORT="TenLoai" ALIGN="LEFT">TenLoai (NULL)</TD></TR><TR><TD WIDTH="160" PORT="TenSP" ALIGN="LEFT">TenSP</TD></TR><TR><TD WIDTH="160" PORT="MoTa" ALIGN="LEFT">MoTa (NULL)</TD></TR><TR><TD WIDTH="160" PORT="HinhAnh" ALIGN="LEFT">HinhAnh (NULL)</TD></TR><TR><TD WIDTH="160" PORT="Gia" ALIGN="LEFT">Gia</TD></TR><TR><TD WIDTH="160" PORT="DonViTinh" ALIGN="LEFT">DonViTinh</TD></TR><TR><TD WIDTH="160" PORT="SoLuongTon" ALIGN="LEFT">SoLuongTon</TD></TR><TR><TD WIDTH="160" PORT="HanSuDung" ALIGN="LEFT">HanSuDung</TD></TR><TR><TD WIDTH="160" PORT="NhietDoBaoQuan" ALIGN="LEFT">NhietDoBaoQuan (NULL)</TD></TR><TR><TD WIDTH="160" PORT="MaDanhMuc" ALIGN="LEFT">MaDanhMuc (FK)</TD></TR><TR><TD WIDTH="160" PORT="TrangThaiXoa" ALIGN="LEFT">TrangThaiXoa</TD></TR><TR><TD WIDTH="160" PORT="NgayTao" ALIGN="LEFT">NgayTao</TD></TR><TR><TD WIDTH="160" PORT="NgayCapNhat" ALIGN="LEFT">NgayCapNhat</TD></TR></TABLE>>];
+ChiTietGioHang [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="3"><TR><TD WIDTH="160" ALIGN="CENTER" BGCOLOR="black"><FONT COLOR="white"><B>ChiTietGioHang</B></FONT></TD></TR><TR><TD WIDTH="160" PORT="MaGioHang" ALIGN="LEFT">MaGioHang (PK, FK)</TD></TR><TR><TD WIDTH="160" PORT="MaSP" ALIGN="LEFT">MaSP (PK, FK)</TD></TR><TR><TD WIDTH="160" PORT="SoLuong" ALIGN="LEFT">SoLuong</TD></TR></TABLE>>];
+KhachHangDangNhap [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="3"><TR><TD WIDTH="160" ALIGN="CENTER" BGCOLOR="black"><FONT COLOR="white"><B>KhachHangDangNhap</B></FONT></TD></TR><TR><TD WIDTH="160" PORT="MaKH" ALIGN="LEFT">MaKH (PK, FK)</TD></TR><TR><TD WIDTH="160" PORT="MatKhauHash" ALIGN="LEFT">MatKhauHash</TD></TR></TABLE>>];
+KhachHang [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="3"><TR><TD WIDTH="160" ALIGN="CENTER" BGCOLOR="black"><FONT COLOR="white"><B>KhachHang</B></FONT></TD></TR><TR><TD WIDTH="160" PORT="MaKH" ALIGN="LEFT">MaKH (PK)</TD></TR><TR><TD WIDTH="160" PORT="HoTen" ALIGN="LEFT">HoTen</TD></TR><TR><TD WIDTH="160" PORT="Email" ALIGN="LEFT">Email (unique)</TD></TR><TR><TD WIDTH="160" PORT="SoDienThoai" ALIGN="LEFT">SoDienThoai (unique)</TD></TR><TR><TD WIDTH="160" PORT="DiaChi" ALIGN="LEFT">DiaChi (NULL)</TD></TR><TR><TD WIDTH="160" PORT="SoDuVi" ALIGN="LEFT">SoDuVi</TD></TR><TR><TD WIDTH="160" PORT="NgayTao" ALIGN="LEFT">NgayTao</TD></TR></TABLE>>];
+GioHang [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="3"><TR><TD WIDTH="160" ALIGN="CENTER" BGCOLOR="black"><FONT COLOR="white"><B>GioHang</B></FONT></TD></TR><TR><TD WIDTH="160" PORT="MaGioHang" ALIGN="LEFT">MaGioHang (PK)</TD></TR><TR><TD WIDTH="160" PORT="MaKH" ALIGN="LEFT">MaKH (FK, unique)</TD></TR><TR><TD WIDTH="160" PORT="NgayCapNhat" ALIGN="LEFT">NgayCapNhat</TD></TR></TABLE>>];
+LichSuGiaoDichVi [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="3"><TR><TD WIDTH="160" ALIGN="CENTER" BGCOLOR="black"><FONT COLOR="white"><B>LichSuGiaoDichVi</B></FONT></TD></TR><TR><TD WIDTH="160" PORT="MaGiaoDich" ALIGN="LEFT">MaGiaoDich (PK)</TD></TR><TR><TD WIDTH="160" PORT="MaKH" ALIGN="LEFT">MaKH (FK)</TD></TR><TR><TD WIDTH="160" PORT="MaDH" ALIGN="LEFT">MaDH (FK, NULL)</TD></TR><TR><TD WIDTH="160" PORT="LoaiGiaoDich" ALIGN="LEFT">LoaiGiaoDich</TD></TR><TR><TD WIDTH="160" PORT="SoDuTruoc" ALIGN="LEFT">SoDuTruoc</TD></TR><TR><TD WIDTH="160" PORT="SoTienThayDoi" ALIGN="LEFT">SoTienThayDoi</TD></TR><TR><TD WIDTH="160" PORT="SoDuSau" ALIGN="LEFT">SoDuSau</TD></TR><TR><TD WIDTH="160" PORT="NgayGiaoDich" ALIGN="LEFT">NgayGiaoDich</TD></TR><TR><TD WIDTH="160" PORT="NoiDung" ALIGN="LEFT">NoiDung</TD></TR><TR><TD WIDTH="160" PORT="MaYeuCauNap" ALIGN="LEFT">MaYeuCauNap (NULL)</TD></TR></TABLE>>];
+DonHang [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="3"><TR><TD WIDTH="160" ALIGN="CENTER" BGCOLOR="black"><FONT COLOR="white"><B>DonHang</B></FONT></TD></TR><TR><TD WIDTH="160" PORT="MaDH" ALIGN="LEFT">MaDH (PK)</TD></TR><TR><TD WIDTH="160" PORT="MaKH" ALIGN="LEFT">MaKH (FK)</TD></TR><TR><TD WIDTH="160" PORT="NgayTao" ALIGN="LEFT">NgayTao</TD></TR><TR><TD WIDTH="160" PORT="TongTien" ALIGN="LEFT">TongTien</TD></TR><TR><TD WIDTH="160" PORT="DiaChiGiaoHang" ALIGN="LEFT">DiaChiGiaoHang (NULL)</TD></TR><TR><TD WIDTH="160" PORT="GhiChu" ALIGN="LEFT">GhiChu (NULL)</TD></TR><TR><TD WIDTH="160" PORT="TrangThai" ALIGN="LEFT">TrangThai</TD></TR><TR><TD WIDTH="160" PORT="NguonDon" ALIGN="LEFT">NguonDon</TD></TR><TR><TD WIDTH="160" PORT="PhuongThucThanhToan" ALIGN="LEFT">PhuongThucThanhToan</TD></TR></TABLE>>];
+ChiTietDonHang [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="3"><TR><TD WIDTH="160" ALIGN="CENTER" BGCOLOR="black"><FONT COLOR="white"><B>ChiTietDonHang</B></FONT></TD></TR><TR><TD WIDTH="160" PORT="MaDH" ALIGN="LEFT">MaDH (PK, FK)</TD></TR><TR><TD WIDTH="160" PORT="MaSP" ALIGN="LEFT">MaSP (PK, FK)</TD></TR><TR><TD WIDTH="160" PORT="SoLuong" ALIGN="LEFT">SoLuong</TD></TR><TR><TD WIDTH="160" PORT="DonGia" ALIGN="LEFT">DonGia</TD></TR><TR><TD WIDTH="160" PORT="GiaGoc" ALIGN="LEFT">GiaGoc</TD></TR><TR><TD WIDTH="160" PORT="TienGiam" ALIGN="LEFT">TienGiam</TD></TR><TR><TD WIDTH="160" PORT="MaKM" ALIGN="LEFT">MaKM (FK, NULL)</TD></TR></TABLE>>];
+{rank=same; DanhMuc;KhachHangDangNhap;LichSuGiaoDichVi;}
+DanhMuc->KhachHangDangNhap [style=invis, weight=30];
+KhachHangDangNhap->LichSuGiaoDichVi [style=invis, weight=30];
+{rank=same; SanPham;KhachHang;DonHang;}
+SanPham->KhachHang [style=invis, weight=30];
+KhachHang->DonHang [style=invis, weight=30];
+{rank=same; ChiTietGioHang;GioHang;ChiTietDonHang;}
+ChiTietGioHang->GioHang [style=invis, weight=30];
+GioHang->ChiTietDonHang [style=invis, weight=30];
+DanhMuc->SanPham [xlabel="1 : 0..N", constraint=false];
+SanPham:n->SanPham:n [xlabel="cha / loại", constraint=false];
+KhachHang->KhachHangDangNhap [xlabel="1 : 0..1", constraint=false];
+KhachHang->GioHang [xlabel="1 : 0..1", constraint=false];
+GioHang->ChiTietGioHang [xlabel="1 : 0..N", constraint=false];
+SanPham->ChiTietGioHang [xlabel="1 : 0..N", constraint=false];
+KhachHang->DonHang [xlabel="1 : 0..N", constraint=false];
+DonHang->ChiTietDonHang [xlabel="1 : 0..N", constraint=false];
+SanPham->ChiTietDonHang [xlabel="1 : 0..N", constraint=false];
+KhachHang->LichSuGiaoDichVi [xlabel="1 : 0..N", constraint=false];
+DonHang->LichSuGiaoDichVi [xlabel="1 : 0..N", constraint=false];
+DanhMuc->SanPham [style=invis, weight=50];
+SanPham->ChiTietGioHang [style=invis, weight=50];
 }
